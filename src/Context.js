@@ -128,12 +128,12 @@ class Context {
 
     // Write content
     this.log();
-    let content = ' ';
+    let content = '';
     if (this._.useTimer) {
-      content += ` ${grey(this._.seconds + 's')}`;
-      content += ` ${grey(figures.pointerSmall)}`;
+      content += grey(this._.seconds + 's');
+      content += ` ${grey(figures.pointerSmall)} `;
     }
-    content += ` ${this._.entity}`;
+    content += this._.entity;
     content += ` ${grey(figures.pointerSmall)} ${message}`;
     process.stdout.write(content);
 
@@ -185,15 +185,15 @@ class Context {
 
     // Write content
     console.log(); // eslint-disable-line
-    let content = ' ';
+    let content = '';
     if (this._.useTimer) {
-      content += ` ${grey(this._.seconds + 's')}`;
-      content += ` ${grey(figures.pointerSmall)}`;
+      content += grey(this._.seconds + 's');
+      content += ` ${grey(figures.pointerSmall)} `;
     }
 
-    content += ` ${this._.entity}`;
+    content += this._.entity;
     content += ` ${grey(figures.pointerSmall)} ${grey(this._.status.message)}`;
-    content += ` ${grey(this._.status.loadingDots)}`;
+    content += grey(this._.status.loadingDots);
     process.stdout.write(content);
     console.log(); // eslint-disable-line
 
@@ -215,7 +215,7 @@ class Context {
     process.stdout.write(ansiEscapes.eraseDown);
     console.log(); // eslint-disable-line
 
-    console.log(`  ${msg}`); // eslint-disable-line
+    console.log(`${msg}`); // eslint-disable-line
 
     // Put cursor to starting position for next view
     process.stdout.write(ansiEscapes.cursorLeft);
@@ -229,7 +229,7 @@ class Context {
     // Clear any existing content
     process.stdout.write(ansiEscapes.eraseDown);
 
-    console.log(`  ${grey.bold(`DEBUG ${figures.line}`)} ${chalk.white(msg)}`); // eslint-disable-line
+    console.log(`${grey.bold(`DEBUG ${figures.line}`)} ${chalk.white(msg)}`); // eslint-disable-line
 
     // Put cursor to starting position for next view
     process.stdout.write(ansiEscapes.cursorLeft);
@@ -252,9 +252,9 @@ class Context {
     // Write Error
     if (entity) {
       entity = `${red(entity)} ${red(figures.pointerSmall)} ${red(`error:`)}`;
-      console.log(`  ${entity}`); // eslint-disable-line
+      console.log(`${entity}`); // eslint-disable-line
     } else {
-      console.log(`  ${red('error:')}`); // eslint-disable-line
+      console.log(`${red('error:')}`); // eslint-disable-line
     }
     console.log(` `, error); // eslint-disable-line
 
@@ -269,7 +269,7 @@ class Context {
     // Clear any existing content
     process.stdout.write(ansiEscapes.eraseDown);
     console.log(); // eslint-disable-line
-    process.stdout.write(prettyoutput(outputs, {}, 2)); // eslint-disable-line
+    process.stdout.write(prettyoutput(outputs)); // eslint-disable-line
   }
 
   // basic CLI utilities
