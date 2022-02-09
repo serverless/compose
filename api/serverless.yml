@@ -1,0 +1,24 @@
+service: components-api
+configValidationMode: error
+deprecationNotificationMode: error
+
+provider:
+  name: aws
+  environment:
+    QUEUE_URL: ${parameter:queueUrl}
+  iam:
+    role:
+      statements:
+        # Allow to send messages to SQS
+        -   Effect: Allow
+            Action: sqs:SendMessage
+            Resource: ${parameter:queueArn}
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - httpApi: '*'
+
+plugins:
+  - ./plugin/plugin

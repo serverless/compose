@@ -1,0 +1,43 @@
+{
+  "name": "components-v4-wip",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@serverless/component-metrics": "^1.0.8",
+    "@serverless/utils": "^1.2.0",
+    "ansi-escapes": "^4.3.1",
+    "chalk": "^2.4.2",
+    "chokidar": "^3.4.1",
+    "dotenv": "^8.2.0",
+    "figures": "^3.2.0",
+    "fs-extra": "^7.0.1",
+    "graphlib": "^2.1.7",
+    "js-yaml": "^3.13.1",
+    "minimist": "^1.2.5",
+    "package-json": "^6.3.0",
+    "prettyoutput": "^1.2.0",
+    "ramda": "^0.26.1",
+    "semver": "^6.1.1",
+    "strip-ansi": "^6.0.1",
+    "traverse": "^0.6.6"
+  },
+  "devDependencies": {
+    "@serverless/eslint-config": "^4.0.0",
+    "prettier": "^2.5.1",
+    "eslint-plugin-import": "^2.25.4"
+  },
+  "eslintConfig": {
+    "extends": "@serverless/eslint-config/node",
+    "root": true
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "prettify": "prettier --write --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml}\""
+  }
+}

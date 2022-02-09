@@ -1,0 +1,32 @@
+name: components
+
+# events:
+#     component: ./components/src/components/events
+#     path: events
+
+# website:
+#     component: ./components/src/components/static-website
+#     path: website
+
+api:
+   component: ./components/framework # serverless-framework
+   path: api
+   # parameters:
+   #     queueUrl: ${queue.queueUrl}
+   #     queueArn: ${queue.queueArn}
+
+# queue:
+#     component: ./components/src/components/queue
+#     worker:
+#         package: my-queue
+#         handler: src/worker.handler
+
+# custom-construct:
+#     component: ./components/src/components/cdk # aws-cdk
+#     construct: ./MyConstruct
+#     retentionPeriod: 3600
+
+#netlify:
+#    component: ./components/src/components/netlify
+#    siteName: construct-demo
+#    path: website
