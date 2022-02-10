@@ -25,11 +25,15 @@ class ServerlessFramework extends Component {
 
     async logs() {
         const promises = Object.keys(this.outputs.functions).map(async (functionName) => {
-            await this.exec(
-                'serverless',
-                ['logs', '--function', functionName],
-                true
-            );
+            try {
+                await this.exec(
+                    'serverless',
+                    ['logs', '--function', functionName],
+                    true
+                );
+            } catch (e) {
+                this.context.log(`Error fetching logs for function ${this.id}:${functionName}`);
+            }
         });
         await Promise.all(promises);
     }
