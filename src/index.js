@@ -1,9 +1,13 @@
+// Setup log writing
+require('@serverless/utils/log-reporters/node');
+
 const path = require('path');
 const args = require('minimist')(process.argv.slice(2));
 const utils = require('./utils');
 const Context = require('./Context');
 const Component = require('./Component');
 const ComponentsService = require('./ComponentsService');
+const { progress } = require('@serverless/utils/log');
 
 // Simplified support only for yml
 const getServerlessFile = (dir) => {
@@ -63,7 +67,7 @@ const runComponents = async () => {
     return;
   }
 
-  const method = args._[0];
+  let method = args._[0];
   if (!method) {
     throw new Error('Please provide a method that should be run.');
   }
@@ -102,11 +106,11 @@ const runComponents = async () => {
       await componentsService[method](options);
     }
 
-    context.close('done');
+    progress.clear();
     process.exit(0);
   } catch (e) {
     context.renderError(e);
-    context.close('error', e);
+    progress.clear();
     process.exit(1);
   }
 };

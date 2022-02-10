@@ -2,11 +2,14 @@ const { resolve, join } = require('path');
 const { pick, isEmpty, path, uniq } = require('ramda');
 const { Graph, alg } = require('graphlib');
 const traverse = require('traverse');
+const { log, progress } = require('@serverless/utils/log');
 
 const Component = require('./Component');
 const Context = require('./Context');
 const utils = require('./utils');
 const { loadComponent } = require('./load');
+
+const mainProgress = progress.get('components:main');
 
 const resolveObject = (object, context) => {
   const regex = /\${(\w*:?[\w\d.-]+)}/g;
@@ -245,7 +248,9 @@ async function executeGraph(serviceName, allComponents, graph, context, method) 
     const fn = async () => {
       const availableOutputs = await context.stateStorage.readRootComponentsOutputs();
       const inputs = resolveObject(allComponents[alias].inputs, availableOutputs);
-      context.status(method, alias);
+      const innerProgress = progress.get(`${method}${alias}`);
+      innerProgress.notice(`Executing method ${method} for alias ${alias}`);
+      // context.status(method, alias);
 
       inputs.service = serviceName;
       inputs.componentId = alias;
@@ -264,6 +269,8 @@ async function executeGraph(serviceName, allComponents, graph, context, method) 
       }
 
       await component[method]();
+      innerProgress.remove();
+      log.notice.success(`Finalized method ${method} for alias ${alias}`);
     };
 
     promises.push(fn());
@@ -287,7 +294,8 @@ const syncState = async (allComponents, instance) => {
         throw new Error('Removing components is not supported yet');
 
         const component = await instance.load(instance.state.components[alias], alias);
-        instance.context.status('Removing', alias);
+        // TODO: REPLACE WITH PROGRESS
+        // instance.context.status('Removing', alias);
 
         await component.remove();
       };
@@ -324,7 +332,7 @@ class ComponentsService {
   async deploy() {
     await this.invokeComponentsInGraph('deploy');
 
-    this.context.status('done', 'deploy');
+    log.notice.success('All deployments finalized');
 
     await this.outputs();
   }
@@ -345,7 +353,8 @@ class ComponentsService {
   async invokeComponentCommand(componentName, command, options) {
     const { serviceName, allComponents, graph } = await this.boot();
 
-    this.context.status(command, componentName);
+    // TODO: REPLACE WITH PROGRESS
+    // this.context.status(command, componentName);
 
     this.context.debug(`Instantiating components.`);
     await instantiateComponents(serviceName, allComponents, graph, this.context);
@@ -370,9 +379,9 @@ class ComponentsService {
   }
 
   async invokeComponentsInGraph(method) {
-    this.context.status(method === 'deploy' ? 'Deploying' : method);
-
     const { serviceName, allComponents, graph } = await this.boot();
+
+    mainProgress.notice(method === 'deploy' ? 'Deploying' : method);
 
     this.context.debug(`Executing the template's components graph.`);
     await executeGraph(serviceName, allComponents, graph, this.context, method);
@@ -381,7 +390,7 @@ class ComponentsService {
   async invokeComponentsInParallel(method) {
     const { serviceName, allComponents, graph } = await this.boot();
 
-    this.context.status(method, 'all');
+    mainProgress.notice(`Executing method ${method} for all components`);
 
     this.context.debug(`Instantiating components.`);
     await instantiateComponents(serviceName, allComponents, graph, this.context);
@@ -397,7 +406,7 @@ class ComponentsService {
   }
 
   async boot() {
-    this.context.status('Initializing');
+    mainProgress.notice('Initializing');
 
     const template = await getTemplate(this.templateContent);
 
@@ -425,10 +434,11 @@ class ComponentsService {
   }
 
   async remove() {
-    this.context.status('Removing');
+    mainProgress.notice('Removing');
+    await this.boot();
 
     this.context.debug('Flushing template state and removing all components.');
-    await syncState({}, this);
+    // await syncState({}, this);
 
     return {};
   }
