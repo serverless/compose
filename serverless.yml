@@ -15,6 +15,10 @@ api:
    #     queueUrl: ${queue.queueUrl}
    #     queueArn: ${queue.queueArn}
 
+otherapi:
+   component: ./components/framework # serverless-framework
+   path: otherapi
+
 # queue:
 #     component: ./components/src/components/queue
 #     worker:
