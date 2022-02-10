@@ -63,7 +63,10 @@ const runComponents = async () => {
     return;
   }
 
-  let method = args._[0] || 'default';
+  const method = args._[0];
+  if (!method) {
+    throw new Error('Please provide a method that should be run.');
+  }
   let componentName;
   if (method.includes(':')) {
     let methods;

@@ -321,10 +321,6 @@ class ComponentsService {
     await this.context.init();
   }
 
-  async default() {
-    return this.deploy();
-  }
-
   async deploy() {
     await this.invokeComponentsInGraph('deploy');
 
@@ -374,7 +370,7 @@ class ComponentsService {
   }
 
   async invokeComponentsInGraph(method) {
-    this.context.status(method === 'default' || method === 'deploy' ? 'Deploying' : method);
+    this.context.status(method === 'deploy' ? 'Deploying' : method);
 
     const { serviceName, allComponents, graph } = await this.boot();
 

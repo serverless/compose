@@ -18,9 +18,6 @@ class Component {
     this.state = {};
 
     // make sure author defined the mandatory functions
-    if (typeof this.default !== 'function') {
-      throw Error(`default function is missing for component "${this.id}"`);
-    }
     if (typeof this.deploy !== 'function') {
       throw Error(`deploy function is missing for component "${this.id}"`);
     }
