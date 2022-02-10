@@ -212,7 +212,7 @@ async function instantiateComponents(serviceName, allComponents, graph, context)
 
       allComponents[alias].instance = await loadComponent({
         context: context,
-        name: componentData.path,
+        path: componentData.path,
         alias,
         inputs,
       });
