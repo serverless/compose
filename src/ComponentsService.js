@@ -233,6 +233,57 @@ async function instantiateComponents(serviceName, allComponents, graph, context)
   return instantiateComponents(serviceName, allComponents, graph, context);
 }
 
+async function executeGraphReverseOrder(serviceName, allComponents, graph, context, method) {
+  const sources = graph.sources();
+
+  if (isEmpty(sources)) {
+    return allComponents;
+  }
+
+  const promises = [];
+
+  for (const alias of sources) {
+    const componentData = graph.node(alias);
+
+    const fn = async () => {
+      const availableOutputs = await context.stateStorage.readRootComponentsOutputs();
+      const inputs = resolveObject(allComponents[alias].inputs, availableOutputs);
+      const innerProgress = progress.get(`${method}${alias}`);
+      innerProgress.notice(`Executing method ${method} for alias ${alias}`);
+
+      inputs.service = serviceName;
+      inputs.componentId = alias;
+
+      const component = await loadComponent({
+        context: context,
+        path: componentData.path,
+        alias,
+        inputs,
+      });
+      allComponents[alias].instance = component;
+
+      // Check the existence of the method on the component
+      if (typeof component[method] !== 'function') {
+        throw new Error(`Missing method ${method} on component ${alias}`);
+      }
+
+      await component[method]();
+      innerProgress.remove();
+      log.notice.success(`Finalized method ${method} for alias ${alias}`);
+    };
+
+    promises.push(fn());
+  }
+
+  await Promise.all(promises);
+
+  for (const alias of sources) {
+    graph.removeNode(alias);
+  }
+
+  return executeGraphReverseOrder(serviceName, allComponents, graph, context, method);
+}
+
 async function executeGraph(serviceName, allComponents, graph, context, method) {
   const leaves = graph.sinks();
 
@@ -250,7 +301,6 @@ async function executeGraph(serviceName, allComponents, graph, context, method) 
       const inputs = resolveObject(allComponents[alias].inputs, availableOutputs);
       const innerProgress = progress.get(`${method}${alias}`);
       innerProgress.notice(`Executing method ${method} for alias ${alias}`);
-      // context.status(method, alias);
 
       inputs.service = serviceName;
       inputs.componentId = alias;
@@ -284,36 +334,6 @@ async function executeGraph(serviceName, allComponents, graph, context, method) 
 
   return executeGraph(serviceName, allComponents, graph, context, method);
 }
-
-const syncState = async (allComponents, instance) => {
-  const promises = [];
-
-  for (const alias in instance.state.components || {}) {
-    if (!allComponents[alias]) {
-      const fn = async () => {
-        throw new Error('Removing components is not supported yet');
-
-        const component = await instance.load(instance.state.components[alias], alias);
-        // TODO: REPLACE WITH PROGRESS
-        // instance.context.status('Removing', alias);
-
-        await component.remove();
-      };
-
-      promises.push(fn());
-    }
-  }
-
-  await Promise.all(promises);
-
-  instance.state.components = {};
-
-  for (const alias in allComponents) {
-    instance.state.components[alias] = allComponents[alias].path;
-  }
-
-  await instance.save();
-};
 
 class ComponentsService {
   /**
@@ -435,11 +455,11 @@ class ComponentsService {
 
   async remove() {
     mainProgress.notice('Removing');
-    await this.boot();
+    const { serviceName, allComponents, graph } = await this.boot();
 
+    await executeGraphReverseOrder(serviceName, allComponents, graph, this.context, 'remove');
     this.context.debug('Flushing template state and removing all components.');
-    // await syncState({}, this);
-
+    await this.context.stateStorage.removeState();
     return {};
   }
 }

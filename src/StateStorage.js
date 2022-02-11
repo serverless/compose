@@ -1,5 +1,6 @@
 const utils = require('./utils/fs');
 const path = require('path');
+const fsp = require('fs').promises;
 
 class StateStorage {
   constructor() {
@@ -81,6 +82,11 @@ class StateStorage {
   async writeState() {
     const stateFilePath = path.join(this.stateRoot, 'state.json');
     await utils.writeFile(stateFilePath, this.state);
+  }
+
+  async removeState() {
+      const stateFilePath = path.join(this.stateRoot, 'state.json');
+      await fsp.unlink(stateFilePath);
   }
 }
 
