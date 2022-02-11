@@ -21,6 +21,8 @@ class ServerlessFramework extends Component {
 
     async remove() {
         await this.exec('serverless', ['remove']);
+        this.state = {};
+        this.save();
     }
 
     async logs() {
