@@ -207,7 +207,7 @@ async function instantiateComponents(serviceName, allComponents, graph, context)
     const componentData = graph.node(alias);
 
     const fn = async () => {
-      const availableOutputs = await context.stateStorage.readRootComponentsOutputs();
+      const availableOutputs = await context.stateStorage.readRootComponentsOutputs(context.stage);
       const inputs = resolveObject(allComponents[alias].inputs, availableOutputs);
 
       inputs.service = serviceName;
@@ -246,7 +246,7 @@ async function executeGraphReverseOrder(serviceName, allComponents, graph, conte
     const componentData = graph.node(alias);
 
     const fn = async () => {
-      const availableOutputs = await context.stateStorage.readRootComponentsOutputs();
+      const availableOutputs = await context.stateStorage.readRootComponentsOutputs(context.stage);
       const inputs = resolveObject(allComponents[alias].inputs, availableOutputs);
       const innerProgress = progress.get(`${method}${alias}`);
       innerProgress.notice(`Executing method ${method} for alias ${alias}`);
@@ -297,7 +297,7 @@ async function executeGraph(serviceName, allComponents, graph, context, method) 
     const componentData = graph.node(alias);
 
     const fn = async () => {
-      const availableOutputs = await context.stateStorage.readRootComponentsOutputs();
+      const availableOutputs = await context.stateStorage.readRootComponentsOutputs(context.stage);
       const inputs = resolveObject(allComponents[alias].inputs, availableOutputs);
       const innerProgress = progress.get(`${method}${alias}`);
       innerProgress.notice(`Executing method ${method} for alias ${alias}`);
@@ -358,7 +358,7 @@ class ComponentsService {
   }
 
   async outputs() {
-    const outputs = await this.context.stateStorage.readRootComponentsOutputs();
+    const outputs = await this.context.stateStorage.readRootComponentsOutputs(this.context.stage);
     this.context.renderOutputs(outputs);
   }
 
@@ -457,9 +457,8 @@ class ComponentsService {
     mainProgress.notice('Removing');
     const { serviceName, allComponents, graph } = await this.boot();
 
-    await executeGraphReverseOrder(serviceName, allComponents, graph, this.context, 'remove');
     this.context.debug('Flushing template state and removing all components.');
-    await this.context.stateStorage.removeState();
+    await executeGraphReverseOrder(serviceName, allComponents, graph, this.context, 'remove');
     return {};
   }
 }

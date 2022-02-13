@@ -18,48 +18,50 @@ class StateStorage {
     return this.state.service;
   }
 
-  async readComponentState(componentId) {
+  async readComponentState(componentId, stage) {
     await this.readState();
 
-    return this.state.components?.[componentId]?.state ?? {};
+    return this.state[stage]?.components?.[componentId]?.state ?? {};
   }
 
-  async writeComponentState(componentId, componentState) {
+  async writeComponentState(componentId, stage, componentState) {
     await this.readState();
 
-    this.state.components = this.state.components ?? {};
-    this.state.components[componentId] = this.state.components[componentId] ?? {};
-    this.state.components[componentId].state = componentState;
+    this.state[stage] = this.state[stage] ?? {};
+    this.state[stage].components = this.state[stage].components ?? {};
+    this.state[stage].components[componentId] = this.state[stage].components[componentId] ?? {};
+    this.state[stage].components[componentId].state = componentState;
 
     await this.writeState();
   }
 
-  async readRootComponentsOutputs() {
+  async readRootComponentsOutputs(stage) {
     await this.readState();
 
-    if (!this.state.components) {
+    if (!this.state[stage]?.components) {
       return {};
     }
 
     const outputs = {};
-    for (const [id, data] of Object.entries(this.state.components)) {
+    for (const [id, data] of Object.entries(this.state[stage]?.components)) {
       outputs[id] = data.outputs ?? {};
     }
     return outputs;
   }
 
-  async readComponentOutputs(componentId) {
+  async readComponentOutputs(componentId, stage) {
     await this.readState();
 
-    return this.state.components?.[componentId]?.outputs ?? {};
+    return this.state[stage]?.components?.[componentId]?.outputs ?? {};
   }
 
-  async writeComponentOutputs(componentId, componentOutputs) {
+  async writeComponentOutputs(componentId, stage, componentOutputs) {
     await this.readState();
 
-    this.state.components = this.state.components ?? {};
-    this.state.components[componentId] = this.state.components[componentId] ?? {};
-    this.state.components[componentId].outputs = componentOutputs;
+    this.state[stage] = this.state.stage ?? {};
+    this.state[stage].components = this.state[stage].components ?? {};
+    this.state[stage].components[componentId] = this.state[stage].components[componentId] ?? {};
+    this.state[stage].components[componentId].outputs = componentOutputs;
 
     await this.writeState();
   }
@@ -82,11 +84,6 @@ class StateStorage {
   async writeState() {
     const stateFilePath = path.join(this.stateRoot, 'state.json');
     await utils.writeFile(stateFilePath, this.state);
-  }
-
-  async removeState() {
-      const stateFilePath = path.join(this.stateRoot, 'state.json');
-      await fsp.unlink(stateFilePath);
   }
 }
 

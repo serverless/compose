@@ -22,7 +22,8 @@ class ServerlessFramework extends Component {
     async remove() {
         await this.exec('serverless', ['remove']);
         this.state = {};
-        this.save();
+        await this.save();
+        await this.updateOutputs({});
     }
 
     async logs() {
@@ -65,6 +66,8 @@ class ServerlessFramework extends Component {
      * @return {Promise<string>}
      */
     async exec(command, args, streamStdout = false) {
+        // Add stage
+        args.push('--stage', this.context.stage);
         // Add inputs
         for (const [key, value] of Object.entries(this.inputs?.parameters ?? {})) {
             args.push('--param', `${key}=${value}`);

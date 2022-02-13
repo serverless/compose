@@ -25,6 +25,7 @@ class Context {
      * @type {StateStorage}
      */
     this.stateStorage = new StateStorage();
+    this.stage = config.stage;
     this.id = undefined;
 
     // todo remove later when we update components
