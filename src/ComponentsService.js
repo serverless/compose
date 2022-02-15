@@ -2,14 +2,17 @@ const { resolve, join } = require('path');
 const { pick, isEmpty, path, uniq } = require('ramda');
 const { Graph, alg } = require('graphlib');
 const traverse = require('traverse');
-const { log, progress } = require('@serverless/utils/log');
+const { log } = require('@serverless/utils/log');
+
+const getProgressReporter = require('@serverless/utils/lib/log/get-progress-reporter');
 
 const Component = require('./Component');
 const Context = require('./Context');
 const utils = require('./utils');
 const { loadComponent } = require('./load');
 
-const mainProgress = progress.get('components:main');
+const progress = getProgressReporter('components');
+const mainProgress = progress.get('main');
 
 const resolveObject = (object, context) => {
   const regex = /\${(\w*:?[\w\d.-]+)}/g;
@@ -384,18 +387,20 @@ class ComponentsService {
     if (component === undefined) {
       throw new Error(`Unknown component ${componentName}`);
     }
-    const defaultCommands = ['deploy', 'dev', 'logs'];
+    const defaultCommands = ['deploy', 'remove'];
     if (defaultCommands.includes(command)) {
       if (!component?.[command]) {
         throw new Error(`No method ${command} on component ${componentName}`);
       }
       return await component[command](options);
     }
-    if (!component.commands?.[command]) {
-      throw new Error(`No command ${command} on component ${componentName}`);
-    }
-    const handler = component.commands?.[command].handler;
-    await handler.call(component, options);
+    // if (!component.commands?.[command]) {
+    //   throw new Error(`No command ${command} on component ${componentName}`);
+    // }
+    // TODO: FIX THIS ASSUMPTION ABOUT SUPPORTING ONLY ONE COMPONENT TYPE
+    return await component.wipRunCommand(command);
+    // const handler = component.commands?.[command].handler;
+    // await handler.call(component, options);
   }
 
   async invokeComponentsInGraph(method) {
