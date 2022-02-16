@@ -1,7 +1,6 @@
 const os = require('os');
 const chalk = require('chalk');
 const ansiEscapes = require('ansi-escapes');
-const stripAnsi = require('strip-ansi');
 const figures = require('figures');
 const path = require('path');
 const prettyoutput = require('prettyoutput');
@@ -9,9 +8,11 @@ const utils = require('./utils');
 const packageJson = require('../package.json');
 const StateStorage = require('./StateStorage');
 const chokidar = require('chokidar');
+const colors = require("./cli/colors");
+const symbols = require("./cli/symbols");
+const {log} = require("./cli/log");
 
 // Serverless Components CLI Colors
-const grey = chalk.dim;
 const red = chalk.hex('fd5750');
 
 class Context {
@@ -34,8 +35,6 @@ class Context {
     // Defaults
     this._ = {};
     this._.entity = 'Components';
-    this._.useTimer = true;
-    this._.seconds = 0;
   }
 
   async init() {
@@ -47,44 +46,6 @@ class Context {
     return `${this.id}-${utils.randomId()}`;
   }
 
-  getRelativeVerticalCursorPosition(contentString) {
-    const base = 1;
-    const terminalWidth = process.stdout.columns;
-    const contentWidth = stripAnsi(contentString).length;
-    const nudges = Math.ceil(Number(contentWidth) / Number(terminalWidth));
-    return base + nudges;
-  }
-
-  renderLog(msg) {
-    if (!msg || msg == '') {
-      console.log(); // eslint-disable-line
-      return;
-    }
-
-    // Clear any existing content
-    process.stdout.write(ansiEscapes.eraseDown);
-    console.log(); // eslint-disable-line
-
-    console.log(`${msg}`); // eslint-disable-line
-
-    // Put cursor to starting position for next view
-    process.stdout.write(ansiEscapes.cursorLeft);
-  }
-
-  renderDebug(msg) {
-    if (!this.debugMode || !msg || msg == '') {
-      return;
-    }
-
-    // Clear any existing content
-    process.stdout.write(ansiEscapes.eraseDown);
-
-    console.log(`${grey.bold(`DEBUG ${figures.line}`)} ${chalk.white(msg)}`); // eslint-disable-line
-
-    // Put cursor to starting position for next view
-    process.stdout.write(ansiEscapes.cursorLeft);
-  }
-
   renderError(error, entity) {
     if (typeof error === 'string') {
       error = new Error(error);
@@ -94,6 +55,8 @@ class Context {
     if (!error || error === '') {
       return;
     }
+
+    // TODO refactor that to be compatible with progresses
 
     // Clear any existing content
     process.stdout.write(ansiEscapes.eraseDown);
@@ -116,19 +79,15 @@ class Context {
     if (typeof outputs !== 'object' || Object.keys(outputs).length === 0) {
       return;
     }
-    // Clear any existing content
-    process.stdout.write(ansiEscapes.eraseDown);
-    console.log(); // eslint-disable-line
-    process.stdout.write(prettyoutput(outputs)); // eslint-disable-line
+    process.stdout.write('');
+    process.stdout.write(prettyoutput(outputs));
   }
 
-  // basic CLI utilities
-  log(msg) {
-    this.renderLog(msg);
-  }
-
-  debug(msg) {
-    this.renderDebug(msg);
+  debug(msg, component = 'serverless') {
+    if (!this.debugMode || !msg || msg === '') {
+      return;
+    }
+    log(`${colors.gray(`${component} ${symbols.separator}`)} ${msg}`);
   }
 }
 

@@ -4,14 +4,15 @@ const { resolve, join } = require('path');
 const { pick, isEmpty, path, uniq } = require('ramda');
 const { Graph, alg } = require('graphlib');
 const traverse = require('traverse');
-const { log, progress } = require('@serverless/utils/log');
+const { log } = require('./cli/log');
 
 const Component = require('./Component');
 const Context = require('./Context');
 const utils = require('./utils');
 const { loadComponent } = require('./load');
+const Progresses = require('./cli/Progresses');
 
-const mainProgress = progress.get('components:main');
+const progresses = new Progresses();
 
 const INTERNAL_COMPONENTS = {
   'serverless-framework': resolve(__dirname, '../components/framework'),
@@ -266,28 +267,33 @@ async function executeGraph({ serviceName, allComponents, graph, context, method
     const fn = async () => {
       const availableOutputs = await context.stateStorage.readRootComponentsOutputs();
       const inputs = resolveObject(allComponents[alias].inputs, availableOutputs);
-      const innerProgress = progress.get(`${method}${alias}`);
-      innerProgress.notice(`Executing method ${method} for alias ${alias}`);
+      progresses.start(alias, method);
 
-      inputs.service = serviceName;
-      inputs.componentId = alias;
+      try {
+        inputs.service = serviceName;
+        inputs.componentId = alias;
 
-      const component = await loadComponent({
-        context: context,
-        path: componentData.path,
-        alias,
-        inputs,
-      });
-      allComponents[alias].instance = component;
+        const component = await loadComponent({
+          context: context,
+          path: componentData.path,
+          alias,
+          inputs,
+        });
+        allComponents[alias].instance = component;
 
-      // Check the existence of the method on the component
-      if (typeof component[method] !== 'function') {
-        throw new Error(`Missing method ${method} on component ${alias}`);
+        // Check the existence of the method on the component
+        if (typeof component[method] !== 'function') {
+          throw new Error(`Missing method ${method} on component ${alias}`);
+        }
+
+        await component[method]();
+      } catch (e) {
+        // TODO show more details
+        progresses.error(alias);
+        return;
       }
 
-      await component[method]();
-      innerProgress.remove();
-      log.notice.success(`Finalized method ${method} for alias ${alias}`);
+      progresses.success(alias);
     };
 
     promises.push(fn());
@@ -317,9 +323,10 @@ class ComponentsService {
   }
 
   async deploy() {
-    await this.invokeComponentsInGraph('deploy');
+    log();
+    log(`Deploying to stage ${this.context.stage}`);
 
-    log.notice.success('All deployments finalized');
+    await this.invokeComponentsInGraph('deploy');
 
     await this.outputs();
   }
@@ -337,20 +344,24 @@ class ComponentsService {
     await this.invokeComponentsInParallel('dev');
   }
 
+  shutdown() {
+    progresses.stopAll();
+  }
+
   async invokeComponentCommand(componentName, command, options) {
     const { serviceName, allComponents, graph } = await this.boot();
 
-    // TODO: REPLACE WITH PROGRESS
-    // this.context.status(command, componentName);
+    progresses.start(componentName, command);
 
     this.context.debug(`Instantiating components.`);
     await instantiateComponents(serviceName, allComponents, graph, this.context);
 
-    this.context.debug(`Invoking "${command}" on component ${componentName}.`);
     const component = allComponents?.[componentName]?.instance;
     if (component === undefined) {
       throw new Error(`Unknown component ${componentName}`);
     }
+    component.debug(`Invoking "${command}".`);
+
     const defaultCommands = ['deploy', 'dev', 'logs'];
     if (defaultCommands.includes(command)) {
       if (!component?.[command]) {
@@ -368,8 +379,6 @@ class ComponentsService {
   async invokeComponentsInGraph(method) {
     const { serviceName, allComponents, graph } = await this.boot();
 
-    mainProgress.notice(method === 'deploy' ? 'Deploying' : method);
-
     this.context.debug(`Executing the template's components graph.`);
     await executeGraph({ serviceName, allComponents, graph, context: this.context, method });
   }
@@ -377,15 +386,22 @@ class ComponentsService {
   async invokeComponentsInParallel(method) {
     const { serviceName, allComponents, graph } = await this.boot();
 
-    mainProgress.notice(`Executing method ${method} for all components`);
-
     this.context.debug(`Instantiating components.`);
     await instantiateComponents(serviceName, allComponents, graph, this.context);
 
     this.context.debug(`Invoking components in parallel.`);
     const promises = Object.values(allComponents).map(async ({ instance }) => {
       if (typeof instance[method] === 'function') {
-        await instance[method]();
+        progresses.add(name, false);
+        progresses.start(name, 'method');
+        try {
+          await instance[method]();
+        } catch (e) {
+          // TODO error details
+          progresses.error(name);
+          return;
+        }
+        progresses.success(name);
       }
     });
 
@@ -393,8 +409,6 @@ class ComponentsService {
   }
 
   async boot() {
-    mainProgress.notice('Initializing');
-
     const template = await getTemplate(this.templateContent);
 
     this.context.debug(`Resolving the template's static variables.`);
@@ -421,8 +435,10 @@ class ComponentsService {
   }
 
   async remove() {
-    mainProgress.notice('Removing');
     const { serviceName, allComponents, graph } = await this.boot();
+
+    log();
+    log(`Removing stage ${this.context.stage} of ${serviceName}`);
 
     await executeGraph({
       serviceName,

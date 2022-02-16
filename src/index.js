@@ -9,7 +9,6 @@ const utils = require('./utils');
 const Context = require('./Context');
 const Component = require('./Component');
 const ComponentsService = require('./ComponentsService');
-const { progress } = require('@serverless/utils/log');
 
 // Simplified support only for yml
 const getServerlessFile = (dir) => {
@@ -109,11 +108,10 @@ const runComponents = async () => {
       await componentsService[method](options);
     }
 
-    progress.clear();
+    componentsService.shutdown();
     process.exit(0);
   } catch (e) {
     context.renderError(e);
-    progress.clear();
     process.exit(1);
   }
 };

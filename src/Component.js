@@ -44,6 +44,13 @@ class Component {
     this.outputs = outputs;
     await this.context.stateStorage.writeComponentOutputs(this.id, this.outputs);
   }
+
+  debug(msg) {
+    if (!this.context.debugMode || !msg || msg === '') {
+      return;
+    }
+    this.context.debug(msg, this.id);
+  }
 }
 
 module.exports = Component;

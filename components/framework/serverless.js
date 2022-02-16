@@ -38,7 +38,8 @@ class ServerlessFramework extends Component {
             true
           );
         } catch (e) {
-          this.context.log(
+          // TODO implement warning?
+                this.debug(
             `Error fetching logs for function ${this.id}:${functionName}`
           );
         }
@@ -83,7 +84,7 @@ class ServerlessFramework extends Component {
       args.push("--param", `${key}=${value}`);
     }
 
-    this.context.debug(`Running ${command} ${args.join(" ")}`);
+    this.debug(`Running ${command} ${args.join(" ")}`);
     return new Promise((resolve, reject) => {
       const process = child_process.spawn(command, args, {
         cwd: this.inputs.path,
@@ -94,14 +95,14 @@ class ServerlessFramework extends Component {
       let allOutput = "";
       if (process.stdout) {
         process.stdout.on("data", (data) => {
-          this.context.debug(data.toString().trim());
+          this.debug(data.toString().trim());
           stdout += data;
           allOutput += data;
         });
       }
       if (process.stderr) {
         process.stderr.on("data", (data) => {
-          this.context.debug(data.toString().trim());
+          this.debug(data.toString().trim());
           stderr += data;
           allOutput += data;
         });
@@ -109,9 +110,7 @@ class ServerlessFramework extends Component {
       process.on("error", (err) => reject(err));
       process.on("close", (code) => {
         if (code !== 0) {
-          reject(
-            `serverless ${command} failed with exit code: ${code}\n` + allOutput
-          );
+          reject(allOutput);
         }
         resolve({ stdout, stderr });
       });
