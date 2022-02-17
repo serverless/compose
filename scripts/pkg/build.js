@@ -32,6 +32,6 @@ const spawnOptions = { cwd: componentsPath, stdio: 'inherit' };
       spawnOptions
     );
   } finally {
-    await fse.remove(path.join(serverlessPath, 'node_modules/npm'));
+    await fse.remove(path.join(componentsPath, 'node_modules/npm'));
   }
 })();
