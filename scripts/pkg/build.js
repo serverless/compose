@@ -23,6 +23,8 @@ const spawnOptions = { cwd: componentsPath, stdio: 'inherit' };
       'node',
       [
         './node_modules/.bin/pkg',
+        '-c',
+        'scripts/pkg/config.js',
         '--targets',
         'node16-linux-x64,node16-mac-x64',
         '--out-path',
