@@ -24,7 +24,7 @@ class Context {
     /**
      * @type {StateStorage}
      */
-    this.stateStorage = new StateStorage();
+    this.stateStorage = new StateStorage(config.stage);
     this.stage = config.stage;
     this.id = undefined;
 

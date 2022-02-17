@@ -30,22 +30,18 @@ class Component {
   // and we can't run async operations in the constructor
   // so we can't auto populate state on instance construction
   async init() {
-    this.state = await this.context.stateStorage.readComponentState(this.id, this.context.stage);
-    this.outputs = await this.context.stateStorage.readComponentOutputs(
-      this.id,
-      this.context.stage
-    );
+    this.state = await this.context.stateStorage.readComponentState(this.id);
+    this.outputs = await this.context.stateStorage.readComponentOutputs(this.id);
   }
 
   async save() {
-    await this.context.stateStorage.writeComponentState(this.id, this.context.stage, this.state);
+    await this.context.stateStorage.writeComponentState(this.id, this.state);
   }
 
   async updateOutputs(outputs) {
     this.outputs = outputs;
     await this.context.stateStorage.writeComponentOutputs(
       this.id,
-      this.context.stage,
       this.outputs
     );
   }

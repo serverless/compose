@@ -3,8 +3,9 @@ const path = require('path');
 const fsp = require('fs').promises;
 
 class StateStorage {
-  constructor() {
+  constructor(stage) {
     this.stateRoot = path.join(process.cwd(), '.serverless');
+    this.stage = stage;
   }
 
   async readServiceState(defaultState) {
@@ -18,50 +19,47 @@ class StateStorage {
     return this.state.service;
   }
 
-  async readComponentState(componentId, stage) {
+  async readComponentState(componentId) {
     await this.readState();
 
-    return this.state[stage]?.components?.[componentId]?.state ?? {};
+    return this.state[this.stage]?.components?.[componentId]?.state ?? {};
   }
 
-  async writeComponentState(componentId, stage, componentState) {
+  async writeComponentState(componentId, componentState) {
     await this.readState();
 
-    this.state[stage] = this.state[stage] ?? {};
-    this.state[stage].components = this.state[stage].components ?? {};
-    this.state[stage].components[componentId] = this.state[stage].components[componentId] ?? {};
-    this.state[stage].components[componentId].state = componentState;
+    this.state.components = this.state.components ?? {};
+    this.state.components[componentId] = this.state.components[componentId] ?? {};
+    this.state.components[componentId].state = componentState;
 
     await this.writeState();
   }
 
-  async readRootComponentsOutputs(stage) {
+  async readRootComponentsOutputs() {
     await this.readState();
 
-    if (!this.state[stage]?.components) {
+    if (!this.state?.components) {
       return {};
     }
 
     const outputs = {};
-    for (const [id, data] of Object.entries(this.state[stage]?.components)) {
+    for (const [id, data] of Object.entries(this.state.components)) {
       outputs[id] = data.outputs ?? {};
     }
     return outputs;
   }
 
-  async readComponentOutputs(componentId, stage) {
+  async readComponentOutputs(componentId) {
     await this.readState();
 
-    return this.state[stage]?.components?.[componentId]?.outputs ?? {};
+    return this.state?.components?.[componentId]?.outputs ?? {};
   }
 
-  async writeComponentOutputs(componentId, stage, componentOutputs) {
+  async writeComponentOutputs(componentId, componentOutputs) {
     await this.readState();
-
-    this.state[stage] = this.state.stage ?? {};
-    this.state[stage].components = this.state[stage].components ?? {};
-    this.state[stage].components[componentId] = this.state[stage].components[componentId] ?? {};
-    this.state[stage].components[componentId].outputs = componentOutputs;
+    this.state.components = this.state.components ?? {};
+    this.state.components[componentId] = this.state.components[componentId] ?? {};
+    this.state.components[componentId].outputs = componentOutputs;
 
     await this.writeState();
   }
@@ -71,7 +69,7 @@ class StateStorage {
     // We will assume it doesn't change outside of our process
     // TODO add locking mechanism in the future
     if (this.state === undefined) {
-      const stateFilePath = path.join(this.stateRoot, 'state.json');
+      const stateFilePath = path.join(this.stateRoot, `state.${this.stage}.json`);
       if (await utils.fileExists(stateFilePath)) {
         this.state = await utils.readFile(stateFilePath);
       } else {
@@ -82,8 +80,13 @@ class StateStorage {
   }
 
   async writeState() {
-    const stateFilePath = path.join(this.stateRoot, 'state.json');
+    const stateFilePath = path.join(this.stateRoot, `state.${this.stage}.json`);
     await utils.writeFile(stateFilePath, this.state);
+  }
+
+  async removeState() {
+    const stateFilePath = path.join(this.stateRoot, `state.${this.stage}.json`);
+    await fsp.unlink(stateFilePath, this.state);
   }
 }
 
