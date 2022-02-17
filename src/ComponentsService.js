@@ -4,15 +4,16 @@ const { resolve, join } = require('path');
 const { pick, isEmpty, path, uniq } = require('ramda');
 const { Graph, alg } = require('graphlib');
 const traverse = require('traverse');
-const { log } = require('./cli/log');
 
 const Component = require('./Component');
 const Context = require('./Context');
 const utils = require('./utils');
 const { loadComponent } = require('./load');
 const Progresses = require('./cli/Progresses');
+const colors = require("./cli/colors");
 
 const progresses = new Progresses();
+progresses.setFooterText(colors.darkGray('Press [?] to enable verbose logs'));
 
 const INTERNAL_COMPONENTS = {
   'serverless-framework': resolve(__dirname, '../components/framework'),
@@ -323,8 +324,8 @@ class ComponentsService {
   }
 
   async deploy() {
-    log();
-    log(`Deploying to stage ${this.context.stage}`);
+    this.context.logger.log();
+    this.context.logger.log(`Deploying to stage ${this.context.stage}`);
 
     await this.invokeComponentsInGraph('deploy');
 
@@ -353,14 +354,14 @@ class ComponentsService {
 
     progresses.start(componentName, command);
 
-    this.context.debug(`Instantiating components.`);
+    this.context.logVerbose(`Instantiating components.`);
     await instantiateComponents(serviceName, allComponents, graph, this.context);
 
     const component = allComponents?.[componentName]?.instance;
     if (component === undefined) {
       throw new Error(`Unknown component ${componentName}`);
     }
-    component.debug(`Invoking "${command}".`);
+    component.logVerbose(`Invoking "${command}".`);
 
     const defaultCommands = ['deploy', 'dev', 'logs'];
     if (defaultCommands.includes(command)) {
@@ -379,17 +380,17 @@ class ComponentsService {
   async invokeComponentsInGraph(method) {
     const { serviceName, allComponents, graph } = await this.boot();
 
-    this.context.debug(`Executing the template's components graph.`);
+    this.context.logVerbose(`Executing the template's components graph.`);
     await executeGraph({ serviceName, allComponents, graph, context: this.context, method });
   }
 
   async invokeComponentsInParallel(method) {
     const { serviceName, allComponents, graph } = await this.boot();
 
-    this.context.debug(`Instantiating components.`);
+    this.context.logVerbose(`Instantiating components.`);
     await instantiateComponents(serviceName, allComponents, graph, this.context);
 
-    this.context.debug(`Invoking components in parallel.`);
+    this.context.logVerbose(`Invoking components in parallel.`);
     const promises = Object.values(allComponents).map(async ({ instance }) => {
       if (typeof instance[method] === 'function') {
         progresses.add(name, false);
@@ -411,19 +412,19 @@ class ComponentsService {
   async boot() {
     const template = await getTemplate(this.templateContent);
 
-    this.context.debug(`Resolving the template's static variables.`);
+    this.context.logVerbose(`Resolving the template's static variables.`);
 
     const resolvedTemplate = resolveTemplate(template);
 
-    this.context.debug('Collecting components from the template.');
+    this.context.logVerbose('Collecting components from the template.');
 
     const allComponents = await getAllComponents(resolvedTemplate);
 
-    this.context.debug(`Analyzing the template's components dependencies.`);
+    this.context.logVerbose(`Analyzing the template's components dependencies.`);
 
     const allComponentsWithDependencies = setDependencies(allComponents);
 
-    this.context.debug(`Creating the template's components graph.`);
+    this.context.logVerbose(`Creating the template's components graph.`);
 
     const graph = createGraph(allComponentsWithDependencies);
 
@@ -437,8 +438,8 @@ class ComponentsService {
   async remove() {
     const { serviceName, allComponents, graph } = await this.boot();
 
-    log();
-    log(`Removing stage ${this.context.stage} of ${serviceName}`);
+    this.context.logger.log();
+    this.context.logger.log(`Removing stage ${this.context.stage} of ${serviceName}`);
 
     await executeGraph({
       serviceName,

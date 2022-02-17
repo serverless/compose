@@ -45,11 +45,11 @@ class Component {
     await this.context.stateStorage.writeComponentOutputs(this.id, this.outputs);
   }
 
-  debug(msg) {
-    if (!this.context.debugMode || !msg || msg === '') {
-      return;
-    }
-    this.context.debug(msg, this.id);
+  /**
+   * @param {string} message
+   */
+  logVerbose(message) {
+    this.context.logger.verbose(this.id, message);
   }
 }
 

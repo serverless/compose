@@ -88,7 +88,7 @@ const runComponents = async () => {
   const config = {
     root: process.cwd(),
     stateRoot: path.join(process.cwd(), '.serverless'),
-    debug: options.debug,
+    verbose: options.verbose,
     stage: options.stage || 'dev',
     entity: serverlessFile.name, // either the name prop of the yaml, or class name of js
   };
@@ -111,7 +111,7 @@ const runComponents = async () => {
     componentsService.shutdown();
     process.exit(0);
   } catch (e) {
-    context.renderError(e);
+    context.logger.error(e);
     process.exit(1);
   }
 };

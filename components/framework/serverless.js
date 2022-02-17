@@ -39,7 +39,7 @@ class ServerlessFramework extends Component {
           );
         } catch (e) {
           // TODO implement warning?
-                this.debug(
+                this.logVerbose(
             `Error fetching logs for function ${this.id}:${functionName}`
           );
         }
@@ -84,7 +84,7 @@ class ServerlessFramework extends Component {
       args.push("--param", `${key}=${value}`);
     }
 
-    this.debug(`Running ${command} ${args.join(" ")}`);
+    this.logVerbose(`Running "${command} ${args.join(" ")}"`);
     return new Promise((resolve, reject) => {
       const process = child_process.spawn(command, args, {
         cwd: this.inputs.path,
@@ -95,14 +95,14 @@ class ServerlessFramework extends Component {
       let allOutput = "";
       if (process.stdout) {
         process.stdout.on("data", (data) => {
-          this.debug(data.toString().trim());
+          this.logVerbose(data.toString().trim());
           stdout += data;
           allOutput += data;
         });
       }
       if (process.stderr) {
         process.stderr.on("data", (data) => {
-          this.debug(data.toString().trim());
+          this.logVerbose(data.toString().trim());
           stderr += data;
           allOutput += data;
         });
@@ -110,7 +110,10 @@ class ServerlessFramework extends Component {
       process.on("error", (err) => reject(err));
       process.on("close", (code) => {
         if (code !== 0) {
-          reject(allOutput);
+                    // Try to extract the error message (temporary solution)
+                    const errorMessagePosition = allOutput.indexOf('Error:');
+                    const error = errorMessagePosition >= 0 ? allOutput.slice(errorMessagePosition) : allOutput;
+                    reject(error);
         }
         resolve({ stdout, stderr });
       });

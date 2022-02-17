@@ -6,7 +6,6 @@
  * https://github.com/jcarpanelli/spinnies/blob/master/LICENSE
  */
 
-const readline = require('readline');
 const cliCursor = require('cli-cursor');
 const colors = require('./colors');
 const symbols = require('./symbols');
@@ -43,6 +42,7 @@ class Progresses {
         this.stream = process.stderr;
         this.lineCount = 0;
         this.currentFrameIndex = 0;
+        this.footerText = '';
         this.enabled = isInteractiveTerminal();
         this.bindSigint();
     }
@@ -58,6 +58,10 @@ class Progresses {
             timer,
         };
         this.updateSpinnerState();
+    }
+
+    setFooterText(text) {
+        this.footerText = text;
     }
 
     /**
@@ -122,7 +126,7 @@ class Progresses {
         });
         if (this.enabled) {
             this.setStreamOutput();
-            readline.moveCursor(this.stream, 0, this.lineCount);
+            this.stream.moveCursor(0, this.lineCount);
             clearInterval(this.currentInterval);
             this.isCursorHidden = false;
             cliCursor.show();
@@ -151,7 +155,6 @@ class Progresses {
         const separator = colors.gray(symbols.separator);
         // Start with an empty line
         let output = '\n';
-        let lineCount = 1;
         for (const [name, progress] of Object.entries(this.progresses)) {
             let symbol = ' ';
             let componentColor = colors.white;
@@ -183,11 +186,20 @@ class Progresses {
                 line += `\n\n${progress.content.trim()}\n`;
             }
 
-            lineCount += stripAnsi(line).split('\n').length;
             output += `${line}\n`;
         }
 
-        readline.clearScreenDown(this.stream);
+        if (this.footerText) {
+            output += `\n${this.footerText.trim()}\n`;
+        }
+
+        output = this.wrapMultilineText(output);
+        output = this.limitOutputToTerminalHeight(output);
+
+        // Erase the current progresses output
+        this.stream.clearScreenDown();
+        // Re-write the updated progresses
+        const lineCount = output.split('\n').length - 1;
         this.writeStream(this.stream, output, lineCount);
         this.lineCount = lineCount;
     }
@@ -196,7 +208,7 @@ class Progresses {
         process.removeAllListeners('SIGINT');
         process.on('SIGINT', () => {
             cliCursor.show();
-            readline.moveCursor(process.stderr, 0, this.lineCount);
+            this.stream.moveCursor(0, this.lineCount);
             process.exit(0);
         });
     }
@@ -210,9 +222,36 @@ class Progresses {
             : text;
     }
 
+    wrapMultilineText(text) {
+        return text.split('\n').map(line => this.wrapLine(line)).join('\n');
+    }
+
+    wrapLine(line) {
+        const columns = process.stderr.columns || 95;
+        const strippedLine = stripAnsi(line);
+        const lineLength = strippedLine.length;
+        // If the line doesn't wrap, we don't touch it
+        if (lineLength <= columns) return line;
+        // Else we wrap it explicitly (with \n) and strip ANSI (else we may mess up ANSI code)
+        // This is needed because we need to calculate the number of lines to clear, so we
+        // need explicit line returns (\n) instead of automatic text wrapping
+        return strippedLine.substring(0, columns - 1)
+            + `\n`
+            + this.wrapLine(strippedLine.substring(columns - 1, strippedLine.length));
+    }
+
     writeStream(stream, output, lineCount) {
         stream.write(output);
-        readline.moveCursor(stream, 0, -lineCount);
+        stream.moveCursor(0, -lineCount);
+    }
+
+    limitOutputToTerminalHeight(output) {
+        if (!this.stream.rows) {
+            return;
+        }
+        const lines = output.split('\n');
+        const overflows = lines.length > this.stream.rows;
+        return overflows ? lines.slice(-this.stream.rows).join('\n') : output;
     }
 }
 
