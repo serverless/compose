@@ -6,18 +6,20 @@ module.exports.hello = async (event) => {
     region: process.env.AWS_REGION,
   });
 
-  await sqs.sendMessage({
-    QueueUrl: process.env.QUEUE_URL,
-    // Any event data we want to send
-    MessageBody: JSON.stringify({
-      message: 'Hello',
-      date: Date.now(),
-    }),
-  }).promise();
+  await sqs
+    .sendMessage({
+      QueueUrl: process.env.QUEUE_URL,
+      // Any event data we want to send
+      MessageBody: JSON.stringify({
+        message: 'Hello',
+        date: Date.now(),
+      }),
+    })
+    .promise();
 
   console.log('A new message has been pushed into SQS');
 
   return {
-    message: "Hello world!"
+    message: 'Hello world!',
   };
 };
