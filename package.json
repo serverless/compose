@@ -1,33 +1,47 @@
 {
-    "dependencies": {
-        "@serverless/component-metrics": "^1.0.8",
-        "@serverless/utils": "^1.2.0",
-        "adm-zip": "^0.5.9",
-        "ansi-escapes": "^4.3.1",
-        "aws-cdk": "^2.1.0",
-        "aws-cdk-lib": "^2.1.0",
-        "aws-sdk": "^2.1046.0",
-        "chalk": "^2.4.2",
-        "chokidar": "^3.4.1",
-        "constructs": "^10.0.12",
-        "figures": "^3.2.0",
-        "fs-extra": "^7.0.1",
-        "graphlib": "^2.1.7",
-        "inquirer": "^8.2.0",
-        "js-yaml": "^3.13.1",
-        "lodash": "^4.17.21",
-        "mime-types": "^2.1.34",
-        "minimist": "^1.2.5",
-        "netlify": "^6.1.29",
-        "package-json": "^6.3.0",
-        "prettyoutput": "^1.2.0",
-        "ramda": "^0.26.1",
-        "semver": "^6.1.1",
-        "strip-ansi": "^6.0.1",
-        "traverse": "^0.6.6",
-        "yaml": "^1.10.2"
-    },
-    "devDependencies": {
-        "prettier": "^2.5.1"
-    }
+  "name": "components-v4-wip",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "bin": {
+    "componentsv4": "./bin/bin"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "prettify": "prettier --write --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml}\"",
+    "pkg:build": "node ./scripts/pkg/build.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@serverless/component-metrics": "^1.0.8",
+    "@serverless/utils": "^6.0.2",
+    "ansi-escapes": "^4.3.1",
+    "chalk": "^2.4.2",
+    "child-process-ext": "^2.1.1",
+    "chokidar": "^3.4.1",
+    "dotenv": "^8.2.0",
+    "figures": "^3.2.0",
+    "fs-extra": "^7.0.1",
+    "graphlib": "^2.1.7",
+    "js-yaml": "^3.13.1",
+    "minimist": "^1.2.5",
+    "package-json": "^6.3.0",
+    "pkg": "^5.5.2",
+    "prettyoutput": "^1.2.0",
+    "ramda": "^0.26.1",
+    "semver": "^6.1.1",
+    "strip-ansi": "^6.0.1",
+    "traverse": "^0.6.6",
+    "yaml": "^1.10.2"
+  },
+  "devDependencies": {
+    "@serverless/eslint-config": "^4.0.0",
+    "eslint-plugin-import": "^2.25.4",
+    "prettier": "^2.5.1"
+  },
+  "eslintConfig": {
+    "extends": "@serverless/eslint-config/node",
+    "root": true
+  }
 }
