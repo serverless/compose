@@ -6,8 +6,8 @@ const utils = require('./utils');
 const packageJson = require('../package.json');
 const StateStorage = require('./StateStorage');
 const chokidar = require('chokidar');
-const Logger = require("./cli/Logger");
-const readline = require("readline");
+const Logger = require('./cli/Logger');
+const readline = require('readline');
 
 class Context {
   stateStorage;
@@ -64,7 +64,7 @@ class Context {
       if (key && key.ctrl && key.name === 'c') {
         // Restore the Ctrl+C behavior by sending SIGINT to ourselves
         // See https://nodejs.org/api/tty.html#readstreamsetrawmodemode
-        process.kill(process.pid, "SIGINT");
+        process.kill(process.pid, 'SIGINT');
       }
     });
     // This is the line that enables the interactive mode

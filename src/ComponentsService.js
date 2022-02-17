@@ -10,7 +10,7 @@ const Context = require('./Context');
 const utils = require('./utils');
 const { loadComponent } = require('./load');
 const Progresses = require('./cli/Progresses');
-const colors = require("./cli/colors");
+const colors = require('./cli/colors');
 
 const progresses = new Progresses();
 progresses.setFooterText(colors.darkGray('Press [?] to enable verbose logs'));
