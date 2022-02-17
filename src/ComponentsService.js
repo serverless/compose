@@ -13,6 +13,10 @@ const { loadComponent } = require('./load');
 
 const mainProgress = progress.get('components:main');
 
+const INTERNAL_COMPONENTS = {
+  'serverless-framework': resolve(__dirname, '../components/framework'),
+};
+
 const resolveObject = (object, context) => {
   const regex = /\${(\w*:?[\w\d.-]+)}/g;
 
@@ -136,11 +140,18 @@ const getAllComponents = async (obj = {}) => {
         if (!(await utils.fileExists(localComponentPath))) {
           throw Error(`No serverless.js file found in ${obj[key].component}`);
         }
+        allComponents[key] = {
+          path: obj[key].component,
+          inputs: obj[key],
+        };
+      } else if (obj[key].component in INTERNAL_COMPONENTS) {
+        allComponents[key] = {
+          path: INTERNAL_COMPONENTS[obj[key].component],
+          inputs: obj[key],
+        };
+      } else {
+        throw new Error(`Unrecognized component: ${obj[key].component}`);
       }
-      allComponents[key] = {
-        path: obj[key].component,
-        inputs: obj[key],
-      };
     }
   }
 
@@ -235,16 +246,21 @@ async function instantiateComponents(serviceName, allComponents, graph, context)
   return instantiateComponents(serviceName, allComponents, graph, context);
 }
 
-async function executeGraphReverseOrder(serviceName, allComponents, graph, context, method) {
-  const sources = graph.sources();
+async function executeGraph({ serviceName, allComponents, graph, context, method, reverse }) {
+  let nodes;
+  if (reverse) {
+    nodes = graph.sources();
+  } else {
+    nodes = graph.sinks();
+  }
 
-  if (isEmpty(sources)) {
+  if (isEmpty(nodes)) {
     return allComponents;
   }
 
   const promises = [];
 
-  for (const alias of sources) {
+  for (const alias of nodes) {
     const componentData = graph.node(alias);
 
     const fn = async () => {
@@ -279,62 +295,11 @@ async function executeGraphReverseOrder(serviceName, allComponents, graph, conte
 
   await Promise.all(promises);
 
-  for (const alias of sources) {
+  for (const alias of nodes) {
     graph.removeNode(alias);
   }
 
-  return executeGraphReverseOrder(serviceName, allComponents, graph, context, method);
-}
-
-async function executeGraph(serviceName, allComponents, graph, context, method) {
-  const leaves = graph.sinks();
-
-  if (isEmpty(leaves)) {
-    return allComponents;
-  }
-
-  const promises = [];
-
-  for (const alias of leaves) {
-    const componentData = graph.node(alias);
-
-    const fn = async () => {
-      const availableOutputs = await context.stateStorage.readRootComponentsOutputs();
-      const inputs = resolveObject(allComponents[alias].inputs, availableOutputs);
-      const innerProgress = progress.get(`${method}${alias}`);
-      innerProgress.notice(`Executing method ${method} for alias ${alias}`);
-
-      inputs.service = serviceName;
-      inputs.componentId = alias;
-
-      const component = await loadComponent({
-        context: context,
-        path: componentData.path,
-        alias,
-        inputs,
-      });
-      allComponents[alias].instance = component;
-
-      // Check the existence of the method on the component
-      if (typeof component[method] !== 'function') {
-        throw new Error(`Missing method ${method} on component ${alias}`);
-      }
-
-      await component[method]();
-      innerProgress.remove();
-      log.notice.success(`Finalized method ${method} for alias ${alias}`);
-    };
-
-    promises.push(fn());
-  }
-
-  await Promise.all(promises);
-
-  for (const alias of leaves) {
-    graph.removeNode(alias);
-  }
-
-  return executeGraph(serviceName, allComponents, graph, context, method);
+  return executeGraph({ serviceName, allComponents, graph, context, method, reverse });
 }
 
 class ComponentsService {
@@ -406,7 +371,7 @@ class ComponentsService {
     mainProgress.notice(method === 'deploy' ? 'Deploying' : method);
 
     this.context.debug(`Executing the template's components graph.`);
-    await executeGraph(serviceName, allComponents, graph, this.context, method);
+    await executeGraph({ serviceName, allComponents, graph, context: this.context, method });
   }
 
   async invokeComponentsInParallel(method) {
@@ -459,7 +424,14 @@ class ComponentsService {
     mainProgress.notice('Removing');
     const { serviceName, allComponents, graph } = await this.boot();
 
-    await executeGraphReverseOrder(serviceName, allComponents, graph, this.context, 'remove');
+    await executeGraph({
+      serviceName,
+      allComponents,
+      graph,
+      context: this.context,
+      method: 'remove',
+      reverse: true,
+    });
     this.context.stateStorage.removeState();
     return {};
   }
