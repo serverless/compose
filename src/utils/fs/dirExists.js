@@ -1,3 +1,5 @@
+'use strict';
+
 const { curry } = require('ramda');
 const fse = require('fs-extra');
 

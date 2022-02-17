@@ -1,3 +1,5 @@
+'use strict';
+
 const YAML = require('js-yaml');
 const { curryN, merge } = require('ramda');
 const isJsonPath = require('./isJsonPath');

@@ -1,3 +1,5 @@
+'use strict';
+
 // Setup log writing
 require('@serverless/utils/log-reporters/node');
 

@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint .",
+    "prettify": "prettier --write --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml}\""
   },
   "author": "",
   "license": "ISC",
@@ -29,15 +30,11 @@
   },
   "devDependencies": {
     "@serverless/eslint-config": "^4.0.0",
-    "prettier": "^2.5.1",
-    "eslint-plugin-import": "^2.25.4"
+    "eslint-plugin-import": "^2.25.4",
+    "prettier": "^2.5.1"
   },
   "eslintConfig": {
     "extends": "@serverless/eslint-config/node",
     "root": true
-  },
-  "scripts": {
-    "lint": "eslint .",
-    "prettify": "prettier --write --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml}\""
   }
 }

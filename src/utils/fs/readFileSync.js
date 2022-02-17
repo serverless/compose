@@ -1,3 +1,5 @@
+'use strict';
+
 const fse = require('fs-extra');
 const { curryN } = require('ramda');
 const parseFile = require('./parseFile');

@@ -1,3 +1,5 @@
+'use strict';
+
 // not using the short-id npm package because it
 // insists on creating 64 unique characters
 // which means that it MUST contain special characters

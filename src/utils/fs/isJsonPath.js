@@ -1,3 +1,5 @@
+'use strict';
+
 const { endsWith } = require('ramda');
 
 const isJsonPath = endsWith('.json');

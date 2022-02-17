@@ -1,3 +1,5 @@
+'use strict';
+
 const { resolve, join } = require('path');
 const { pick, isEmpty, path, uniq } = require('ramda');
 const { Graph, alg } = require('graphlib');

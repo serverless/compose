@@ -1,3 +1,5 @@
+'use strict';
+
 const load = async (type, id, context) => {
   const Component = require(type);
 

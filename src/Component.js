@@ -1,3 +1,5 @@
+'use strict';
+
 class Component {
   /**
    * @param {string} id
@@ -40,10 +42,7 @@ class Component {
 
   async updateOutputs(outputs) {
     this.outputs = outputs;
-    await this.context.stateStorage.writeComponentOutputs(
-      this.id,
-      this.outputs
-    );
+    await this.context.stateStorage.writeComponentOutputs(this.id, this.outputs);
   }
 }
 

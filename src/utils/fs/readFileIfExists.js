@@ -1,3 +1,5 @@
+'use strict';
+
 const { curryN } = require('ramda');
 const fileExists = require('./fileExists');
 const readFile = require('./readFile');

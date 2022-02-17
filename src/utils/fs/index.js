@@ -1,3 +1,5 @@
+'use strict';
+
 const isJsonPath = require('./isJsonPath');
 const isYamlPath = require('./isYamlPath');
 const isArchivePath = require('./isArchivePath');

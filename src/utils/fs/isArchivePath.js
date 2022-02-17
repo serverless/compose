@@ -1,3 +1,5 @@
+'use strict';
+
 const { endsWith, is } = require('ramda');
 
 const isArchivePath = (filePath) => {
