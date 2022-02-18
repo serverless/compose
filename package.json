@@ -27,7 +27,7 @@
     "graphlib": "^2.1.7",
     "is-interactive": "^1",
     "is-unicode-supported": "^0.1",
-    "js-yaml": "^3.13.1",
+    "js-yaml": "^4.1.0",
     "minimist": "^1.2.5",
     "package-json": "^6.3.0",
     "pkg": "^5.5.2",
@@ -35,8 +35,7 @@
     "ramda": "^0.26.1",
     "semver": "^6.1.1",
     "strip-ansi": "^6.0.1",
-    "traverse": "^0.6.6",
-    "yaml": "^1.10.2"
+    "traverse": "^0.6.6"
   },
   "devDependencies": {
     "@serverless/eslint-config": "^4.0.0",

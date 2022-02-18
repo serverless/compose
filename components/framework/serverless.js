@@ -1,6 +1,6 @@
 const Component = require('../../src/Component');
 const child_process = require('child_process');
-const yaml = require('yaml');
+const YAML = require('js-yaml');
 
 class ServerlessFramework extends Component {
   // TODO:
@@ -24,14 +24,14 @@ class ServerlessFramework extends Component {
 
   async deploy() {
     const { stderr: deployOutput } = await this.exec('serverless', ['deploy']);
-    if (deployOutput.includes('No changes to deploy. Deployment skipped.')) {
-      return;
-    }
+    // if (deployOutput.includes('No changes to deploy. Deployment skipped.')) {
+    //   return;
+    // }
 
     const { stdout: infoOutput } = await this.exec('serverless', ['info']);
     let outputs;
     try {
-      outputs = yaml.parse(infoOutput);
+        outputs = YAML.load(infoOutput.toString());
     } catch (e) {
       throw new Error(`Impossible to parse the output of "serverless info":\n${infoOutput}`);
     }
