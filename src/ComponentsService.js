@@ -209,45 +209,6 @@ const createGraph = (allComponents) => {
   return graph;
 };
 
-async function instantiateComponents(serviceName, allComponents, graph, context) {
-  const leaves = graph.sinks();
-
-  if (isEmpty(leaves)) {
-    return allComponents;
-  }
-
-  const promises = [];
-
-  for (const alias of leaves) {
-    const componentData = graph.node(alias);
-
-    const fn = async () => {
-      const availableOutputs = await context.stateStorage.readRootComponentsOutputs();
-      const inputs = resolveObject(allComponents[alias].inputs, availableOutputs);
-
-      inputs.service = serviceName;
-      inputs.componentId = alias;
-
-      allComponents[alias].instance = await loadComponent({
-        context: context,
-        path: componentData.path,
-        alias,
-        inputs,
-      });
-    };
-
-    promises.push(fn());
-  }
-
-  await Promise.all(promises);
-
-  for (const alias of leaves) {
-    graph.removeNode(alias);
-  }
-
-  return instantiateComponents(serviceName, allComponents, graph, context);
-}
-
 class ComponentsService {
   /**
    * @param {Context} context
@@ -319,12 +280,7 @@ class ComponentsService {
     progresses.start(componentName, command);
 
     this.context.logVerbose(`Instantiating components.`);
-    await instantiateComponents(
-      this.resolvedTemplate.name,
-      this.allComponents,
-      this.componentsGraph,
-      this.context
-    );
+    await this.instantiateComponents();
 
     const component = this.allComponents?.[componentName]?.instance;
     if (component === undefined) {
@@ -372,12 +328,7 @@ class ComponentsService {
 
   async invokeComponentsInParallel(method) {
     this.context.logVerbose(`Instantiating components.`);
-    await instantiateComponents(
-      this.resolvedTemplate.name,
-      this.allComponents,
-      this.componentsGraph,
-      this.context
-    );
+    await this.instantiateComponents();
 
     this.context.logVerbose(`Invoking components in parallel.`);
     const promises = Object.values(this.allComponents).map(async ({ instance }) => {
@@ -468,6 +419,45 @@ class ComponentsService {
     }
 
     return this.executeComponentsGraph({ method, reverse });
+  }
+
+  async instantiateComponents() {
+    const leaves = this.componentsGraph.sinks();
+
+    if (isEmpty(leaves)) {
+      return;
+    }
+
+    const promises = [];
+
+    for (const alias of leaves) {
+      const componentData = this.componentsGraph.node(alias);
+
+      const fn = async () => {
+        const availableOutputs = await this.context.stateStorage.readRootComponentsOutputs();
+        const inputs = resolveObject(this.allComponents[alias].inputs, availableOutputs);
+
+        inputs.service = this.resolvedTemplate.name;
+        inputs.componentId = alias;
+
+        this.allComponents[alias].instance = await loadComponent({
+          context: this.context,
+          path: componentData.path,
+          alias,
+          inputs,
+        });
+      };
+
+      promises.push(fn());
+    }
+
+    await Promise.all(promises);
+
+    for (const alias of leaves) {
+      this.componentsGraph.removeNode(alias);
+    }
+
+    return this.instantiateComponents();
   }
 }
 
