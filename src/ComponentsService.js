@@ -248,67 +248,6 @@ async function instantiateComponents(serviceName, allComponents, graph, context)
   return instantiateComponents(serviceName, allComponents, graph, context);
 }
 
-async function executeGraph({ serviceName, allComponents, graph, context, method, reverse }) {
-  let nodes;
-  if (reverse) {
-    nodes = graph.sources();
-  } else {
-    nodes = graph.sinks();
-  }
-
-  if (isEmpty(nodes)) {
-    return allComponents;
-  }
-
-  const promises = [];
-
-  for (const alias of nodes) {
-    const componentData = graph.node(alias);
-
-    const fn = async () => {
-      const availableOutputs = await context.stateStorage.readRootComponentsOutputs();
-      const inputs = resolveObject(allComponents[alias].inputs, availableOutputs);
-      progresses.start(alias, method);
-
-      try {
-        inputs.service = serviceName;
-        inputs.componentId = alias;
-
-        const component = await loadComponent({
-          context: context,
-          path: componentData.path,
-          alias,
-          inputs,
-        });
-        allComponents[alias].instance = component;
-
-        // Check the existence of the method on the component
-        if (typeof component[method] !== 'function') {
-          throw new Error(`Missing method ${method} on component ${alias}`);
-        }
-
-        await component[method]();
-      } catch (e) {
-        // TODO show more details
-        progresses.error(alias);
-        return;
-      }
-
-      progresses.success(alias);
-    };
-
-    promises.push(fn());
-  }
-
-  await Promise.all(promises);
-
-  for (const alias of nodes) {
-    graph.removeNode(alias);
-  }
-
-  return executeGraph({ serviceName, allComponents, graph, context, method, reverse });
-}
-
 class ComponentsService {
   /**
    * @param {Context} context
@@ -317,17 +256,44 @@ class ComponentsService {
   constructor(context, templateContent) {
     this.context = context;
     this.templateContent = templateContent;
+
+    // Variables that will be populated during init
+    this.resolvedTemplate = null;
+    this.allComponents = null;
+    this.componentsGraph = null;
   }
 
   async init() {
     await this.context.init();
+    const template = await getTemplate(this.templateContent);
+
+    this.context.logVerbose(`Resolving the template's static variables.`);
+    const resolvedTemplate = resolveTemplate(template);
+
+    this.resolvedTemplate = resolvedTemplate;
+
+    this.context.logVerbose('Collecting components from the template.');
+
+    const allComponents = await getAllComponents(resolvedTemplate);
+
+    this.context.logVerbose(`Analyzing the template's components dependencies.`);
+
+    const allComponentsWithDependencies = setDependencies(allComponents);
+
+    this.allComponents = allComponentsWithDependencies;
+
+    this.context.logVerbose(`Creating the template's components graph.`);
+
+    // TODO: THAT GRAPH MIGHT BE ADJUSTED OVER THE COURSE OF PROCESSING
+    const graph = createGraph(allComponentsWithDependencies);
+    this.componentsGraph = graph;
   }
 
   async deploy() {
     this.context.logger.log();
     this.context.logger.log(`Deploying to stage ${this.context.stage}`);
 
-    await this.invokeComponentsInGraph('deploy');
+    await this.invokeComponentsInGraph({ method: 'deploy' });
 
     await this.outputs();
   }
@@ -350,14 +316,17 @@ class ComponentsService {
   }
 
   async invokeComponentCommand(componentName, command, options) {
-    const { serviceName, allComponents, graph } = await this.boot();
-
     progresses.start(componentName, command);
 
     this.context.logVerbose(`Instantiating components.`);
-    await instantiateComponents(serviceName, allComponents, graph, this.context);
+    await instantiateComponents(
+      this.resolvedTemplate.name,
+      this.allComponents,
+      this.componentsGraph,
+      this.context
+    );
 
-    const component = allComponents?.[componentName]?.instance;
+    const component = this.allComponents?.[componentName]?.instance;
     if (component === undefined) {
       throw new Error(`Unknown component ${componentName}`);
     }
@@ -396,21 +365,22 @@ class ComponentsService {
     }
   }
 
-  async invokeComponentsInGraph(method) {
-    const { serviceName, allComponents, graph } = await this.boot();
-
+  async invokeComponentsInGraph({ method, reverse }) {
     this.context.logVerbose(`Executing the template's components graph.`);
-    await executeGraph({ serviceName, allComponents, graph, context: this.context, method });
+    await this.executeComponentsGraph({ method });
   }
 
   async invokeComponentsInParallel(method) {
-    const { serviceName, allComponents, graph } = await this.boot();
-
     this.context.logVerbose(`Instantiating components.`);
-    await instantiateComponents(serviceName, allComponents, graph, this.context);
+    await instantiateComponents(
+      this.resolvedTemplate.name,
+      this.allComponents,
+      this.componentsGraph,
+      this.context
+    );
 
     this.context.logVerbose(`Invoking components in parallel.`);
-    const promises = Object.values(allComponents).map(async ({ instance }) => {
+    const promises = Object.values(this.allComponents).map(async ({ instance }) => {
       if (typeof instance[method] === 'function') {
         progresses.add(instance.id, false);
         progresses.start(instance.id, 'method');
@@ -428,48 +398,76 @@ class ComponentsService {
     await Promise.all(promises);
   }
 
-  async boot() {
-    const template = await getTemplate(this.templateContent);
-
-    this.context.logVerbose(`Resolving the template's static variables.`);
-
-    const resolvedTemplate = resolveTemplate(template);
-
-    this.context.logVerbose('Collecting components from the template.');
-
-    const allComponents = await getAllComponents(resolvedTemplate);
-
-    this.context.logVerbose(`Analyzing the template's components dependencies.`);
-
-    const allComponentsWithDependencies = setDependencies(allComponents);
-
-    this.context.logVerbose(`Creating the template's components graph.`);
-
-    const graph = createGraph(allComponentsWithDependencies);
-
-    return {
-      serviceName: resolvedTemplate.name,
-      allComponents: allComponentsWithDependencies,
-      graph,
-    };
-  }
-
   async remove() {
-    const { serviceName, allComponents, graph } = await this.boot();
-
     this.context.logger.log();
-    this.context.logger.log(`Removing stage ${this.context.stage} of ${serviceName}`);
+    this.context.logger.log(
+      `Removing stage ${this.context.stage} of ${this.resolvedTemplate.name}`
+    );
 
-    await executeGraph({
-      serviceName,
-      allComponents,
-      graph,
-      context: this.context,
-      method: 'remove',
-      reverse: true,
-    });
+    await this.invokeComponentsInGraph({ method: 'remove', reverse: true });
     this.context.stateStorage.removeState();
     return {};
+  }
+
+  async executeComponentsGraph({ method, reverse }) {
+    let nodes;
+    if (reverse) {
+      nodes = this.componentsGraph.sources();
+    } else {
+      nodes = this.componentsGraph.sinks();
+    }
+
+    if (isEmpty(nodes)) {
+      return this.allComponents;
+    }
+
+    const promises = [];
+
+    for (const alias of nodes) {
+      const componentData = this.componentsGraph.node(alias);
+
+      const fn = async () => {
+        const availableOutputs = await this.context.stateStorage.readRootComponentsOutputs();
+        const inputs = resolveObject(this.allComponents[alias].inputs, availableOutputs);
+        progresses.start(alias, method);
+
+        try {
+          inputs.service = this.resolvedTemplate.name;
+          inputs.componentId = alias;
+
+          const component = await loadComponent({
+            context: this.context,
+            path: componentData.path,
+            alias,
+            inputs,
+          });
+          this.allComponents[alias].instance = component;
+
+          // Check the existence of the method on the component
+          if (typeof component[method] !== 'function') {
+            throw new Error(`Missing method ${method} on component ${alias}`);
+          }
+
+          await component[method]();
+        } catch (e) {
+          // TODO show more details
+          progresses.error(alias);
+          return;
+        }
+
+        progresses.success(alias);
+      };
+
+      promises.push(fn());
+    }
+
+    await Promise.all(promises);
+
+    for (const alias of nodes) {
+      this.componentsGraph.removeNode(alias);
+    }
+
+    return this.executeComponentsGraph({ method, reverse });
   }
 }
 
