@@ -393,16 +393,16 @@ class ComponentsService {
     this.context.logVerbose(`Invoking components in parallel.`);
     const promises = Object.values(allComponents).map(async ({ instance }) => {
       if (typeof instance[method] === 'function') {
-        progresses.add(name, false);
-        progresses.start(name, 'method');
+        progresses.add(instance.id, false);
+        progresses.start(instance.id, 'method');
         try {
           await instance[method]();
         } catch (e) {
           // TODO error details
-          progresses.error(name);
+          progresses.error(instance.id);
           return;
         }
-        progresses.success(name);
+        progresses.success(instance.id);
       }
     });
 
