@@ -260,7 +260,7 @@ class ComponentsService {
   }
 
   async outputs() {
-    const outputs = await this.context.stateStorage.readRootComponentsOutputs();
+    const outputs = await this.context.stateStorage.readComponentsOutputs();
     this.context.renderOutputs(outputs);
   }
 
@@ -378,7 +378,7 @@ class ComponentsService {
       const componentData = this.componentsGraph.node(alias);
 
       const fn = async () => {
-        const availableOutputs = await this.context.stateStorage.readRootComponentsOutputs();
+        const availableOutputs = await this.context.stateStorage.readComponentsOutputs();
         const inputs = resolveObject(this.allComponents[alias].inputs, availableOutputs);
         progresses.start(alias, method);
 
@@ -434,7 +434,7 @@ class ComponentsService {
       const componentData = this.componentsGraph.node(alias);
 
       const fn = async () => {
-        const availableOutputs = await this.context.stateStorage.readRootComponentsOutputs();
+        const availableOutputs = await this.context.stateStorage.readComponentsOutputs();
         const inputs = resolveObject(this.allComponents[alias].inputs, availableOutputs);
 
         inputs.service = this.resolvedTemplate.name;

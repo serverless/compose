@@ -35,7 +35,7 @@ class StateStorage {
     await this.writeState();
   }
 
-  async readRootComponentsOutputs() {
+  async readComponentsOutputs() {
     await this.readState();
 
     if (!this.state?.components) {
