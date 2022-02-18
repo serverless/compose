@@ -3,6 +3,25 @@ const child_process = require('child_process');
 const yaml = require('yaml');
 
 class ServerlessFramework extends Component {
+  // TODO:
+  // Component-specific commands
+  // In the long run, they should be generated based on configured command schema
+  // and options schema for each command
+  // commands = {
+  //   print: {
+  //     handler: async () => await this.command(['print']),
+  //   },
+  //   package: {
+  //     handler: async () => await this.command(['package']),
+  //   },
+  // };
+  // For now the workaround is to just pray that the command is correct and rely on validation from the Framework
+  async command(command, options) {
+    const cliparams = Object.entries(options).map(([key, value]) => `--${key}=${value}`);
+    const args = [command, ...cliparams];
+    return await this.exec('serverless', args, true);
+  }
+
   async deploy() {
     const { stderr: deployOutput } = await this.exec('serverless', ['deploy']);
     if (deployOutput.includes('No changes to deploy. Deployment skipped.')) {

@@ -370,11 +370,30 @@ class ComponentsService {
       }
       return await component[command](options);
     }
+    // Workaround to invoke all custom Framework commands
+    // TODO: Support options and validation
+    if (!component.commands?.[command] && component.inputs.component === 'serverless-framework') {
+      const handler = component.command;
+      try {
+        await handler.call(component, command, options);
+        progresses.success(componentName);
+      } catch (e) {
+        // TODO: Provide better details about error
+        progresses.error(componentName);
+      }
+      return;
+    }
     if (!component.commands?.[command]) {
       throw new Error(`No command ${command} on component ${componentName}`);
     }
     const handler = component.commands?.[command].handler;
-    await handler.call(component, options);
+    try {
+      await handler.call(component, options);
+      progresses.success(componentName);
+    } catch (e) {
+      // TODO: Provide better details about error
+      progresses.error(componentName);
+    }
   }
 
   async invokeComponentsInGraph(method) {
