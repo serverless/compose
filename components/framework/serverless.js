@@ -3,6 +3,13 @@ const child_process = require('child_process');
 const YAML = require('js-yaml');
 
 class ServerlessFramework extends Component {
+  constructor(id, context, inputs) {
+    // Default inputs
+    inputs.path = inputs.path ?? '.';
+
+    super(id, context, inputs);
+  }
+
   // TODO:
   // Component-specific commands
   // In the long run, they should be generated based on configured command schema
@@ -31,7 +38,7 @@ class ServerlessFramework extends Component {
     const { stdout: infoOutput } = await this.exec('serverless', ['info']);
     let outputs;
     try {
-        outputs = YAML.load(infoOutput.toString());
+      outputs = YAML.load(infoOutput.toString());
     } catch (e) {
       throw new Error(`Impossible to parse the output of "serverless info":\n${infoOutput}`);
     }
@@ -77,6 +84,10 @@ class ServerlessFramework extends Component {
   async exec(command, args, streamStdout = false) {
     // Add stage
     args.push('--stage', this.context.stage);
+    // Add config file name if necessary
+    if (this.inputs?.config) {
+      args.push('--config', this.inputs.config);
+    }
     // Add inputs
     for (const [key, value] of Object.entries(this.inputs?.parameters ?? {})) {
       args.push('--param', `${key}=${value}`);
