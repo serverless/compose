@@ -1,11 +1,8 @@
-const os = require('os');
-const figures = require('figures');
 const path = require('path');
 const prettyoutput = require('prettyoutput');
 const utils = require('./utils');
 const packageJson = require('../package.json');
 const StateStorage = require('./StateStorage');
-const chokidar = require('chokidar');
 const Logger = require('./cli/Logger');
 const readline = require('readline');
 

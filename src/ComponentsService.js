@@ -1,12 +1,10 @@
 'use strict';
 
-const { resolve, join } = require('path');
-const { pick, isEmpty, path, uniq } = require('ramda');
+const { resolve } = require('path');
+const { isEmpty, path } = require('ramda');
 const { Graph, alg } = require('graphlib');
 const traverse = require('traverse');
 
-const Component = require('./Component');
-const Context = require('./Context');
 const utils = require('./utils');
 const { loadComponent } = require('./load');
 const Progresses = require('./cli/Progresses');
