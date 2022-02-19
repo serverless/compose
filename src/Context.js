@@ -46,8 +46,18 @@ class Context {
     if (typeof outputs !== 'object' || Object.keys(outputs).length === 0) {
       return;
     }
-    process.stdout.write('');
-    process.stdout.write(prettyoutput(outputs));
+    process.stdout.write('\n');
+    process.stdout.write(
+      prettyoutput(outputs, {
+        colors: {
+          keys: 'gray',
+          dash: 'gray',
+          number: 'white',
+          true: 'white',
+          false: 'white',
+        },
+      })
+    );
   }
 
   logVerbose(message) {
