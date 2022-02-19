@@ -40,6 +40,9 @@ class Component {
     await this.context.stateStorage.writeComponentState(this.id, this.state);
   }
 
+  /**
+   * @param {Record<string, any>} outputs
+   */
   async updateOutputs(outputs) {
     this.outputs = outputs;
     await this.context.stateStorage.writeComponentOutputs(this.id, this.outputs);

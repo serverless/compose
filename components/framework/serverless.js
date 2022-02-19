@@ -34,15 +34,7 @@ class ServerlessFramework extends Component {
     // if (deployOutput.includes('No changes to deploy. Deployment skipped.')) {
     //   return;
     // }
-
-    const { stdout: infoOutput } = await this.exec('serverless', ['info']);
-    let outputs;
-    try {
-      outputs = YAML.load(infoOutput.toString());
-    } catch (e) {
-      throw new Error(`Impossible to parse the output of "serverless info":\n${infoOutput}`);
-    }
-    await this.updateOutputs(outputs);
+    await this.updateOutputs(await this.retrieveOutputs());
   }
 
   async remove() {
@@ -128,6 +120,31 @@ class ServerlessFramework extends Component {
         resolve({ stdout, stderr });
       });
     });
+  }
+
+  async retrieveOutputs() {
+    const { stdout: infoOutput } = await this.exec('serverless', ['info', '--verbose']);
+    let outputs;
+    try {
+      outputs = YAML.load(infoOutput.toString());
+    } catch (e) {
+      throw new Error(`Impossible to parse the output of "serverless info":\n${infoOutput}`);
+    }
+
+    // Exclude some useless fields from the outputs
+    delete outputs['service']; // this duplicates the component ID
+    delete outputs['stage']; // stage is global across all components anyway
+    delete outputs['stack']; // stage is global across all components anyway
+    delete outputs['endpoints']; // TODO present them better
+    // Merge CF outputs into the list
+    outputs = {
+      ...outputs,
+      ...outputs['Stack Outputs'],
+    };
+    delete outputs['Stack Outputs'];
+    delete outputs['ServerlessDeploymentBucketName']; // useless info
+
+    return outputs;
   }
 }
 
