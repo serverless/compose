@@ -304,7 +304,7 @@ class ComponentsService {
         progresses.success(componentName);
       } catch (e) {
         // TODO: Provide better details about error
-        progresses.error(componentName);
+        progresses.error(componentName, e);
       }
       return;
     }
@@ -317,7 +317,7 @@ class ComponentsService {
       progresses.success(componentName);
     } catch (e) {
       // TODO: Provide better details about error
-      progresses.error(componentName);
+      progresses.error(componentName, e);
     }
   }
 
@@ -339,7 +339,7 @@ class ComponentsService {
           await instance[method]();
         } catch (e) {
           // TODO error details
-          progresses.error(instance.id);
+          progresses.error(instance.id, e);
           return;
         }
         progresses.success(instance.id);
@@ -402,7 +402,7 @@ class ComponentsService {
           await component[method]();
         } catch (e) {
           // TODO show more details
-          progresses.error(alias);
+          progresses.error(alias, e);
           return;
         }
 
