@@ -7,25 +7,16 @@ const Logger = require('./cli/Logger');
 const readline = require('readline');
 
 class Context {
+  /** @type {StateStorage} */
   stateStorage;
+
   constructor(config) {
     this.version = packageJson.version;
     this.root = path.resolve(config.root) || process.cwd();
     this.logger = new Logger(config.verbose || false);
-
-    /**
-     * @type {StateStorage}
-     */
     this.stateStorage = new StateStorage(config.stage);
     this.stage = config.stage;
     this.id = undefined;
-
-    // todo remove later when we update components
-    this.outputs = {};
-
-    // Defaults
-    this._ = {};
-    this._.entity = 'Components';
   }
 
   async init() {
@@ -33,10 +24,6 @@ class Context {
 
     const serviceState = this.stateStorage.readServiceState({ id: utils.randomId() });
     this.id = serviceState.id;
-  }
-
-  resourceId() {
-    return `${this.id}-${utils.randomId()}`;
   }
 
   renderOutputs(outputs) {
