@@ -106,9 +106,11 @@ class Progresses {
 
   /**
    * @param {string} name
-   * @param {string} [error]
+   * @param {string|Error} [error]
    */
   error(name, error) {
+    error = error instanceof Error ? error.message : error;
+
     if (!this.progresses[name]) throw Error(`No progress with name ${name}`);
     this.progresses[name].status = 'error';
     this.progresses[name].text = 'error';
