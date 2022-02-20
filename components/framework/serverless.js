@@ -102,29 +102,29 @@ class ServerlessFramework extends Component {
 
     this.logVerbose(`Running "${command} ${args.join(' ')}"`);
     return new Promise((resolve, reject) => {
-      const process = child_process.spawn(command, args, {
+      const child = child_process.spawn(command, args, {
         cwd: this.inputs.path,
         stdio: streamStdout ? 'inherit' : undefined,
       });
       let stdout = '';
       let stderr = '';
       let allOutput = '';
-      if (process.stdout) {
-        process.stdout.on('data', (data) => {
+      if (child.stdout) {
+        child.stdout.on('data', (data) => {
           this.logVerbose(data.toString().trim());
           stdout += data;
           allOutput += data;
         });
       }
-      if (process.stderr) {
-        process.stderr.on('data', (data) => {
+      if (child.stderr) {
+        child.stderr.on('data', (data) => {
           this.logVerbose(data.toString().trim());
           stderr += data;
           allOutput += data;
         });
       }
-      process.on('error', (err) => reject(err));
-      process.on('close', (code) => {
+      child.on('error', (err) => reject(err));
+      child.on('close', (code) => {
         if (code !== 0) {
           // Try to extract the error message (temporary solution)
           const errorMessagePosition = allOutput.indexOf('Error:');
@@ -134,6 +134,8 @@ class ServerlessFramework extends Component {
         }
         resolve({ stdout, stderr });
       });
+      // Make sure that when our process is killed, we terminate the subprocess too
+      process.on('exit', () => child.kill());
     });
   }
 
