@@ -223,22 +223,15 @@ class ComponentsService {
     await this.context.init();
     const template = await getTemplate(this.templateContent);
 
-    this.context.logVerbose(`Resolving the template's static variables.`);
     const resolvedTemplate = resolveTemplate(template);
 
     this.resolvedTemplate = resolvedTemplate;
 
-    this.context.logVerbose('Collecting components from the template.');
-
     const allComponents = await getAllComponents(resolvedTemplate);
-
-    this.context.logVerbose(`Analyzing the template's components dependencies.`);
 
     const allComponentsWithDependencies = setDependencies(allComponents);
 
     this.allComponents = allComponentsWithDependencies;
-
-    this.context.logVerbose(`Creating the template's components graph.`);
 
     // TODO: THAT GRAPH MIGHT BE ADJUSTED OVER THE COURSE OF PROCESSING
     const graph = createGraph(allComponentsWithDependencies);
@@ -268,14 +261,13 @@ class ComponentsService {
   }
 
   async invokeComponentCommand(componentName, command, options) {
-    this.context.logVerbose(`Instantiating components.`);
     await this.instantiateComponents();
 
     const component = this.allComponents?.[componentName]?.instance;
     if (component === undefined) {
       throw new Error(`Unknown component ${componentName}`);
     }
-    component.logVerbose(`Invoking "${command}".`);
+    component.logVerbose(`Invoking "${command}" on component "${componentName}"`);
 
     const isDefaultCommand = ['deploy', 'remove', 'dev', 'logs'].includes(command);
 
@@ -283,7 +275,7 @@ class ComponentsService {
     if (isDefaultCommand) {
       // Default command defined for all components (deploy, logs, dev, etc.)
       if (!component?.[command]) {
-        throw new Error(`No method ${command} on component ${componentName}`);
+        throw new Error(`No method "${command}" on component "${componentName}"`);
       }
       handler = (options) => component[command](options);
     } else if (
@@ -314,15 +306,14 @@ class ComponentsService {
   }
 
   async invokeComponentsInGraph({ method, reverse }) {
-    this.context.logVerbose(`Executing the template's components graph.`);
+    this.context.logVerbose(`Executing "${method}" following the component dependency graph`);
     await this.executeComponentsGraph({ method });
   }
 
   async invokeComponentsInParallel(method, options) {
-    this.context.logVerbose(`Instantiating components.`);
     await this.instantiateComponents();
 
-    this.context.logVerbose(`Invoking components in parallel.`);
+    this.context.logVerbose(`Executing "${method}" across all components in parallel`);
     const promises = Object.values(this.allComponents).map(async ({ instance }) => {
       if (typeof instance[method] !== 'function') return;
       try {
