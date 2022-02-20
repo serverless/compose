@@ -348,7 +348,7 @@ class ComponentsService {
     );
 
     await this.invokeComponentsInGraph({ method: 'remove', reverse: true });
-    this.context.stateStorage.removeState();
+    await this.context.stateStorage.removeState();
     return {};
   }
 
