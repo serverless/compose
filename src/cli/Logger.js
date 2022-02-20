@@ -59,7 +59,7 @@ class Logger {
   verbose(message, namespace) {
     if (!message || message === '') return;
     if (this.verboseMode) {
-      this.log(message, namespace);
+      this.log(colors.gray(message), namespace);
     } else {
       this.verboseLogs.push({
         message,
