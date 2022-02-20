@@ -52,7 +52,7 @@ class Context {
   }
 
   logVerbose(message) {
-    this.logger.verbose('serverless', message);
+    this.logger.verbose(message, ['serverless']);
   }
 
   startInteractiveInput() {
