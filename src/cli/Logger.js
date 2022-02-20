@@ -1,5 +1,6 @@
 const colors = require('./colors');
 const symbols = require('./symbols');
+const { safeWrite } = require('./output');
 
 class Logger {
   /** @type {[{ namespace?: string[], message: string }]} */
@@ -13,43 +14,21 @@ class Logger {
   }
 
   /**
-   * Safely writes text to stdout.
-   * It takes into account dynamic content that may be written below.
+   * Writes text to stdout.
    * @param {string} message
    * @param {string[]} [namespace]
    */
   writeText(message, namespace = []) {
-    const prefix = this.generatePrefix(namespace);
-    message = message ?? '';
-    for (const line of message.split('\n')) {
-      // This writes from the cursor
-      process.stdout.write(`${prefix}${line}`);
-      // But maybe the line already contained content (e.g. a progress)
-      // so we clear the rest of line, up till its end (on the right side)
-      process.stdout.clearLine(1);
-      // Then we can add a line return
-      process.stdout.write('\n');
-    }
+    safeWrite(message, process.stdout, this.generatePrefix(namespace));
   }
 
   /**
-   * Safely write logs to stderr.
-   * It takes into account dynamic content that may be written below.
+   * Writes logs to stderr.
    * @param {string} [message]
    * @param {string[]} [namespace]
    */
   log(message, namespace = []) {
-    const prefix = this.generatePrefix(namespace);
-    message = message ?? '';
-    for (const line of message.split('\n')) {
-      // This writes from the cursor
-      process.stderr.write(`${prefix}${line}`);
-      // But maybe the line already contained content (e.g. a progress)
-      // so we clear the rest of line, up till its end (on the right side)
-      process.stderr.clearLine(1);
-      // Then we can add a line return
-      process.stderr.write('\n');
-    }
+    safeWrite(message, process.stderr, this.generatePrefix(namespace));
   }
 
   /**

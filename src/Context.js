@@ -7,6 +7,7 @@ const Logger = require('./cli/Logger');
 const readline = require('readline');
 const Progresses = require('./cli/Progresses');
 const colors = require('./cli/colors');
+const { safeWrite } = require('./cli/output');
 
 class Context {
   /** @type {StateStorage} */
@@ -37,17 +38,18 @@ class Context {
     if (typeof outputs !== 'object' || Object.keys(outputs).length === 0) {
       return;
     }
-    process.stdout.write('\n');
-    process.stdout.write(
-      prettyoutput(outputs, {
-        colors: {
-          keys: 'gray',
-          dash: 'gray',
-          number: 'white',
-          true: 'white',
-          false: 'white',
-        },
-      })
+    safeWrite(
+      '\n' +
+        prettyoutput(outputs, {
+          colors: {
+            keys: 'gray',
+            dash: 'gray',
+            number: 'white',
+            true: 'white',
+            false: 'white',
+          },
+        }),
+      process.stdout
     );
   }
 
