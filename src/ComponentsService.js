@@ -7,11 +7,6 @@ const traverse = require('traverse');
 
 const utils = require('./utils');
 const { loadComponent } = require('./load');
-const Progresses = require('./cli/Progresses');
-const colors = require('./cli/colors');
-
-const progresses = new Progresses();
-progresses.setFooterText(colors.darkGray('Press [?] to enable verbose logs'));
 
 const INTERNAL_COMPONENTS = {
   'serverless-framework': resolve(__dirname, '../components/framework'),
@@ -208,6 +203,8 @@ const createGraph = (allComponents) => {
 };
 
 class ComponentsService {
+  /** @type {Context} */
+  context;
   /**
    * @param {Context} context
    * @param templateContent
@@ -270,13 +267,7 @@ class ComponentsService {
     await this.invokeComponentsInParallel('dev');
   }
 
-  shutdown() {
-    progresses.stopAll();
-  }
-
   async invokeComponentCommand(componentName, command, options) {
-    progresses.start(componentName, command);
-
     this.context.logVerbose(`Instantiating components.`);
     await this.instantiateComponents();
 
@@ -286,36 +277,39 @@ class ComponentsService {
     }
     component.logVerbose(`Invoking "${command}".`);
 
-    const defaultCommands = ['deploy', 'dev', 'logs'];
-    if (defaultCommands.includes(command)) {
+    const isDefaultCommand = ['deploy', 'remove', 'dev', 'logs'].includes(command);
+
+    let handler;
+    if (isDefaultCommand) {
+      // Default command defined for all components (deploy, logs, dev, etc.)
       if (!component?.[command]) {
         throw new Error(`No method ${command} on component ${componentName}`);
       }
-      return await component[command](options);
-    }
-    // Workaround to invoke all custom Framework commands
-    // TODO: Support options and validation
-    if (!component.commands?.[command] && component.inputs.component === 'serverless-framework') {
-      const handler = component.command;
-      try {
-        await handler.call(component, command, options);
-        progresses.success(componentName);
-      } catch (e) {
-        // TODO: Provide better details about error
-        progresses.error(componentName, e);
+      handler = (options) => component[command](options);
+    } else if (
+      !component.commands?.[command] &&
+      component.inputs.component === 'serverless-framework'
+    ) {
+      // Workaround to invoke all custom Framework commands
+      // TODO: Support options and validation
+      handler = (options) => component.command(command, options);
+    } else {
+      // Custom command: the handler is defined in the component's `commands` property
+      if (!component.commands?.[command]) {
+        throw new Error(`No command ${command} on component ${componentName}`);
       }
-      return;
+      const commandHandler = component.commands[command].handler;
+      handler = (options) => commandHandler.call(component, options);
     }
-    if (!component.commands?.[command]) {
-      throw new Error(`No command ${command} on component ${componentName}`);
-    }
-    const handler = component.commands?.[command].handler;
     try {
-      await handler.call(component, options);
-      progresses.success(componentName);
+      await handler(options);
     } catch (e) {
-      // TODO: Provide better details about error
-      progresses.error(componentName, e);
+      // If the component has an ongoing progress, we automatically set it to "error"
+      if (this.context.progresses.exists(componentName)) {
+        this.context.progresses.error(componentName, e);
+      } else {
+        this.context.logger.error(e);
+      }
     }
   }
 
@@ -331,16 +325,16 @@ class ComponentsService {
     this.context.logVerbose(`Invoking components in parallel.`);
     const promises = Object.values(this.allComponents).map(async ({ instance }) => {
       if (typeof instance[method] === 'function') {
-        progresses.add(instance.id, false);
-        progresses.start(instance.id, 'method');
         try {
           await instance[method]();
         } catch (e) {
-          // TODO error details
-          progresses.error(instance.id, e);
-          return;
+          // If the component has an ongoing progress, we automatically set it to "error"
+          if (this.context.progresses.exists(instance.id)) {
+            this.context.progresses.error(instance.id, e);
+          } else {
+            this.context.logger.error(e);
+          }
         }
-        progresses.success(instance.id);
       }
     });
 
@@ -378,7 +372,6 @@ class ComponentsService {
       const fn = async () => {
         const availableOutputs = await this.context.stateStorage.readComponentsOutputs();
         const inputs = resolveObject(this.allComponents[alias].inputs, availableOutputs);
-        progresses.start(alias, method);
 
         try {
           inputs.service = this.resolvedTemplate.name;
@@ -399,12 +392,13 @@ class ComponentsService {
 
           await component[method]();
         } catch (e) {
-          // TODO show more details
-          progresses.error(alias, e);
-          return;
+          // If the component has an ongoing progress, we automatically set it to "error"
+          if (this.context.progresses.exists(alias)) {
+            this.context.progresses.error(alias, e);
+          } else {
+            this.context.logger.error(e);
+          }
         }
-
-        progresses.success(alias);
       };
 
       promises.push(fn());

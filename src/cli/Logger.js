@@ -55,6 +55,7 @@ class Logger {
     if (this.verboseMode && error.stack) {
       this.log(`${colors.red('Error:')} ${error.stack}`);
     } else {
+      error = error instanceof Error ? error.message : error;
       this.log(`${colors.red('Error:')} ${error}`);
     }
   }

@@ -54,6 +54,18 @@ class Component {
   logVerbose(message) {
     this.context.logger.verbose(this.id, message);
   }
+
+  startProgress(text) {
+    this.context.progresses.start(this.id, text);
+  }
+
+  updateProgress(text) {
+    this.context.progresses.update(this.id, text);
+  }
+
+  successProgress(text) {
+    this.context.progresses.success(this.id, text);
+  }
 }
 
 module.exports = Component;

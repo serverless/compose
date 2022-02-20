@@ -5,10 +5,14 @@ const packageJson = require('../package.json');
 const StateStorage = require('./StateStorage');
 const Logger = require('./cli/Logger');
 const readline = require('readline');
+const Progresses = require('./cli/Progresses');
+const colors = require('./cli/colors');
 
 class Context {
   /** @type {StateStorage} */
   stateStorage;
+  /** @type {Progresses} */
+  progresses;
 
   constructor(config) {
     this.version = packageJson.version;
@@ -17,6 +21,9 @@ class Context {
     this.stateStorage = new StateStorage(config.stage);
     this.stage = config.stage;
     this.id = undefined;
+
+    this.progresses = new Progresses();
+    this.progresses.setFooterText(colors.darkGray('Press [?] to enable verbose logs'));
   }
 
   async init() {
@@ -65,6 +72,10 @@ class Context {
     // If later we need user input (e.g. prompts), we need to disable this
     // See https://nodejs.org/api/tty.html#readstreamsetrawmodemode
     process.stdin.setRawMode(true);
+  }
+
+  shutdown() {
+    this.progresses.stopAll();
   }
 }
 

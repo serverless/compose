@@ -108,7 +108,7 @@ const runComponents = async () => {
       await componentsService[method](options);
     }
 
-    componentsService.shutdown();
+    context.shutdown();
     process.exit(0);
   } catch (e) {
     context.logger.error(e);

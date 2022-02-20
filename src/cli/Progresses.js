@@ -82,6 +82,13 @@ class Progresses {
 
   /**
    * @param {string} name
+   */
+  exists(name) {
+    return this.progresses[name];
+  }
+
+  /**
+   * @param {string} name
    * @param {string} text
    */
   update(name, text) {

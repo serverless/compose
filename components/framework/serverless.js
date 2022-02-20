@@ -30,20 +30,33 @@ class ServerlessFramework extends Component {
   }
 
   async deploy() {
+    this.startProgress('deploying');
+
     const { stderr: deployOutput } = await this.exec('serverless', ['deploy']);
-    // Skip retrieving outputs via `sls info` if we already have outputs (accelerate)
+
     const hasOutputs = this.outputs && Object.keys(this.outputs).length > 0;
-    if (deployOutput.includes('No changes to deploy. Deployment skipped.') && hasOutputs) {
-      return;
+    const hasChanges = !deployOutput.includes('No changes to deploy. Deployment skipped.');
+    // Skip retrieving outputs via `sls info` if we already have outputs (faster)
+    if (hasChanges || !hasOutputs) {
+      await this.updateOutputs(await this.retrieveOutputs());
     }
-    await this.updateOutputs(await this.retrieveOutputs());
+
+    if (hasChanges) {
+      this.successProgress('deployed');
+    } else {
+      this.successProgress('no changes');
+    }
   }
 
   async remove() {
+    this.startProgress('removing');
+
     await this.exec('serverless', ['remove']);
     this.state = {};
     await this.save();
     await this.updateOutputs({});
+
+    this.successProgress('removed');
   }
 
   async logs() {
