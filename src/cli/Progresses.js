@@ -21,16 +21,20 @@ const dashes = {
   frames: ['-', '_'],
 };
 
+/**
+ * @typedef {{
+ *   text: string;
+ *   timer: boolean;
+ *   startTime?: number;
+ *   endTime?: number;
+ *   status: 'spinning'|'success'|'error'|'waiting'|'stopped';
+ *   content?: string;
+ * }} Progress
+ */
+
 class Progresses {
   /**
-   * @type {Record<string, {
-   *   text: string;
-   *   timer: boolean;
-   *   startTime?: number;
-   *   endTime?: number;
-   *   status: 'spinning'|'success'|'error'|'waiting'|'stopped';
-   *   content?: string;
-   * }>}
+   * @type {Record<string, Progress>}
    */
   progresses = {};
   constructor() {
@@ -69,14 +73,13 @@ class Progresses {
    * @param {string} text
    */
   start(name, text) {
-    if (!this.progresses[name]) {
-      this.progresses[name] = {
-        timer: true,
-      };
-    }
-    this.progresses[name].status = 'spinning';
-    this.progresses[name].text = text;
-    this.progresses[name].startTime = Date.now();
+    this.progresses[name] = {
+      ...this.progresses[name],
+      timer: true,
+      status: 'spinning',
+      text: text,
+      startTime: Date.now(),
+    };
     this.updateSpinnerState();
   }
 

@@ -3,7 +3,7 @@ const symbols = require('./symbols');
 const { safeWrite } = require('./output');
 
 class Logger {
-  /** @type {[{ namespace?: string[], message: string }]} */
+  /** @type {Array<{ namespace?: string[], message: string }>} */
   verboseLogs = [];
 
   /**
@@ -52,7 +52,8 @@ class Logger {
    * @param {string[]} [namespace]
    */
   error(error, namespace = []) {
-    if (this.verboseMode && error.stack) {
+    if (this.verboseMode && error instanceof Error) {
+      // Print the stack trace in verbose mode
       this.log(`${colors.red('Error:')} ${error.stack}`, namespace);
     } else {
       error = error instanceof Error ? error.message : error;
@@ -70,6 +71,7 @@ class Logger {
   }
 
   /**
+   * @private
    * @param {string[]} namespace
    * @return string
    */

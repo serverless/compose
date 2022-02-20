@@ -14,6 +14,8 @@ class Context {
   stateStorage;
   /** @type {Progresses} */
   progresses;
+  /** @type {Logger} */
+  logger;
 
   constructor(config) {
     this.version = packageJson.version;
@@ -30,7 +32,7 @@ class Context {
   async init() {
     this.startInteractiveInput();
 
-    const serviceState = this.stateStorage.readServiceState({ id: utils.randomId() });
+    const serviceState = await this.stateStorage.readServiceState({ id: utils.randomId() });
     this.id = serviceState.id;
   }
 

@@ -94,26 +94,12 @@ class ServerlessFramework extends Component {
     }
   }
 
-  async dev() {
-    Object.keys(this.outputs.functions).forEach((functionName) => {
-      this.exec('serverless', ['logs', '--tail', '--function', functionName], true);
-    });
-
-    return this.context.watch(this.inputs.path, async () => {
-      this.context.status('Uploading');
-      const promises = Object.keys(this.outputs.functions).map(async (functionName) => {
-        await this.exec('serverless', ['deploy', 'function', '--function', functionName]);
-      });
-      await Promise.all(promises);
-    });
-  }
-
   /**
    * @return {Promise<{ stdout: string, stderr: string }>}
    */
   async exec(command, args, streamStdout = false, stdoutCallback = undefined) {
     // Add stage
-    args.push('--stage', this.context.stage);
+    args.push('--stage', this.stage);
     // Add config file name if necessary
     if (this.inputs?.config) {
       args.push('--config', this.inputs.config);

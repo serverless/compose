@@ -55,8 +55,7 @@ const validateGraph = (graph) => {
       msg.push(fromAToB.padStart(padLength));
       msg.push(fromBToA.padStart(padLength));
     }, cycles);
-    msg = msg.join('\n');
-    throw new Error(msg);
+    throw new Error(msg.join('\n'));
   }
 };
 
@@ -203,10 +202,10 @@ const createGraph = (allComponents) => {
 };
 
 class ComponentsService {
-  /** @type {Context} */
+  /** @type {import('./Context')} */
   context;
   /**
-   * @param {Context} context
+   * @param {import('./Context')} context
    * @param templateContent
    */
   constructor(context, templateContent) {
@@ -242,7 +241,7 @@ class ComponentsService {
     this.context.logger.log();
     this.context.logger.log(`Deploying to stage ${this.context.stage}`);
 
-    await this.invokeComponentsInGraph({ method: 'deploy' });
+    await this.invokeComponentsInGraph({ method: 'deploy', reverse: false });
 
     await this.outputs();
   }
@@ -256,10 +255,6 @@ class ComponentsService {
     await this.invokeComponentsInParallel('logs', options);
   }
 
-  async dev() {
-    await this.invokeComponentsInParallel('dev');
-  }
-
   async invokeComponentCommand(componentName, command, options) {
     await this.instantiateComponents();
 
@@ -269,7 +264,7 @@ class ComponentsService {
     }
     component.logVerbose(`Invoking "${command}" on component "${componentName}"`);
 
-    const isDefaultCommand = ['deploy', 'remove', 'dev', 'logs'].includes(command);
+    const isDefaultCommand = ['deploy', 'remove', 'logs'].includes(command);
 
     let handler;
     if (isDefaultCommand) {
@@ -307,7 +302,7 @@ class ComponentsService {
 
   async invokeComponentsInGraph({ method, reverse }) {
     this.context.logVerbose(`Executing "${method}" following the component dependency graph`);
-    await this.executeComponentsGraph({ method });
+    await this.executeComponentsGraph({ method, reverse });
   }
 
   async invokeComponentsInParallel(method, options) {

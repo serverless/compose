@@ -86,7 +86,7 @@ class StateStorage {
 
   async removeState() {
     const stateFilePath = path.join(this.stateRoot, `state.${this.stage}.json`);
-    await fsp.unlink(stateFilePath, this.state);
+    await fsp.unlink(stateFilePath);
   }
 }
 
