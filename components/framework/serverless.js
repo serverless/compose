@@ -59,16 +59,39 @@ class ServerlessFramework extends Component {
     this.successProgress('removed');
   }
 
-  async logs() {
-    const promises = Object.keys(this.outputs.functions).map(async (functionName) => {
+  async logs(options) {
+    const functions = this.outputs.functions ?? {};
+    // Some services do not have functions, let's not start a progress when tailing
+    if (Object.keys(functions).length === 0) return;
+
+    if (options.tail) {
+      this.startProgress('logs');
+    }
+
+    const promises = Object.keys(functions).map(async (functionName) => {
+      const args = ['logs', '--function', functionName];
+      if (options.tail) {
+        args.push('--tail');
+      }
       try {
-        await this.exec('serverless', ['logs', '--function', functionName], true);
+        await this.exec('serverless', args, false, (output) => {
+          if (output.length > 0) {
+            // Silence this error because it's not really an error: there are simply no logs
+            if (output.includes('No existing streams for the function')) return;
+            this.writeText(output.trim(), [functionName]);
+          }
+        });
       } catch (e) {
-        // TODO implement warning?
-        this.logVerbose(`Error fetching logs for function ${this.id}:${functionName}`);
+        // Silence this error because it's not really an error: there are simply no logs
+        if (typeof e === 'string' && e.includes('No existing streams for the function')) return;
+        this.logError(e, [functionName]);
       }
     });
     await Promise.all(promises);
+
+    if (options.tail) {
+      this.successProgress('no log streams to tail');
+    }
   }
 
   async dev() {
@@ -86,9 +109,9 @@ class ServerlessFramework extends Component {
   }
 
   /**
-   * @return {Promise<string>}
+   * @return {Promise<{ stdout: string, stderr: string }>}
    */
-  async exec(command, args, streamStdout = false) {
+  async exec(command, args, streamStdout = false, stdoutCallback = undefined) {
     // Add stage
     args.push('--stage', this.context.stage);
     // Add config file name if necessary
@@ -114,6 +137,9 @@ class ServerlessFramework extends Component {
           this.logVerbose(data.toString().trim());
           stdout += data;
           allOutput += data;
+          if (stdoutCallback) {
+            stdoutCallback(data.toString());
+          }
         });
       }
       if (child.stderr) {
