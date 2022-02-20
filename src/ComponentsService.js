@@ -259,8 +259,8 @@ class ComponentsService {
     this.context.renderOutputs(outputs);
   }
 
-  async logs() {
-    await this.invokeComponentsInParallel('logs');
+  async logs(options) {
+    await this.invokeComponentsInParallel('logs', options);
   }
 
   async dev() {
@@ -318,22 +318,21 @@ class ComponentsService {
     await this.executeComponentsGraph({ method });
   }
 
-  async invokeComponentsInParallel(method) {
+  async invokeComponentsInParallel(method, options) {
     this.context.logVerbose(`Instantiating components.`);
     await this.instantiateComponents();
 
     this.context.logVerbose(`Invoking components in parallel.`);
     const promises = Object.values(this.allComponents).map(async ({ instance }) => {
-      if (typeof instance[method] === 'function') {
-        try {
-          await instance[method]();
-        } catch (e) {
-          // If the component has an ongoing progress, we automatically set it to "error"
-          if (this.context.progresses.exists(instance.id)) {
-            this.context.progresses.error(instance.id, e);
-          } else {
-            this.context.logger.error(e);
-          }
+      if (typeof instance[method] !== 'function') return;
+      try {
+        await instance[method](options);
+      } catch (e) {
+        // If the component has an ongoing progress, we automatically set it to "error"
+        if (this.context.progresses.exists(instance.id)) {
+          this.context.progresses.error(instance.id, e);
+        } else {
+          this.context.logger.error(e);
         }
       }
     });
