@@ -75,6 +75,7 @@ class Context {
   }
 
   shutdown() {
+    this.progresses.setFooterText('');
     this.progresses.stopAll();
   }
 }
