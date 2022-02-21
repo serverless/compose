@@ -252,7 +252,7 @@ class ComponentsService {
     const outputs = await this.context.stateStorage.readComponentsOutputs();
 
     if (isEmpty(outputs)) {
-      this.context.logger.log('Could not find any deployed components');
+      throw new Error('Could not find any deployed components');
     } else {
       this.context.renderOutputs(outputs);
     }
