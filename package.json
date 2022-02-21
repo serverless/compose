@@ -41,6 +41,9 @@
     "ignorePatterns": [
       "api/*.js",
       "otherapi/*.js"
-    ]
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2020
+    }
   }
 }

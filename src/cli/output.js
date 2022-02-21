@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Safely writes text to a stream.
  * It takes into account dynamic content that may be written below.

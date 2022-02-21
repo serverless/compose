@@ -1,3 +1,5 @@
+'use strict';
+
 const utils = require('./utils/fs');
 const path = require('path');
 const fsp = require('fs').promises;

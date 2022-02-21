@@ -1,5 +1,7 @@
+'use strict';
+
 const Component = require('../../src/Component');
-const child_process = require('child_process');
+const childProcess = require('child_process');
 const YAML = require('js-yaml');
 
 class ServerlessFramework extends Component {
@@ -111,7 +113,7 @@ class ServerlessFramework extends Component {
 
     this.logVerbose(`Running "${command} ${args.join(' ')}"`);
     return new Promise((resolve, reject) => {
-      const child = child_process.spawn(command, args, {
+      const child = childProcess.spawn(command, args, {
         cwd: this.inputs.path,
         stdio: streamStdout ? 'inherit' : undefined,
       });
@@ -161,17 +163,17 @@ class ServerlessFramework extends Component {
     }
 
     // Exclude some useless fields from the outputs
-    delete outputs['service']; // this duplicates the component ID
-    delete outputs['stage']; // stage is global across all components anyway
-    delete outputs['stack']; // stage is global across all components anyway
-    delete outputs['endpoints']; // TODO present them better
+    delete outputs.service; // this duplicates the component ID
+    delete outputs.stage; // stage is global across all components anyway
+    delete outputs.stack; // stage is global across all components anyway
+    delete outputs.endpoints; // TODO present them better
     // Merge CF outputs into the list
     outputs = {
       ...outputs,
       ...outputs['Stack Outputs'],
     };
     delete outputs['Stack Outputs'];
-    delete outputs['ServerlessDeploymentBucketName']; // useless info
+    delete outputs.ServerlessDeploymentBucketName; // useless info
 
     return outputs;
   }
