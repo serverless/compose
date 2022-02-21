@@ -9,14 +9,15 @@ name: components
 #     path: website
 
 api:
-  component: ./components/framework # serverless-framework
+  component: serverless-framework
   path: api
   parameters:
     fromother: ${otherapi.HttpApiId}
 
 otherapi:
-  component: ./components/framework # serverless-framework
+  component: serverless-framework
   path: otherapi
+
 # queue:
 #     component: ./components/src/components/queue
 #     worker:
