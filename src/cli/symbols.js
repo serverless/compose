@@ -1,3 +1,5 @@
+'use strict';
+
 const isUnicodeSupported = require('is-unicode-supported');
 
 const main = {

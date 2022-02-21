@@ -1,3 +1,5 @@
+'use strict';
+
 const { resolve } = require('path');
 
 async function loadComponent({ context, path, alias, inputs }) {

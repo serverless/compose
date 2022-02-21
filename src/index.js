@@ -45,7 +45,7 @@ const isComponentsTemplate = (serverlessFile) => {
   }
 
   // make sure it IS a components file
-  for (const key in serverlessFile) {
+  for (const key of Object.keys(serverlessFile)) {
     if (serverlessFile[key] && serverlessFile[key].component) {
       return true;
     }

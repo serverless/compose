@@ -1,3 +1,5 @@
+'use strict';
+
 // @ts-nocheck Types do not work with chalk for some reason
 const chalk = require('chalk');
 

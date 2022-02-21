@@ -37,6 +37,10 @@
   },
   "eslintConfig": {
     "extends": "@serverless/eslint-config/node",
-    "root": true
+    "root": true,
+    "ignorePatterns": [
+      "api/*.js",
+      "otherapi/*.js"
+    ]
   }
 }
