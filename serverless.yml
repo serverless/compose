@@ -17,7 +17,6 @@ api:
 otherapi:
   component: serverless-framework
   path: otherapi
-
 # queue:
 #     component: ./components/src/components/queue
 #     worker:

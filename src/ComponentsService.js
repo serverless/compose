@@ -242,17 +242,20 @@ class ComponentsService {
     this.context.logger.log(`Deploying to stage ${this.context.stage}`);
 
     await this.invokeComponentsInGraph({ method: 'deploy', reverse: false });
-
-    await this.outputs();
-  }
-
-  async outputs() {
-    const outputs = await this.context.stateStorage.readComponentsOutputs();
-    this.context.renderOutputs(outputs);
   }
 
   async logs(options) {
     await this.invokeComponentsInParallel('logs', options);
+  }
+
+  async info() {
+    const outputs = await this.context.stateStorage.readComponentsOutputs();
+
+    if (isEmpty(outputs)) {
+      this.context.logger.log('Could not find any deployed components');
+    } else {
+      this.context.renderOutputs(outputs);
+    }
   }
 
   async invokeComponentCommand(componentName, command, options) {
