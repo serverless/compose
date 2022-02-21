@@ -19,6 +19,3 @@ functions:
     handler: handler.hello
     events:
       - httpApi: '*'
-
-plugins:
-  - ./plugin/plugin
