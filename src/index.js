@@ -15,20 +15,11 @@ const getServerlessFile = (dir) => {
   const ymlFilePath = path.join(dir, 'serverless.yml');
   const yamlFilePath = path.join(dir, 'serverless.yaml');
 
-  try {
-    if (utils.fileExistsSync(ymlFilePath)) {
-      return utils.readFileSync(ymlFilePath);
-    }
-    if (utils.fileExistsSync(yamlFilePath)) {
-      return utils.readFileSync(yamlFilePath);
-    }
-  } catch (e) {
-    // todo currently our YAML parser does not support
-    // CF schema (!Ref for example). So we silent that error
-    // because the framework can deal with that
-    if (e.name !== 'YAMLException') {
-      throw e;
-    }
+  if (utils.fileExistsSync(ymlFilePath)) {
+    return utils.readFileSync(ymlFilePath);
+  }
+  if (utils.fileExistsSync(yamlFilePath)) {
+    return utils.readFileSync(yamlFilePath);
   }
 
   return false;
@@ -65,7 +56,7 @@ const runComponents = async () => {
   const serverlessFile = getServerlessFile(process.cwd());
 
   if (!serverlessFile || !isComponentsFile(serverlessFile)) {
-    return;
+    throw new Error('No serverless.yml components file found.');
   }
 
   let method = args._[0];
