@@ -26,7 +26,13 @@ class ServerlessFramework extends Component {
   // };
   // For now the workaround is to just pray that the command is correct and rely on validation from the Framework
   async command(command, options) {
-    const cliparams = Object.entries(options).map(([key, value]) => `--${key}=${value}`);
+    const cliparams = Object.entries(options).map(([key, value]) => {
+      if (value === true) {
+        // Support flags like `--verbose`
+        return `--${key}`;
+      }
+      return `--${key}=${value}`;
+    });
     const args = [command, ...cliparams];
     return await this.exec('serverless', args, true);
   }
