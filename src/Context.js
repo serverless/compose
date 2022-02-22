@@ -1,3 +1,5 @@
+'use strict';
+
 const path = require('path');
 const prettyoutput = require('prettyoutput');
 const utils = require('./utils');
@@ -43,16 +45,15 @@ class Context {
       return;
     }
     safeWrite(
-      '\n' +
-        prettyoutput(outputs, {
-          colors: {
-            keys: 'gray',
-            dash: 'gray',
-            number: 'white',
-            true: 'white',
-            false: 'white',
-          },
-        }),
+      `\n${prettyoutput(outputs, {
+        colors: {
+          keys: 'gray',
+          dash: 'gray',
+          number: 'white',
+          true: 'white',
+          false: 'white',
+        },
+      })}`,
       process.stdout
     );
   }

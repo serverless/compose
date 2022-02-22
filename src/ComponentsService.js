@@ -32,7 +32,7 @@ const resolveObject = (object, context) => {
         } else if (typeof referencedPropertyValue === 'string') {
           newValue = newValue.replace(match, referencedPropertyValue);
         } else {
-          throw Error(`the referenced substring is not a string`);
+          throw Error('the referenced substring is not a string');
         }
       }
       this.update(newValue);
@@ -46,7 +46,7 @@ const validateGraph = (graph) => {
   const isAcyclic = alg.isAcyclic(graph);
   if (!isAcyclic) {
     const cycles = alg.findCycles(graph);
-    let msg = ['Your template has circular dependencies:'];
+    const msg = ['Your template has circular dependencies:'];
     cycles.forEach((cycle, index) => {
       let fromAToB = cycle.join(' --> ');
       fromAToB = `${(index += 1)}. ${fromAToB}`;
@@ -108,7 +108,7 @@ const resolveTemplate = (template) => {
             } else if (typeof referencedPropertyValue === 'string') {
               newValue = newValue.replace(match, referencedPropertyValue);
             } else {
-              throw Error(`the referenced substring is not a string`);
+              throw Error('the referenced substring is not a string');
             }
           }
         }
@@ -125,7 +125,7 @@ const resolveTemplate = (template) => {
 const getAllComponents = async (obj = {}) => {
   const allComponents = {};
 
-  for (const key in obj) {
+  for (const key of Object.keys(obj)) {
     if (obj[key] && obj[key].component) {
       // local components start with a .
       if (obj[key].component[0] === '.') {
@@ -155,8 +155,8 @@ const getAllComponents = async (obj = {}) => {
 const setDependencies = (allComponents) => {
   const regex = /\${(\w*:?[\w\d.-]+)}/g;
 
-  for (const alias in allComponents) {
-    const dependencies = traverse(allComponents[alias].inputs).reduce(function (accum, value) {
+  for (const alias of Object.keys(allComponents)) {
+    const dependencies = traverse(allComponents[alias].inputs).reduce((accum, value) => {
       const matches = typeof value === 'string' ? value.match(regex) : null;
       if (matches) {
         for (const match of matches) {
@@ -183,11 +183,11 @@ const setDependencies = (allComponents) => {
 const createGraph = (allComponents) => {
   const graph = new Graph();
 
-  for (const alias in allComponents) {
+  for (const alias of Object.keys(allComponents)) {
     graph.setNode(alias, allComponents[alias]);
   }
 
-  for (const alias in allComponents) {
+  for (const alias of Object.keys(allComponents)) {
     const { dependencies } = allComponents[alias];
     if (!isEmpty(dependencies)) {
       for (const dependency of dependencies) {
@@ -275,21 +275,21 @@ class ComponentsService {
       if (!component?.[command]) {
         throw new Error(`No method "${command}" on component "${componentName}"`);
       }
-      handler = (options) => component[command](options);
+      handler = (opts) => component[command](opts);
     } else if (
       !component.commands?.[command] &&
       component.inputs.component === 'serverless-framework'
     ) {
       // Workaround to invoke all custom Framework commands
       // TODO: Support options and validation
-      handler = (options) => component.command(command, options);
+      handler = (opts) => component.command(command, opts);
     } else {
       // Custom command: the handler is defined in the component's `commands` property
       if (!component.commands?.[command]) {
         throw new Error(`No command ${command} on component ${componentName}`);
       }
       const commandHandler = component.commands[command].handler;
-      handler = (options) => commandHandler.call(component, options);
+      handler = (opts) => commandHandler.call(component, opts);
     }
     try {
       await handler(options);
@@ -437,7 +437,7 @@ class ComponentsService {
       this.componentsGraph.removeNode(alias);
     }
 
-    return this.instantiateComponents();
+    this.instantiateComponents();
   }
 }
 

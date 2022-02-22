@@ -40,11 +40,17 @@ class Component {
     this.outputs = await this.context.stateStorage.readComponentOutputs(this.id);
   }
 
-  async deploy(options) {}
+  async deploy() {
+    // To be implemented by components
+  }
 
-  async remove(options) {}
+  async remove() {
+    // To be implemented by components
+  }
 
-  async logs(options) {}
+  async logs() {
+    // To be implemented by components
+  }
 
   async save() {
     await this.context.stateStorage.writeComponentState(this.id, this.state);

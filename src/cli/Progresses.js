@@ -77,7 +77,7 @@ class Progresses {
       ...this.progresses[name],
       timer: true,
       status: 'spinning',
-      text: text,
+      text,
       startTime: Date.now(),
     };
     this.updateSpinnerState();
@@ -253,11 +253,9 @@ class Progresses {
     // Else we wrap it explicitly (with \n) and strip ANSI (else we may mess up ANSI code)
     // This is needed because we need to calculate the number of lines to clear, so we
     // need explicit line returns (\n) instead of automatic text wrapping
-    return (
-      strippedLine.substring(0, columns - 1) +
-      `\n` +
-      this.wrapLine(strippedLine.substring(columns - 1, strippedLine.length))
-    );
+    return `${strippedLine.substring(0, columns - 1)}\n${this.wrapLine(
+      strippedLine.substring(columns - 1, strippedLine.length)
+    )}`;
   }
 
   writeStream(stream, output, lineCount) {
@@ -267,7 +265,7 @@ class Progresses {
 
   limitOutputToTerminalHeight(output) {
     if (!this.stream.rows) {
-      return;
+      return '';
     }
     const lines = output.split('\n');
     const overflows = lines.length > this.stream.rows;

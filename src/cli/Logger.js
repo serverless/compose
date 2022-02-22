@@ -1,3 +1,5 @@
+'use strict';
+
 const colors = require('./colors');
 const symbols = require('./symbols');
 const { safeWrite } = require('./output');
