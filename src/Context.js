@@ -26,7 +26,9 @@ class Context {
     this.id = undefined;
 
     this.progresses = new Progresses();
-    this.progresses.setFooterText(colors.darkGray('Press [?] to enable verbose logs'));
+    if (!config.verbose) {
+      this.progresses.setFooterText(colors.darkGray('Press [?] to enable verbose logs'));
+    }
   }
 
   async init() {
@@ -65,6 +67,7 @@ class Context {
     process.stdin.on('keypress', (character, key) => {
       if (character === '?') {
         this.logger.enableVerbose();
+        this.progresses.setFooterText();
       }
       if (key && key.ctrl && key.name === 'c') {
         // Restore the Ctrl+C behavior by sending SIGINT to ourselves
