@@ -33,7 +33,7 @@ class ServerlessFramework extends Component {
       }
       return `--${key}=${value}`;
     });
-    const args = [command, ...cliparams];
+    const args = [...command.split(':'), ...cliparams];
     return await this.exec('serverless', args, true);
   }
 
