@@ -147,9 +147,8 @@ class ServerlessFramework extends Component {
       child.on('close', (code) => {
         if (code !== 0) {
           // Try to extract the error message (temporary solution)
-          const errorMessagePosition = allOutput.indexOf('Error:');
-          const error =
-            errorMessagePosition >= 0 ? allOutput.slice(errorMessagePosition) : allOutput;
+          const errorMessagePosition = stdout.indexOf('Error:');
+          const error = errorMessagePosition >= 0 ? stdout.slice(errorMessagePosition) : allOutput;
           reject(error);
         }
         resolve({ stdout, stderr });
