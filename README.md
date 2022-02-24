@@ -1,4 +1,4 @@
-***BETA:** This repository contains a beta version of a new Serverless Framework feature.*
+**\*BETA:** This repository contains a beta version of a new Serverless Framework feature.\*
 
 Deploy and orchestrate multiple Serverless Framework services in monorepositories.
 
@@ -36,7 +36,7 @@ The CLI can now be used via the following command:
 components-v4
 ```
 
-*Note: while in beta, the feature is available via the `components-v4` command, not the main `serverless` CLI.*
+_Note: while in beta, the feature is available via the `components-v4` command, not the main `serverless` CLI._
 
 ## Usage
 

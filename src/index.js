@@ -6,6 +6,7 @@ require('@serverless/utils/log-reporters/node');
 const path = require('path');
 const args = require('minimist')(process.argv.slice(2));
 const utils = require('./utils');
+const renderHelp = require('./render-help');
 const Context = require('./Context');
 const Component = require('./Component');
 const ComponentsService = require('./ComponentsService');
@@ -53,15 +54,20 @@ const isComponentsFile = (serverlessFile) => {
 };
 
 const runComponents = async () => {
-  const serverlessFile = getServerlessFile(process.cwd());
-
-  if (!serverlessFile || !isComponentsFile(serverlessFile)) {
-    throw new Error('No serverless.yml components file found.');
+  if (args.help || args._[0] === 'help') {
+    renderHelp();
+    return;
   }
 
   let method = args._[0];
   if (!method) {
     throw new Error('Please provide a method that should be run.');
+  }
+
+  const serverlessFile = getServerlessFile(process.cwd());
+
+  if (!serverlessFile || !isComponentsFile(serverlessFile)) {
+    throw new Error('No serverless.yml components file found.');
   }
   let componentName;
   if (method.includes(':')) {
