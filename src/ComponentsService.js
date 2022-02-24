@@ -60,7 +60,7 @@ const validateGraph = (graph) => {
   }
 };
 
-const getTemplate = async (template) => {
+const getConfiguration = async (template) => {
   if (typeof template === 'string') {
     if (
       (!utils.isJsonPath(template) && !utils.isYamlPath(template)) ||
@@ -76,51 +76,6 @@ const getTemplate = async (template) => {
     );
   }
   return template;
-};
-
-const resolveTemplate = (template) => {
-  const regex = /\${(\w*:?[\w\d.-]+)}/g;
-  let variableResolved = false;
-  const resolvedTemplate = traverse(template).forEach(function (value) {
-    const matches = typeof value === 'string' ? value.match(regex) : null;
-    if (matches) {
-      let newValue = value;
-      for (const match of matches) {
-        const referencedPropertyPath = match.substring(2, match.length - 1).split('.');
-        const referencedTopLevelProperty = referencedPropertyPath[0];
-        if (/\${env\.(\w*:?[\w\d.-]+)}/g.test(match)) {
-          newValue = process.env[referencedPropertyPath[1]];
-          variableResolved = true;
-        } else {
-          if (!template[referencedTopLevelProperty]) {
-            throw Error(`invalid reference ${match}`);
-          }
-
-          if (!template[referencedTopLevelProperty].component) {
-            variableResolved = true;
-            const referencedPropertyValue = path(referencedPropertyPath, template);
-
-            if (referencedPropertyValue === undefined) {
-              throw Error(`invalid reference ${match}`);
-            }
-
-            if (match === value) {
-              newValue = referencedPropertyValue;
-            } else if (typeof referencedPropertyValue === 'string') {
-              newValue = newValue.replace(match, referencedPropertyValue);
-            } else {
-              throw Error('the referenced substring is not a string');
-            }
-          }
-        }
-      }
-      this.update(newValue);
-    }
-  });
-  if (variableResolved) {
-    return resolveTemplate(resolvedTemplate);
-  }
-  return resolvedTemplate;
 };
 
 const getAllComponents = async (obj = {}) => {
@@ -214,20 +169,17 @@ class ComponentsService {
     this.templateContent = templateContent;
 
     // Variables that will be populated during init
-    this.resolvedTemplate = null;
+    this.configuration = null;
     this.allComponents = null;
     this.componentsGraph = null;
   }
 
   async init() {
     await this.context.init();
-    const template = await getTemplate(this.templateContent);
+    const configuration = await getConfiguration(this.templateContent);
+    this.configuration = configuration;
 
-    const resolvedTemplate = resolveTemplate(template);
-
-    this.resolvedTemplate = resolvedTemplate;
-
-    const allComponents = await getAllComponents(resolvedTemplate);
+    const allComponents = await getAllComponents(configuration);
 
     const allComponentsWithDependencies = setDependencies(allComponents);
 
@@ -332,9 +284,7 @@ class ComponentsService {
 
   async remove() {
     this.context.logger.log();
-    this.context.logger.log(
-      `Removing stage ${this.context.stage} of ${this.resolvedTemplate.name}`
-    );
+    this.context.logger.log(`Removing stage ${this.context.stage} of ${this.configuration.name}`);
 
     await this.invokeComponentsInGraph({ method: 'remove', reverse: true });
     await this.context.stateStorage.removeState();
@@ -364,7 +314,7 @@ class ComponentsService {
         const inputs = resolveObject(this.allComponents[alias].inputs, availableOutputs);
 
         try {
-          inputs.service = this.resolvedTemplate.name;
+          inputs.service = this.configuration.name;
           inputs.componentId = alias;
 
           const component = await loadComponent({
@@ -427,7 +377,7 @@ class ComponentsService {
         const availableOutputs = await this.context.stateStorage.readComponentsOutputs();
         const inputs = resolveObject(this.allComponents[alias].inputs, availableOutputs);
 
-        inputs.service = this.resolvedTemplate.name;
+        inputs.service = this.configuration.name;
         inputs.componentId = alias;
 
         this.allComponents[alias].instance = await loadComponent({
