@@ -17,26 +17,27 @@ const resolveObject = (object, context) => {
 
   const resolvedObject = traverse(object).forEach(function (value) {
     const matches = typeof value === 'string' ? value.match(regex) : null;
-    if (matches) {
-      let newValue = value;
-      for (const match of matches) {
-        const referencedPropertyPath = match.substring(2, match.length - 1).split('.');
-        const referencedPropertyValue = path(referencedPropertyPath, context);
-
-        if (referencedPropertyValue === undefined) {
-          throw Error(`invalid reference ${match}`);
-        }
-
-        if (match === value) {
-          newValue = referencedPropertyValue;
-        } else if (typeof referencedPropertyValue === 'string') {
-          newValue = newValue.replace(match, referencedPropertyValue);
-        } else {
-          throw Error('the referenced substring is not a string');
-        }
-      }
-      this.update(newValue);
+    if (!matches) {
+      return;
     }
+    let newValue = value;
+    for (const match of matches) {
+      const referencedPropertyPath = match.substring(2, match.length - 1).split('.');
+      const referencedPropertyValue = path(referencedPropertyPath, context);
+
+      if (referencedPropertyValue === undefined) {
+        throw Error(`invalid reference ${match}`);
+      }
+
+      if (match === value) {
+        newValue = referencedPropertyValue;
+      } else if (typeof referencedPropertyValue === 'string') {
+        newValue = newValue.replace(match, referencedPropertyValue);
+      } else {
+        throw Error('the referenced substring is not a string');
+      }
+    }
+    this.update(newValue);
   });
 
   return resolvedObject;
