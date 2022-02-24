@@ -353,6 +353,7 @@ class ComponentsService {
       return this.allComponents;
     }
 
+    /** @type {Promise<boolean>[]} */
     const promises = [];
 
     for (const alias of nodes) {
@@ -380,6 +381,8 @@ class ComponentsService {
           }
 
           await component[method]();
+
+          return true;
         } catch (e) {
           // If the component has an ongoing progress, we automatically set it to "error"
           if (this.context.progresses.exists(alias)) {
@@ -387,13 +390,19 @@ class ComponentsService {
           } else {
             this.context.logger.error(e);
           }
+          return false;
         }
       };
 
       promises.push(fn());
     }
 
-    await Promise.all(promises);
+    const results = await Promise.all(promises);
+    const allSuccessful = results.reduce((carry, current) => carry && current, true);
+    if (!allSuccessful) {
+      // Skip next components if there was any error
+      return;
+    }
 
     for (const alias of nodes) {
       this.componentsGraph.removeNode(alias);
