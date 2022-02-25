@@ -397,7 +397,7 @@ class ComponentsService {
       this.componentsGraph.removeNode(alias);
     }
 
-    this.instantiateComponents();
+    await this.instantiateComponents();
   }
 }
 
