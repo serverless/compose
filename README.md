@@ -1,4 +1,4 @@
-**\*BETA:** This repository contains a beta version of a new Serverless Framework feature.\*
+_**BETA:** This repository contains a beta version of a new Serverless Framework feature._
 
 Deploy and orchestrate multiple Serverless Framework services in monorepositories.
 
