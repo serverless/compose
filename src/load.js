@@ -2,6 +2,9 @@
 
 const { resolve } = require('path');
 
+/**
+ * @return {Promise<import('./Component')>}
+ */
 async function loadComponent({ context, path, alias, inputs }) {
   const externalComponentPath = resolve(context.root, path, 'serverless.js');
 

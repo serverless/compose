@@ -178,18 +178,13 @@ class ComponentsService {
 
   async init() {
     await this.context.init();
-    const configuration = await getConfiguration(this.templateContent);
-    this.configuration = configuration;
+    this.configuration = await getConfiguration(this.templateContent);
 
-    const allComponents = await getAllComponents(configuration);
-
-    const allComponentsWithDependencies = setDependencies(allComponents);
-
-    this.allComponents = allComponentsWithDependencies;
+    const allComponents = await getAllComponents(this.configuration);
+    this.allComponents = setDependencies(allComponents);
 
     // TODO: THAT GRAPH MIGHT BE ADJUSTED OVER THE COURSE OF PROCESSING
-    const graph = createGraph(allComponentsWithDependencies);
-    this.componentsGraph = graph;
+    this.componentsGraph = createGraph(this.allComponents);
   }
 
   async deploy() {
@@ -201,7 +196,7 @@ class ComponentsService {
       this.context.progresses.add(componentName);
     });
 
-    await this.invokeComponentsInGraph({ method: 'deploy', reverse: false });
+    await this.executeComponentsGraph({ method: 'deploy', reverse: false });
 
     // Resolve the status of components that were not deployed
     Object.keys(this.allComponents).forEach((componentName) => {
@@ -270,11 +265,6 @@ class ComponentsService {
     }
   }
 
-  async invokeComponentsInGraph({ method, reverse }) {
-    this.context.logVerbose(`Executing "${method}" following the component dependency graph`);
-    await this.executeComponentsGraph({ method, reverse });
-  }
-
   async invokeComponentsInParallel(method, options) {
     await this.instantiateComponents();
 
@@ -300,7 +290,7 @@ class ComponentsService {
     this.context.logger.log();
     this.context.logger.log(`Removing stage ${this.context.stage} of ${this.configuration.name}`);
 
-    await this.invokeComponentsInGraph({ method: 'remove', reverse: true });
+    await this.executeComponentsGraph({ method: 'remove', reverse: true });
     await this.context.stateStorage.removeState();
     return {};
   }
