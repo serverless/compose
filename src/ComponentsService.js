@@ -26,7 +26,9 @@ const resolveObject = (object, context) => {
       const referencedPropertyValue = path(referencedPropertyPath, context);
 
       if (referencedPropertyValue === undefined) {
-        throw Error(`invalid reference ${match}`);
+        throw Error(
+          `the variable ${match} cannot be resolved: the referenced output does not exist`
+        );
       }
 
       if (match === value) {
