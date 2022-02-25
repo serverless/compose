@@ -113,7 +113,7 @@ class ServerlessFramework extends Component {
       args.push('--config', this.inputs.config);
     }
     // Add inputs
-    for (const [key, value] of Object.entries(this.inputs?.parameters ?? {})) {
+    for (const [key, value] of Object.entries(this.inputs?.params ?? {})) {
       args.push('--param', `${key}=${value}`);
     }
 
