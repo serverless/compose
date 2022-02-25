@@ -3,7 +3,7 @@ _**BETA:** This repository contains a beta version of a new Serverless Framework
 Deploy and orchestrate multiple Serverless Framework services in monorepositories.
 
 ```yaml
-app: myapp
+name: myapp
 
 subscriptions:
   component: serverless-framework
@@ -62,7 +62,7 @@ In that new file, you can reference existing Serverless Framework projects by th
 
 ```yaml
 # Name of the application
-app: myapp
+name: myapp
 
 service-a:
   component: serverless-framework
@@ -87,6 +87,8 @@ Deploying myapp to stage dev
 
 ```
 
+**⚠️ Warning:** The deployment will run `serverless deploy` in each service directory. If Serverless Framework is installed locally (in `node_modules/`) in some services, you need to make sure Serverless Framework v3.3.0 or greater is installed.
+
 ### Service dependencies and variables
 
 TODO
@@ -100,7 +102,25 @@ TODO
 
 ### Service-specific commands
 
-TODO
+It is possible to run commands for a specific component only. For example to deploy only a specific component:
+
+```bash
+components-v4 deploy --component=service-a
+
+# Shortcut alternative
+components-v4 service-a:deploy
+```
+
+Or tail logs of a single function:
+
+```bash
+components-v4 logs --component=service-a --function=index
+
+# Shortcut alternative
+components-v4 service-a:logs --function=index
+```
+
+All Serverless Framework commands are supported via service-specific commands, including custom commands from plugins.
 
 ### Supported Serverless Framework features
 
