@@ -27,7 +27,7 @@ const dashes = {
  *   timer: boolean;
  *   startTime?: number;
  *   endTime?: number;
- *   status: 'spinning'|'success'|'error'|'waiting'|'stopped';
+ *   status: 'spinning'|'success'|'error'|'waiting'|'stopped'|'skipped';
  *   content?: string;
  * }} Progress
  */
@@ -92,6 +92,13 @@ class Progresses {
 
   /**
    * @param {string} name
+   */
+  isWaiting(name) {
+    return this.progresses[name]?.status === 'waiting';
+  }
+
+  /**
+   * @param {string} name
    * @param {string} text
    */
   update(name, text) {
@@ -129,10 +136,21 @@ class Progresses {
     this.updateSpinnerState();
   }
 
+  /**
+   * @param {string} name
+   */
+  skipped(name) {
+    if (!this.progresses[name]) throw Error(`No progress with name ${name}`);
+    this.progresses[name].status = 'skipped';
+    this.progresses[name].text = 'skipped';
+    this.progresses[name].endTime = Date.now();
+    this.updateSpinnerState();
+  }
+
   stopAll() {
     Object.keys(this.progresses).forEach((name) => {
       const { status: currentStatus } = this.progresses[name];
-      if (currentStatus !== 'error' && currentStatus !== 'success' && currentStatus !== 'waiting') {
+      if (currentStatus === 'spinning' || currentStatus === 'waiting') {
         this.progresses[name].status = 'stopped';
       }
     });
@@ -180,7 +198,7 @@ class Progresses {
         symbol = symbols.error;
         componentColor = colors.red;
         statusColor = colors.red;
-      } else if (progress.status === 'waiting') {
+      } else if (progress.status === 'waiting' || progress.status === 'skipped') {
         statusColor = colors.gray;
       }
       let line = `${colors.red(symbol)}  ${componentColor(name)} ${separator} ${statusColor(

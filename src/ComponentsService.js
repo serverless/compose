@@ -196,7 +196,19 @@ class ComponentsService {
     this.context.logger.log();
     this.context.logger.log(`Deploying to stage ${this.context.stage}`);
 
+    // Pre-emptively add all components to the progress list
+    Object.keys(this.allComponents).forEach((componentName) => {
+      this.context.progresses.add(componentName);
+    });
+
     await this.invokeComponentsInGraph({ method: 'deploy', reverse: false });
+
+    // Resolve the status of components that were not deployed
+    Object.keys(this.allComponents).forEach((componentName) => {
+      if (this.context.progresses.isWaiting(componentName)) {
+        this.context.progresses.skipped(componentName);
+      }
+    });
   }
 
   async logs(options) {
