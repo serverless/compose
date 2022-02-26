@@ -207,6 +207,15 @@ class ComponentsService {
     });
   }
 
+  async remove() {
+    this.context.logger.log();
+    this.context.logger.log(`Removing stage ${this.context.stage} of ${this.configuration.name}`);
+
+    await this.executeComponentsGraph({ method: 'remove', reverse: true });
+    await this.context.stateStorage.removeState();
+    return {};
+  }
+
   async logs(options) {
     await this.invokeComponentsInParallel('logs', options);
   }
@@ -285,15 +294,6 @@ class ComponentsService {
     });
 
     await Promise.all(promises);
-  }
-
-  async remove() {
-    this.context.logger.log();
-    this.context.logger.log(`Removing stage ${this.context.stage} of ${this.configuration.name}`);
-
-    await this.executeComponentsGraph({ method: 'remove', reverse: true });
-    await this.context.stateStorage.removeState();
-    return {};
   }
 
   async executeComponentsGraph({ method, reverse }) {
