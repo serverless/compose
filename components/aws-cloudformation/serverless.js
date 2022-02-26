@@ -34,7 +34,7 @@ class AwsCloudformation extends Component {
   constructor(id, context, inputs) {
     super(id, context, inputs);
 
-    this.stackName = `${this.appName}-${this.stage}`;
+    this.stackName = `${this.appName}-${this.id}-${this.stage}`;
     this.region = this.inputs.region;
   }
 
@@ -185,7 +185,9 @@ class AwsCloudformation extends Component {
     this.state.templateHash = templateHash;
     await this.save();
 
-    const outputs = {};
+    const outputs = {
+      stack: this.stackName,
+    };
     for (const output of response.Stacks[0]?.Outputs) {
       outputs[output.OutputKey] = output.OutputValue;
     }
@@ -226,6 +228,10 @@ class AwsCloudformation extends Component {
         StackName: stackId,
       }
     );
+
+    this.state = {};
+    await this.save();
+    await this.updateOutputs({});
 
     this.successProgress('removed');
   }
