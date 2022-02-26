@@ -211,9 +211,20 @@ class ComponentsService {
     this.context.logger.log();
     this.context.logger.log(`Removing stage ${this.context.stage} of ${this.configuration.name}`);
 
+    // Pre-emptively add all components to the progress list
+    Object.keys(this.allComponents).forEach((componentName) => {
+      this.context.progresses.add(componentName);
+    });
+
     await this.executeComponentsGraph({ method: 'remove', reverse: true });
     await this.context.stateStorage.removeState();
-    return {};
+
+    // Resolve the status of components that were not removed
+    Object.keys(this.allComponents).forEach((componentName) => {
+      if (this.context.progresses.isWaiting(componentName)) {
+        this.context.progresses.skipped(componentName);
+      }
+    });
   }
 
   async logs(options) {
