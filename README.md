@@ -91,14 +91,84 @@ Deploying myapp to stage dev
 
 ### Service dependencies and variables
 
-TODO
+Service variables let us:
+
+- order deployments
+- inject outputs from one service into another
+
+This is possible via the `${component.output}` syntax. For example:
+
+```yaml
+service-a:
+  component: serverless-framework
+  path: service-a
+
+service-b:
+  component: serverless-framework
+  path: service-b
+  params:
+    queueUrl: ${service-a.queueUrl}
+```
+
+Let's break down the example above into 3 steps:
+
+1. `${service-a.queueUrl}` will resolve to the `queueUrl` output of the `service-a` service.
+
+   The outputs of a Serverless Framework service are resolved from its **CloudFormation outputs**. Here is how we can expose the `queueUrl` output in the `service-a/serverless.yml` config:
+
+   ```yaml
+   # service-a/serverless.yml
+   # ...
+   
+   resources:
+     Resources:
+       MyQueue:
+         Type: AWS::SQS::Queue
+         # ...
+     Outputs:
+       queueUrl:
+         Value: !Ref MyQueue
+   ```
+
+2. Because of the dependency introduced by the variable, `components-v4 deploy` will automatically **deploy `service-a` first, and then `service-b`.**
+
+3. The value will be passed to `service-b` [as a parameter](https://www.serverless.com/framework/docs/guides/parameters) named `queueUrl`. Parameters can be referenced in Serverless Framework configuration via the `${param:xxx}` syntax:
+
+   ```yaml
+   # service-b/serverless.yml
+   provider:
+     ...
+     environment:
+       # Here we inject the queue URL as a Lambda environment variable
+       SERVICE_A_QUEUE_URL: ${param:queueUrl}
+   ```
+
+Cross-services variables are a great way to share API URLs, queue URLs, database table names, and more, without having to hardcode resource names or use SSM.
 
 ### Global commands
 
-TODO
+On top of `components-v4 deploy`, the following commands can be run globally across all services:
 
-- info
-- logs
+- `components-v4 info` to view all services outputs
+- `components-v4 remove` to remove all services
+- `components-v4 logs` to fetch logs from **all functions across all services**
+
+For example, it is possible to tail logs for all functions at once:
+
+```bash
+$ components-v4 deploy --tail
+
+service-a › users › START
+service-a › users › 2021-12-31 16:54:14  INFO  New user created
+service-a › users › END Duration: 13 ms ...
+service-b › subscriptions › START
+service-b › subscriptions › 2021-12-31 16:54:14  INFO  New subscription enabled
+service-b › subscriptions › END Duration: 7 ms ...
+
+    ⠴  service-a › logs › 2s
+    ⠦  service-a › logs › 2s
+
+```
 
 ### Service-specific commands
 
