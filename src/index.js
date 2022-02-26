@@ -55,13 +55,14 @@ const isComponentsFile = (serverlessFile) => {
 
 const runComponents = async () => {
   if (args.help || args._[0] === 'help') {
-    renderHelp();
+    await renderHelp();
     return;
   }
 
   let method = args._[0];
   if (!method) {
-    throw new Error('Please provide a method that should be run.');
+    await renderHelp();
+    return;
   }
 
   const serverlessFile = getServerlessFile(process.cwd());
