@@ -24,7 +24,7 @@ class StateStorage {
   async readComponentState(componentId) {
     await this.readState();
 
-    return this.state[this.stage]?.components?.[componentId]?.state ?? {};
+    return this.state.components?.[componentId]?.state ?? {};
   }
 
   async writeComponentState(componentId, componentState) {
