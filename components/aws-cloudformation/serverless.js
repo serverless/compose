@@ -101,6 +101,14 @@ class AwsCloudformation extends Component {
               ChangeSetName: changeSetName,
             })
           );
+          // Supports scenarios where the stack was deployed separately and we don't have it tracked
+          const hasOutputs = this.outputs && Object.keys(this.outputs).length > 0;
+          if (!hasOutputs) {
+            await this.refreshOutputs(cloudFormation);
+          }
+          // Update state
+          this.state.templateHash = templateHash;
+          await this.save();
           this.successProgress('no changes');
           return;
         }
@@ -185,13 +193,7 @@ class AwsCloudformation extends Component {
     this.state.templateHash = templateHash;
     await this.save();
 
-    const outputs = {
-      stack: this.stackName,
-    };
-    for (const output of response.Stacks[0]?.Outputs) {
-      outputs[output.OutputKey] = output.OutputValue;
-    }
-    await this.updateOutputs(outputs);
+    await this.refreshOutputs(cloudFormation, response);
 
     this.successProgress('deployed');
   }
@@ -275,6 +277,30 @@ class AwsCloudformation extends Component {
     }
     // TODO we need a way to configure AWS credentials
     return new CloudFormationClient(options);
+  }
+
+  /**
+   * Refresh outputs from CloudFormation outputs.
+   *
+   * @param {CloudFormationClient} cloudFormation
+   * @param {import('@aws-sdk/client-cloudformation').DescribeStacksCommandOutput} [describeStackResponse]
+   */
+  async refreshOutputs(cloudFormation, describeStackResponse) {
+    if (!describeStackResponse) {
+      describeStackResponse = await cloudFormation.send(
+        new DescribeStacksCommand({
+          StackName: this.stackName,
+        })
+      );
+    }
+
+    const outputs = {
+      stack: this.stackName,
+    };
+    for (const output of describeStackResponse.Stacks[0]?.Outputs) {
+      outputs[output.OutputKey] = output.OutputValue;
+    }
+    await this.updateOutputs(outputs);
   }
 }
 
