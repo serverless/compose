@@ -10,6 +10,7 @@ const { loadComponent } = require('./load');
 
 const INTERNAL_COMPONENTS = {
   'serverless-framework': resolve(__dirname, '../components/framework'),
+  'aws-cloudformation': resolve(__dirname, '../components/aws-cloudformation'),
 };
 
 const resolveObject = (object, context) => {

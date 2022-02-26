@@ -26,6 +26,7 @@ class Context {
     this.stateStorage = new StateStorage(config.stage);
     this.stage = config.stage;
     this.id = undefined;
+    this.appName = config.appName;
 
     this.progresses = new Progresses();
     if (!config.verbose) {

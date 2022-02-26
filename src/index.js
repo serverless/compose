@@ -87,7 +87,7 @@ const runComponents = async () => {
     stateRoot: path.join(process.cwd(), '.serverless'),
     verbose: options.verbose,
     stage: options.stage || 'dev',
-    entity: serverlessFile.name, // either the name prop of the yaml, or class name of js
+    appName: serverlessFile.name,
   };
 
   const context = new Context(config);
