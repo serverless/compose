@@ -3,6 +3,9 @@
 const Component = require('../../src/Component');
 const childProcess = require('child_process');
 const YAML = require('js-yaml');
+const hasha = require('hasha');
+const globby = require('globby');
+const path = require('path');
 
 class ServerlessFramework extends Component {
   constructor(id, context, inputs) {
@@ -40,6 +43,19 @@ class ServerlessFramework extends Component {
   async deploy() {
     this.startProgress('deploying');
 
+    let cacheHash;
+    if (this.inputs.cachePatterns) {
+      this.startProgress('calculating changes');
+      cacheHash = await this.calculateCacheHash();
+      const hasNoChanges =
+        JSON.stringify(this.inputs) === JSON.stringify(this.state.inputs) &&
+        cacheHash === this.state.cacheHash;
+      if (hasNoChanges) {
+        this.successProgress('no changes');
+        return;
+      }
+    }
+
     const { stderr: deployOutput } = await this.exec('serverless', ['deploy']);
 
     const hasOutputs = this.outputs && Object.keys(this.outputs).length > 0;
@@ -47,6 +63,13 @@ class ServerlessFramework extends Component {
     // Skip retrieving outputs via `sls info` if we already have outputs (faster)
     if (hasChanges || !hasOutputs) {
       await this.updateOutputs(await this.retrieveOutputs());
+    }
+
+    // Save state
+    if (this.inputs.cachePatterns) {
+      this.state.inputs = this.inputs;
+      this.state.cacheHash = cacheHash;
+      await this.save();
     }
 
     if (hasChanges) {
@@ -181,6 +204,28 @@ class ServerlessFramework extends Component {
     delete outputs.ServerlessDeploymentBucketName; // useless info
 
     return outputs;
+  }
+
+  /**
+   * @return {Promise<string>}
+   */
+  async calculateCacheHash() {
+    const algorithm = 'md5'; // fastest
+
+    const allFilePaths = await globby(this.inputs.cachePatterns, {
+      cwd: this.inputs.path,
+    });
+
+    const promises = [];
+    for (const filePath of allFilePaths) {
+      promises.push(hasha.fromFile(path.join(this.inputs.path, filePath), { algorithm }));
+    }
+    const hashes = await Promise.all(promises);
+
+    // Sort hashes to avoid having the final hash change just because files where read in a different order
+    hashes.sort();
+
+    return hasha(hashes.join(), { algorithm });
   }
 }
 
