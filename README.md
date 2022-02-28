@@ -119,7 +119,7 @@ Let's break down the example above into 3 steps:
    ```yaml
    # service-a/serverless.yml
    # ...
-   
+
    resources:
      Resources:
        MyQueue:
@@ -144,6 +144,32 @@ Let's break down the example above into 3 steps:
    ```
 
 Cross-services variables are a great way to share API URLs, queue URLs, database table names, and more, without having to hardcode resource names or use SSM.
+
+Alternatively, you can also specify explicit dependencies without passing any variables between services by setting `dependsOn` to a name of service in configuration. For example:
+
+```yaml
+service-a:
+  component: serverless-framework
+  path: service-a
+
+service-b:
+  component: serverless-framework
+  path: service-b
+  dependsOn: service-a
+
+service-c:
+  component: serverless-framework
+  path: service-c
+
+service-d:
+  component: serverless-framework
+  path: service-d
+  dependsOn:
+    - service-a
+    - service-c
+```
+
+As seen in the above example, it is possible to configure more than one dependency by providing `dependsOn` as a list.
 
 ### Global commands
 

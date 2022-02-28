@@ -130,8 +130,33 @@ const setDependencies = (allComponents) => {
           }
         }
       }
+
       return accum;
     }, []);
+
+    if (typeof allComponents[alias].inputs.dependsOn === 'string') {
+      const explicitDependency = allComponents[alias].inputs.dependsOn;
+      if (!allComponents[explicitDependency]) {
+        throw new Error(
+          `The component "${explicitDependency}" referenced in "dependsOn" of "${alias}" component does not exist.`
+        );
+      }
+      if (!dependencies.includes(explicitDependency)) {
+        dependencies.push(explicitDependency);
+      }
+    } else {
+      const explicitDependencies = allComponents[alias].inputs.dependsOn || [];
+      for (const explicitDependency of explicitDependencies) {
+        if (!allComponents[explicitDependency]) {
+          throw new Error(
+            `The component "${explicitDependency}" referenced in "dependsOn" of "${alias}" component does not exist.`
+          );
+        }
+        if (!dependencies.includes(explicitDependency)) {
+          dependencies.push(explicitDependency);
+        }
+      }
+    }
 
     allComponents[alias].dependencies = dependencies;
   }
