@@ -192,10 +192,10 @@ components-v4 service-a:logs --function=index
 
 All Serverless Framework commands are supported via service-specific commands, including custom commands from plugins.
 
-### Supported Serverless Framework features
+## Differences with Serverless Framework configuration
 
-(not sure about this title)
+Configuration files for deploying components (multiple services) and traditional Serverless Framework configuration files use the same name: `serverless.yml`.
 
-Goal: explictly expose differences with traditionnal Serverless Framework configuration files.
+However, the configuration format and features they offer are different. Unless documented here, expect any Serverless Framework feature **to not be supported**.
 
-TODO
+For example, it is not possible to include plugins in components configuration. Additionally, all Serverless Framework variables are not supported (yet).
