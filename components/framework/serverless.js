@@ -45,7 +45,7 @@ class ServerlessFramework extends Component {
 
     let cacheHash;
     if (this.inputs.cachePatterns) {
-      this.startProgress('calculating changes');
+      this.updateProgress('calculating changes');
       cacheHash = await this.calculateCacheHash();
       const hasNoChanges =
         JSON.stringify(this.inputs) === JSON.stringify(this.state.inputs) &&
@@ -54,6 +54,7 @@ class ServerlessFramework extends Component {
         this.successProgress('no changes');
         return;
       }
+      this.updateProgress('deploying');
     }
 
     const { stderr: deployOutput } = await this.exec('serverless', ['deploy']);
