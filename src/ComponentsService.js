@@ -125,14 +125,12 @@ const setDependencies = (allComponents) => {
             throw Error(`the referenced component in expression ${match} does not exist`);
           }
 
-          if (!accum.includes(referencedComponent)) {
-            accum.push(referencedComponent);
-          }
+          accum.add(referencedComponent);
         }
       }
 
       return accum;
-    }, []);
+    }, new Set());
 
     if (typeof allComponents[alias].inputs.dependsOn === 'string') {
       const explicitDependency = allComponents[alias].inputs.dependsOn;
@@ -141,9 +139,7 @@ const setDependencies = (allComponents) => {
           `The component "${explicitDependency}" referenced in "dependsOn" of "${alias}" component does not exist.`
         );
       }
-      if (!dependencies.includes(explicitDependency)) {
-        dependencies.push(explicitDependency);
-      }
+      dependencies.add(explicitDependency);
     } else {
       const explicitDependencies = allComponents[alias].inputs.dependsOn || [];
       for (const explicitDependency of explicitDependencies) {
@@ -152,13 +148,11 @@ const setDependencies = (allComponents) => {
             `The component "${explicitDependency}" referenced in "dependsOn" of "${alias}" component does not exist.`
           );
         }
-        if (!dependencies.includes(explicitDependency)) {
-          dependencies.push(explicitDependency);
-        }
+        dependencies.add(explicitDependency);
       }
     }
 
-    allComponents[alias].dependencies = dependencies;
+    allComponents[alias].dependencies = Array.from(dependencies);
   }
 
   return allComponents;
