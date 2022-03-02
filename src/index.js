@@ -36,11 +36,9 @@ const isComponentsTemplate = (serverlessFile) => {
     return false;
   }
 
-  // make sure it IS a components file
-  for (const key of Object.keys(serverlessFile)) {
-    if (serverlessFile[key] && serverlessFile[key].component) {
-      return true;
-    }
+  // make sure it IS a serverless-compose file
+  if (serverlessFile.services) {
+    return true;
   }
 
   return false;
@@ -80,7 +78,7 @@ const runComponents = async () => {
   delete options._; // remove the method name if any
 
   if (!isComponentsTemplate(serverlessFile)) {
-    throw new Error('serverless-compose.yml file not found');
+    throw new Error('serverless-compose.yml file does not contain valid serverless-compose configuration');
   }
 
   const config = {
