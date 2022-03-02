@@ -5,13 +5,12 @@ Deploy and orchestrate multiple Serverless Framework services in monorepositorie
 ```yaml
 name: myapp
 
-subscriptions:
-  component: serverless-framework
-  path: subscriptions
+services:
+  subscriptions:
+    path: subscriptions
 
-users:
-  component: serverless-framework
-  path: users
+  users:
+    path: users
 ```
 
 ## Beta version
@@ -27,16 +26,22 @@ We use GitHub issues to discuss ideas and features: we encourage you to **subscr
 While in beta, the feature ships as a separate package and CLI. Install it via NPM:
 
 ```bash
-npm -g i @serverless/components-v4-beta
+npm -g i @serverless/compose
 ```
 
 The CLI can now be used via the following command:
 
 ```bash
-components-v4
+serverless-compose
 ```
 
-_Note: while in beta, the feature is available via the `components-v4` command, not the main `serverless` CLI._
+or for short:
+
+```bash
+slsc
+```
+
+_Note: while in beta, the feature is available via the `serverless-compose` command, not the main `serverless` CLI._
 
 ## Usage
 
@@ -56,7 +61,7 @@ my-project/
     serverless.yml
 ```
 
-You can now create a **new top-level** `serverless.yml` configuration file at the root of your mono-repository.
+You can now create a **new top-level** `serverless-compose.yml` configuration file at the root of your mono-repository.
 
 In that new file, you can reference existing Serverless Framework projects by their **relative paths**:
 
@@ -64,21 +69,20 @@ In that new file, you can reference existing Serverless Framework projects by th
 # Name of the application
 name: myapp
 
-service-a:
-  component: serverless-framework
-  # Relative path to the Serverless Framework service
-  path: service-a
+services:
+  service-a:
+    # Relative path to the Serverless Framework service
+    path: service-a
 
-service-b:
-  component: serverless-framework
-  # Relative path to the Serverless Framework service
-  path: service-b
+  service-b:
+    # Relative path to the Serverless Framework service
+    path: service-b
 ```
 
 To deploy all services, instead of running `serverless deploy` in each service, you can now deploy all services at once via:
 
 ```bash
-$ components-v4 deploy
+$ serverless-compose deploy
 
 Deploying myapp to stage dev
 
@@ -96,18 +100,17 @@ Service variables let us:
 - order deployments
 - inject outputs from one service into another
 
-This is possible via the `${component.output}` syntax. For example:
+This is possible via the `${service.output}` syntax. For example:
 
 ```yaml
-service-a:
-  component: serverless-framework
-  path: service-a
+services:
+  service-a:
+    path: service-a
 
-service-b:
-  component: serverless-framework
-  path: service-b
-  params:
-    queueUrl: ${service-a.queueUrl}
+  service-b:
+    path: service-b
+    params:
+      queueUrl: ${service-a.queueUrl}
 ```
 
 Let's break down the example above into 3 steps:
@@ -130,7 +133,7 @@ Let's break down the example above into 3 steps:
          Value: !Ref MyQueue
    ```
 
-2. Because of the dependency introduced by the variable, `components-v4 deploy` will automatically **deploy `service-a` first, and then `service-b`.**
+2. Because of the dependency introduced by the variable, `serverless-compose deploy` will automatically **deploy `service-a` first, and then `service-b`.**
 
 3. The value will be passed to `service-b` [as a parameter](https://www.serverless.com/framework/docs/guides/parameters) named `queueUrl`. Parameters can be referenced in Serverless Framework configuration via the `${param:xxx}` syntax:
 
@@ -148,41 +151,38 @@ Cross-services variables are a great way to share API URLs, queue URLs, database
 Alternatively, you can also specify explicit dependencies without passing any variables between services by setting `dependsOn` to a name of service in configuration. For example:
 
 ```yaml
-service-a:
-  component: serverless-framework
-  path: service-a
+services:
+  service-a:
+    path: service-a
 
-service-b:
-  component: serverless-framework
-  path: service-b
-  dependsOn: service-a
+  service-b:
+    path: service-b
+    dependsOn: service-a
 
-service-c:
-  component: serverless-framework
-  path: service-c
+  service-c:
+    path: service-c
 
-service-d:
-  component: serverless-framework
-  path: service-d
-  dependsOn:
-    - service-a
-    - service-c
+  service-d:
+    path: service-d
+    dependsOn:
+      - service-a
+      - service-c
 ```
 
 As seen in the above example, it is possible to configure more than one dependency by providing `dependsOn` as a list.
 
 ### Global commands
 
-On top of `components-v4 deploy`, the following commands can be run globally across all services:
+On top of `serverless-compose deploy`, the following commands can be run globally across all services:
 
-- `components-v4 info` to view all services outputs
-- `components-v4 remove` to remove all services
-- `components-v4 logs` to fetch logs from **all functions across all services**
+- `serverless-compose info` to view all services outputs
+- `serverless-compose remove` to remove all services
+- `serverless-compose logs` to fetch logs from **all functions across all services**
 
 For example, it is possible to tail logs for all functions at once:
 
 ```bash
-$ components-v4 deploy --tail
+$ serverless-compose deploy --tail
 
 service-a › users › START
 service-a › users › 2021-12-31 16:54:14  INFO  New user created
@@ -198,30 +198,28 @@ service-b › subscriptions › END Duration: 7 ms ...
 
 ### Service-specific commands
 
-It is possible to run commands for a specific component only. For example to deploy only a specific component:
+It is possible to run commands for a specific service only. For example to deploy only a specific service:
 
 ```bash
-components-v4 deploy --component=service-a
+serverless-components deploy --component=service-a
 
 # Shortcut alternative
-components-v4 service-a:deploy
+serverless-components service-a:deploy
 ```
 
 Or tail logs of a single function:
 
 ```bash
-components-v4 logs --component=service-a --function=index
+serverless-components logs --component=service-a --function=index
 
 # Shortcut alternative
-components-v4 service-a:logs --function=index
+serverless-components service-a:logs --function=index
 ```
 
 All Serverless Framework commands are supported via service-specific commands, including custom commands from plugins.
 
 ## Differences with Serverless Framework configuration
 
-Configuration files for deploying components (multiple services) and traditional Serverless Framework configuration files use the same name: `serverless.yml`.
-
-However, the configuration format and features they offer are different. Unless documented here, expect any Serverless Framework feature **to not be supported**.
+While a bit similar, the configuration format and features they offer are different. Unless documented here, expect any Serverless Framework feature **to not be supported**.
 
 For example, it is not possible to include plugins in components configuration. Additionally, all Serverless Framework variables are not supported (yet).
