@@ -71,7 +71,9 @@ const runComponents = async () => {
   delete options._; // remove the method name if any
 
   if (!isComponentsTemplate(serverlessFile)) {
-    throw new Error('serverless-compose.yml file does not contain valid serverless-compose configuration');
+    throw new Error(
+      'serverless-compose.yml file does not contain valid serverless-compose configuration'
+    );
   }
 
   const config = {

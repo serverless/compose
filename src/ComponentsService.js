@@ -84,27 +84,31 @@ const getConfiguration = async (template) => {
 const getAllComponents = async (obj = {}) => {
   const allComponents = {};
 
-  for (const key of Object.keys(obj)) {
-    if (obj[key] && obj[key].component) {
-      // local components start with a .
-      if (obj[key].component[0] === '.') {
-        // todo should local component paths be relative to cwd?
-        const localComponentPath = resolve(process.cwd(), obj[key].component, 'serverless.js');
+  for (const [key, val] of Object.entries(obj.services)) {
+    if (val.component) {
+      if (val.component[0] === '.') {
+        const localComponentPath = resolve(process.cwd(), val.component, 'serverless.js');
         if (!(await utils.fileExists(localComponentPath))) {
-          throw Error(`No serverless.js file found in ${obj[key].component}`);
+          throw Error(`No serverless.js file found in ${val.component}`);
         }
         allComponents[key] = {
-          path: obj[key].component,
-          inputs: obj[key],
+          path: val.component,
+          inputs: val,
         };
-      } else if (obj[key].component in INTERNAL_COMPONENTS) {
+      } else if (val.component in INTERNAL_COMPONENTS) {
         allComponents[key] = {
-          path: INTERNAL_COMPONENTS[obj[key].component],
-          inputs: obj[key],
+          path: INTERNAL_COMPONENTS[val.component],
+          inputs: val,
         };
       } else {
         throw new Error(`Unrecognized component: ${obj[key].component}`);
       }
+    } else {
+      // By default assume `serverless-framework` component
+      allComponents[key] = {
+        path: INTERNAL_COMPONENTS['serverless-framework'],
+        inputs: val,
+      };
     }
   }
 
