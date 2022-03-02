@@ -18,7 +18,7 @@ You can also [check out and deploy the example](https://github.com/serverlessinc
 
 ## Beta version
 
-This repository contains a beta version of a Serverless Framework Compose: a new feature providing multi-service deployments.
+This repository contains a beta version of Serverless Framework Compose: a new feature providing multi-service deployments.
 
 While in beta, this feature is in a separate repository and NPM package. Eventually, it will be merged in the main `serverless` CLI and project.
 
