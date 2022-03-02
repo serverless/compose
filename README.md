@@ -26,7 +26,7 @@ We use GitHub issues to discuss ideas and features: we encourage you to **subscr
 While in beta, the feature ships as a separate package and CLI. Install it via NPM:
 
 ```bash
-npm -g i @serverless/compose
+npm -g i @serverless/compose-beta
 ```
 
 The CLI can now be used via the following command:
