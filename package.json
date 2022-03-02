@@ -1,10 +1,11 @@
 {
-  "name": "@serverless/components-v4-beta",
+  "name": "@serverless/compose",
   "version": "0.0.1",
   "description": "",
   "main": "src/index.js",
   "bin": {
-    "components-v4": "./bin/bin"
+    "serverless-compose": "./bin/bin",
+    "slsc": "./bin/bin"
   },
   "scripts": {
     "lint": "eslint .",
