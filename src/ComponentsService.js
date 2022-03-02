@@ -126,7 +126,7 @@ const setDependencies = (allComponents) => {
           const referencedComponent = match.substring(2, match.length - 1).split('.')[0];
 
           if (!allComponents[referencedComponent]) {
-            throw Error(`the referenced component in expression ${match} does not exist`);
+            throw Error(`the referenced service in expression ${match} does not exist`);
           }
 
           accum.add(referencedComponent);
@@ -140,7 +140,7 @@ const setDependencies = (allComponents) => {
       const explicitDependency = allComponents[alias].inputs.dependsOn;
       if (!allComponents[explicitDependency]) {
         throw new Error(
-          `The component "${explicitDependency}" referenced in "dependsOn" of "${alias}" component does not exist.`
+          `The service "${explicitDependency}" referenced in "dependsOn" of "${alias}" does not exist`
         );
       }
       dependencies.add(explicitDependency);
@@ -149,7 +149,7 @@ const setDependencies = (allComponents) => {
       for (const explicitDependency of explicitDependencies) {
         if (!allComponents[explicitDependency]) {
           throw new Error(
-            `The component "${explicitDependency}" referenced in "dependsOn" of "${alias}" component does not exist.`
+            `The service "${explicitDependency}" referenced in "dependsOn" of "${alias}" does not exist`
           );
         }
         dependencies.add(explicitDependency);
@@ -258,7 +258,7 @@ class ComponentsService {
     const outputs = await this.context.stateStorage.readComponentsOutputs();
 
     if (isEmpty(outputs)) {
-      throw new Error('Could not find any deployed components');
+      throw new Error('Could not find any deployed service');
     } else {
       this.context.renderOutputs(outputs);
     }
@@ -269,9 +269,9 @@ class ComponentsService {
 
     const component = this.allComponents?.[componentName]?.instance;
     if (component === undefined) {
-      throw new Error(`Unknown component ${componentName}`);
+      throw new Error(`Unknown service ${componentName}`);
     }
-    component.logVerbose(`Invoking "${command}" on component "${componentName}"`);
+    component.logVerbose(`Invoking "${command}" on service "${componentName}"`);
 
     const isDefaultCommand = ['deploy', 'remove', 'logs'].includes(command);
 
@@ -279,7 +279,7 @@ class ComponentsService {
     if (isDefaultCommand) {
       // Default command defined for all components (deploy, logs, dev, etc.)
       if (!component?.[command]) {
-        throw new Error(`No method "${command}" on component "${componentName}"`);
+        throw new Error(`No method "${command}" on service "${componentName}"`);
       }
       handler = (opts) => component[command](opts);
     } else if (
@@ -292,7 +292,7 @@ class ComponentsService {
     } else {
       // Custom command: the handler is defined in the component's `commands` property
       if (!component.commands?.[command]) {
-        throw new Error(`No command ${command} on component ${componentName}`);
+        throw new Error(`No command ${command} on service ${componentName}`);
       }
       const commandHandler = component.commands[command].handler;
       handler = (opts) => commandHandler.call(component, opts);
@@ -312,7 +312,7 @@ class ComponentsService {
   async invokeComponentsInParallel(method, options) {
     await this.instantiateComponents();
 
-    this.context.logVerbose(`Executing "${method}" across all components in parallel`);
+    this.context.logVerbose(`Executing "${method}" across all services in parallel`);
     const promises = Object.values(this.allComponents).map(async ({ instance }) => {
       if (typeof instance[method] !== 'function') return;
       try {
@@ -366,7 +366,7 @@ class ComponentsService {
 
           // Check the existence of the method on the component
           if (typeof component[method] !== 'function') {
-            throw new Error(`Missing method ${method} on component ${alias}`);
+            throw new Error(`Missing method ${method} on service ${alias}`);
           }
 
           await component[method]();

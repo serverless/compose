@@ -7,7 +7,7 @@ const colors = require('./cli/colors');
 const commands = [
   {
     command: 'deploy',
-    description: 'Deploy a components service',
+    description: 'Deploy all services',
     options: {
       verbose: 'Show verbose logs',
       stage: 'Stage of the service',
@@ -15,7 +15,7 @@ const commands = [
   },
   {
     command: 'remove',
-    description: 'Remove a components service',
+    description: 'Remove all services',
     options: {
       verbose: 'Show verbose logs',
       stage: 'Stage of the service',
@@ -23,7 +23,7 @@ const commands = [
   },
   {
     command: 'info',
-    description: 'Display information about the components service',
+    description: 'Display information about deployed services',
     options: {
       verbose: 'Show verbose logs',
       stage: 'Stage of the service',
@@ -31,11 +31,11 @@ const commands = [
   },
   {
     command: 'logs',
-    description: 'Output the logs for deployed components service',
+    description: 'Output the logs for all services',
     options: {
       verbose: 'Show verbose logs',
       stage: 'Stage of the service',
-      tail: 'Tail the log output',
+      tail: 'Tail the log in real time',
     },
   },
 ];
@@ -55,11 +55,11 @@ const formatCommand = (command) => {
 
 module.exports = async () => {
   const logger = new Logger(false);
-  logger.log(`components-v4-beta v${version}`);
+  logger.log(`serverless-compose v${version}`);
   logger.log();
   logger.log(colors.darkGray('Usage'));
   logger.log();
-  logger.log('components-v4 <command> <options>');
+  logger.log('serverless-compose <command> <options>');
   logger.log();
   logger.log(colors.darkGray('Commands'));
   logger.log();
