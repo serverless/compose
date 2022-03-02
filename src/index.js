@@ -44,13 +44,6 @@ const isComponentsTemplate = (serverlessFile) => {
   return false;
 };
 
-const isComponentsFile = (serverlessFile) => {
-  if (typeof serverlessFile === 'function' || isComponentsTemplate(serverlessFile)) {
-    return true;
-  }
-  return false;
-};
-
 const runComponents = async () => {
   if (args.help || args._[0] === 'help') {
     await renderHelp();
@@ -65,7 +58,7 @@ const runComponents = async () => {
 
   const serverlessFile = getServerlessFile(process.cwd());
 
-  if (!serverlessFile || !isComponentsFile(serverlessFile)) {
+  if (!serverlessFile) {
     throw new Error('No serverless-compose.yml file found.');
   }
   let componentName;
