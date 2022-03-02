@@ -1,11 +1,12 @@
 _**BETA:** This repository contains a beta version of a new Serverless Framework feature._
 
-Deploy and orchestrate multiple Serverless Framework services in monorepositories.
+**Deploy and orchestrate multiple Serverless Framework services in monorepositories.**
 
 ```yaml
 name: myapp
 
 services:
+
   subscriptions:
     path: subscriptions
 
@@ -15,11 +16,14 @@ services:
 
 ## Beta version
 
-This repository contains a beta version of a new Serverless Framework feature: multi-service deployments.
+This repository contains a beta version of a Serverless Framework Compose: a new feature providing multi-service deployments.
 
-While in beta, the feature is in a separate repository and NPM package. Eventually it will be merged in the main `serverless` CLI and project.
+While in beta, this feature is in a separate repository and NPM package. Eventually, it will be merged in the main `serverless` CLI and project.
 
-We use GitHub issues to discuss ideas and features: we encourage you to **subscribe** to GitHub repository notifications and get involved in discussions.
+We use GitHub issues to discuss ideas and features. We encourage you to:
+
+- **watch** the GitHub repository to be notified of releases and discussions
+- get involved in GitHub issues
 
 ## Installation
 
@@ -50,7 +54,7 @@ The multi-service deployment feature is designed for **monorepositories**.
 Assuming you have an application containing multiple Serverless Framework services, for example:
 
 ```bash
-my-project/
+my-app/
   service-a/
     src/
       ...
@@ -61,7 +65,7 @@ my-project/
     serverless.yml
 ```
 
-You can now create a **new top-level** `serverless-compose.yml` configuration file at the root of your mono-repository.
+You can now create a `serverless-compose.yml` configuration file at the root of your monorepository.
 
 In that new file, you can reference existing Serverless Framework projects by their **relative paths**:
 
@@ -70,6 +74,7 @@ In that new file, you can reference existing Serverless Framework projects by th
 name: myapp
 
 services:
+
   service-a:
     # Relative path to the Serverless Framework service
     path: service-a
@@ -148,7 +153,7 @@ Let's break down the example above into 3 steps:
 
 Cross-services variables are a great way to share API URLs, queue URLs, database table names, and more, without having to hardcode resource names or use SSM.
 
-Alternatively, you can also specify explicit dependencies without passing any variables between services by setting `dependsOn` to a name of service in configuration. For example:
+Alternatively, you can also specify **explicit dependencies** without passing any variables between services by setting `dependsOn` to a name of service in configuration. For example:
 
 ```yaml
 services:
@@ -182,7 +187,7 @@ On top of `serverless-compose deploy`, the following commands can be run globall
 For example, it is possible to tail logs for all functions at once:
 
 ```bash
-$ serverless-compose deploy --tail
+$ serverless-compose logs --tail
 
 service-a › users › START
 service-a › users › 2021-12-31 16:54:14  INFO  New user created
@@ -201,25 +206,25 @@ service-b › subscriptions › END Duration: 7 ms ...
 It is possible to run commands for a specific service only. For example to deploy only a specific service:
 
 ```bash
-serverless-components deploy --component=service-a
+serverless-compose deploy --service=service-a
 
 # Shortcut alternative
-serverless-components service-a:deploy
+serverless-compose service-a:deploy
 ```
 
 Or tail logs of a single function:
 
 ```bash
-serverless-components logs --component=service-a --function=index
+serverless-compose logs --service=service-a --function=index
 
 # Shortcut alternative
-serverless-components service-a:logs --function=index
+serverless-compose service-a:logs --function=index
 ```
 
 All Serverless Framework commands are supported via service-specific commands, including custom commands from plugins.
 
-## Differences with Serverless Framework configuration
+## Differences with `serverless.yml`
 
-While a bit similar, the configuration format and features they offer are different. Unless documented here, expect any Serverless Framework feature **to not be supported**.
+Unless documented here, expect any `serverless.yml` feature to not be supported in `serverless-compose.yml`. For example, it is not possible to include plugins or use `serverless.yml` variables (like `${env:`, `${opt:`, etc.) inside `serverless-compose.yml`.
 
-For example, it is not possible to include plugins in components configuration. Additionally, all Serverless Framework variables are not supported (yet).
+Feel free to open an issue if you need a feature that isn't supported at the moment.
