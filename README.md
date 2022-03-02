@@ -14,6 +14,8 @@ services:
     path: users
 ```
 
+You can also [check out and deploy the example](https://github.com/serverlessinc/compose-example).
+
 ## Beta version
 
 This repository contains a beta version of a Serverless Framework Compose: a new feature providing multi-service deployments.
