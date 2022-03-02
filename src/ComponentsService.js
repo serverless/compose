@@ -107,7 +107,7 @@ const getAllComponents = async (obj = {}) => {
       // By default assume `serverless-framework` component
       allComponents[key] = {
         path: INTERNAL_COMPONENTS['serverless-framework'],
-        inputs: val,
+        inputs: { ...val, component: 'serverless-framework' },
       };
     }
   }
