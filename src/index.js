@@ -13,8 +13,8 @@ const ComponentsService = require('./ComponentsService');
 
 // Simplified support only for yml
 const getServerlessFile = (dir) => {
-  const ymlFilePath = path.join(dir, 'serverless.yml');
-  const yamlFilePath = path.join(dir, 'serverless.yaml');
+  const ymlFilePath = path.join(dir, 'serverless-compose.yml');
+  const yamlFilePath = path.join(dir, 'serverless-compose.yaml');
 
   if (utils.fileExistsSync(ymlFilePath)) {
     return utils.readFileSync(ymlFilePath);
@@ -68,7 +68,7 @@ const runComponents = async () => {
   const serverlessFile = getServerlessFile(process.cwd());
 
   if (!serverlessFile || !isComponentsFile(serverlessFile)) {
-    throw new Error('No serverless.yml components file found.');
+    throw new Error('No serverless-compose.yml file found.');
   }
   let componentName;
   if (method.includes(':')) {
@@ -80,7 +80,7 @@ const runComponents = async () => {
   delete options._; // remove the method name if any
 
   if (!isComponentsTemplate(serverlessFile)) {
-    throw new Error('serverless.yml component file not found');
+    throw new Error('serverless-compose.yml file not found');
   }
 
   const config = {
