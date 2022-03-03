@@ -6,7 +6,6 @@ _**BETA:** This repository contains a beta version of a new Serverless Framework
 name: myapp
 
 services:
-
   subscriptions:
     path: subscriptions
 
@@ -76,7 +75,6 @@ In that new file, you can reference existing Serverless Framework projects by th
 name: myapp
 
 services:
-
   service-a:
     # Relative path to the Serverless Framework service
     path: service-a

@@ -50,24 +50,30 @@ const runComponents = async () => {
     return;
   }
 
-  let method = args._[0];
+  let method = args._;
   if (!method) {
     await renderHelp();
     return;
   }
+  method = method.join(':');
 
   const serverlessFile = getServerlessFile(process.cwd());
 
   if (!serverlessFile) {
     throw new Error('No serverless-compose.yml file found.');
   }
+
+  const options = args;
+
   let componentName;
-  if (method.includes(':')) {
+  if (options.service) {
+    componentName = options.service;
+    delete options.service;
+  } else if (method.includes(':')) {
     let methods;
     [componentName, ...methods] = method.split(':');
     method = methods.join(':');
   }
-  const options = args;
   delete options._; // remove the method name if any
 
   if (!isComponentsTemplate(serverlessFile)) {
