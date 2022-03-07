@@ -81,6 +81,27 @@ const getConfiguration = async (template) => {
   return template;
 };
 
+// For now, only supported variable is `${sls:stage}`;
+const resolveConfigurationVariables = async (configuration, stage) => {
+  const slsStageRegex = /\${sls:stage}/g;
+  let variableResolved = false;
+  const resolvedConfiguration = traverse(configuration).forEach(function (value) {
+    const matches = typeof value === 'string' ? value.match(slsStageRegex) : null;
+    if (matches) {
+      let newValue = value;
+      for (const match of matches) {
+        variableResolved = true;
+        newValue = newValue.replace(match, stage);
+      }
+      this.update(newValue);
+    }
+  });
+  if (variableResolved) {
+    return resolveConfigurationVariables(resolvedConfiguration);
+  }
+  return resolvedConfiguration;
+};
+
 const getAllComponents = async (obj = {}) => {
   const allComponents = {};
 
@@ -203,6 +224,8 @@ class ComponentsService {
   async init() {
     await this.context.init();
     this.configuration = await getConfiguration(this.templateContent);
+
+    await resolveConfigurationVariables(this.configuration, this.context.stage);
 
     const allComponents = await getAllComponents(this.configuration);
     this.allComponents = setDependencies(allComponents);
