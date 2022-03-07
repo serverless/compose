@@ -223,6 +223,14 @@ serverless-compose service-a:logs --function=index
 
 All Serverless Framework commands are supported via service-specific commands, including custom commands from plugins.
 
+### Service-specific commands when using parameters
+
+The `serverless-compose service-a:deploy` command is the equivalent of running `serverless deploy` in service-a's directory. Both approaches can be used.
+
+However, if "service-a" uses `${param:xxx}` to reference `serverless-compose.yml` parameters, then `serverless deploy` will not work. Indeed, `${param:xxx}` cannot be resolved outside of Serverless Framework compose.
+
+In these cases, you must run all commands from the root: `serverless-compose service-a:deploy`.
+
 ## Differences with `serverless.yml`
 
 Unless documented here, expect any `serverless.yml` feature to not be supported in `serverless-compose.yml`. For example, it is not possible to include plugins or use `serverless.yml` variables (like `${env:`, `${opt:`, etc.) inside `serverless-compose.yml`.
