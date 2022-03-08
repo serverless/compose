@@ -5,6 +5,7 @@ require('@serverless/utils/log-reporters/node');
 
 const path = require('path');
 const args = require('minimist')(process.argv.slice(2));
+const traverse = require('traverse');
 const utils = require('./utils');
 const renderHelp = require('./render-help');
 const Context = require('./Context');
@@ -42,6 +43,45 @@ const isComponentsTemplate = (serverlessFile) => {
   }
 
   return false;
+};
+
+const getConfiguration = async (template) => {
+  if (typeof template === 'string') {
+    if (
+      (!utils.isJsonPath(template) && !utils.isYamlPath(template)) ||
+      !(await utils.fileExists(template))
+    ) {
+      throw Error('the referenced template path does not exist');
+    }
+
+    return utils.readFile(template);
+  } else if (typeof template !== 'object') {
+    throw Error(
+      'the template input could either be an object, or a string path to a template file'
+    );
+  }
+  return template;
+};
+
+// For now, only supported variable is `${sls:stage}`;
+const resolveConfigurationVariables = async (configuration, stage) => {
+  const slsStageRegex = /\${sls:stage}/g;
+  let variableResolved = false;
+  const resolvedConfiguration = traverse(configuration).forEach(function (value) {
+    const matches = typeof value === 'string' ? value.match(slsStageRegex) : null;
+    if (matches) {
+      let newValue = value;
+      for (const match of matches) {
+        variableResolved = true;
+        newValue = newValue.replace(match, stage);
+      }
+      this.update(newValue);
+    }
+  });
+  if (variableResolved) {
+    return resolveConfigurationVariables(resolvedConfiguration);
+  }
+  return resolvedConfiguration;
 };
 
 const runComponents = async () => {
@@ -82,7 +122,7 @@ const runComponents = async () => {
     );
   }
 
-  const config = {
+  const contextConfig = {
     root: process.cwd(),
     stateRoot: path.join(process.cwd(), '.serverless'),
     verbose: options.verbose,
@@ -90,10 +130,15 @@ const runComponents = async () => {
     appName: serverlessFile.name,
   };
 
-  const context = new Context(config);
+  const context = new Context(contextConfig);
+  await context.init();
+
+  // TODO: TRY/CATCH
+  const configuration = await getConfiguration(serverlessFile);
+  await resolveConfigurationVariables(configuration, context.stage);
 
   try {
-    const componentsService = new ComponentsService(context, serverlessFile);
+    const componentsService = new ComponentsService(context, configuration);
     await componentsService.init();
 
     if (componentName) {
