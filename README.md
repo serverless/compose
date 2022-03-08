@@ -2,6 +2,11 @@ _**BETA:** This repository contains a beta version of a new Serverless Framework
 
 **Deploy and orchestrate multiple Serverless Framework services in monorepositories.**
 
+- Deploy multiple services in parallel
+- Deploy dependent services in a specific order
+- Share outputs from one service to another
+- Run commands across multiple services
+
 ```yaml
 name: myapp
 
@@ -11,6 +16,8 @@ services:
 
   users:
     path: users
+
+  ...
 ```
 
 You can also [check out and deploy the example](https://github.com/serverlessinc/compose-example).
