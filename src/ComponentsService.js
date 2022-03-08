@@ -63,45 +63,6 @@ const validateGraph = (graph) => {
   }
 };
 
-const getConfiguration = async (template) => {
-  if (typeof template === 'string') {
-    if (
-      (!utils.isJsonPath(template) && !utils.isYamlPath(template)) ||
-      !(await utils.fileExists(template))
-    ) {
-      throw Error('the referenced template path does not exist');
-    }
-
-    return utils.readFile(template);
-  } else if (typeof template !== 'object') {
-    throw Error(
-      'the template input could either be an object, or a string path to a template file'
-    );
-  }
-  return template;
-};
-
-// For now, only supported variable is `${sls:stage}`;
-const resolveConfigurationVariables = async (configuration, stage) => {
-  const slsStageRegex = /\${sls:stage}/g;
-  let variableResolved = false;
-  const resolvedConfiguration = traverse(configuration).forEach(function (value) {
-    const matches = typeof value === 'string' ? value.match(slsStageRegex) : null;
-    if (matches) {
-      let newValue = value;
-      for (const match of matches) {
-        variableResolved = true;
-        newValue = newValue.replace(match, stage);
-      }
-      this.update(newValue);
-    }
-  });
-  if (variableResolved) {
-    return resolveConfigurationVariables(resolvedConfiguration);
-  }
-  return resolvedConfiguration;
-};
-
 const getAllComponents = async (obj = {}) => {
   const allComponents = {};
 
@@ -209,23 +170,19 @@ class ComponentsService {
   context;
   /**
    * @param {import('./Context')} context
-   * @param templateContent
+   * @param configuration
    */
-  constructor(context, templateContent) {
+  constructor(context, configuration) {
     this.context = context;
-    this.templateContent = templateContent;
+    this.configuration = configuration;
 
     // Variables that will be populated during init
-    this.configuration = null;
     this.allComponents = null;
     this.componentsGraph = null;
   }
 
   async init() {
     await this.context.init();
-    this.configuration = await getConfiguration(this.templateContent);
-
-    await resolveConfigurationVariables(this.configuration, this.context.stage);
 
     const allComponents = await getAllComponents(this.configuration);
     this.allComponents = setDependencies(allComponents);
