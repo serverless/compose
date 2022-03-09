@@ -89,6 +89,8 @@ services:
   service-b:
     # Relative path to the Serverless Framework service
     path: service-b
+    # If the file is not named "serverless.yml" it is possible to configure that:
+    # config: serverless.api.yml
 ```
 
 To deploy all services, instead of running `serverless deploy` in each service, you can now deploy all services at once via:
