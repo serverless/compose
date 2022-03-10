@@ -182,8 +182,6 @@ class ComponentsService {
   }
 
   async init() {
-    await this.context.init();
-
     const allComponents = await getAllComponents(this.configuration);
     this.allComponents = setDependencies(allComponents);
 
