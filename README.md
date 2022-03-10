@@ -20,7 +20,7 @@ services:
   ...
 ```
 
-You can also [check out and deploy the example](https://github.com/serverlessinc/compose-example).
+You can also [check out and deploy the example](https://github.com/serverless/compose-example).
 
 ## Beta version
 
