@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 
+// Used to measure length of the whole command
+EvalError.$composeCommandStartTime = process.hrtime();
+
 const { runComponents } = require('../src')
+
 
 // Run
 ;(async () => {
