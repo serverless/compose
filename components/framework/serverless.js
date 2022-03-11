@@ -3,9 +3,7 @@
 const Component = require('../../src/Component');
 const childProcess = require('child_process');
 const YAML = require('js-yaml');
-const hasha = require('hasha');
-const globby = require('globby');
-const path = require('path');
+const { execSync } = require('child_process');
 
 class ServerlessFramework extends Component {
   constructor(id, context, inputs) {
@@ -43,18 +41,22 @@ class ServerlessFramework extends Component {
   async deploy() {
     this.startProgress('deploying');
 
-    let cacheHash;
-    if (this.inputs.cachePatterns) {
+    let currentGitRef;
+    if (this.inputs.gitDiff) {
       this.updateProgress('calculating changes');
-      cacheHash = await this.calculateCacheHash();
-      const hasNoChanges =
-        JSON.stringify(this.inputs) === JSON.stringify(this.state.inputs) &&
-        cacheHash === this.state.cacheHash;
-      if (hasNoChanges) {
+      // TODO optimize by returning early
+      const hasInputChanges = JSON.stringify(this.inputs) !== JSON.stringify(this.state.inputs);
+      currentGitRef = this.getCurrentGitRef();
+      const isTrackedByGit = !!currentGitRef;
+      const hasGitChanges = !this.state.deployedGitRef || this.hasChangesSinceCommit(this.state.deployedGitRef);
+      const hasChanges = hasInputChanges || !isTrackedByGit || hasGitChanges;
+      if (hasChanges) {
+        this.logVerbose('Changes detected, deploying');
+        this.updateProgress('deploying');
+      } else {
         this.successProgress('no changes');
         return;
       }
-      this.updateProgress('deploying');
     }
 
     const { stderr: deployOutput } = await this.exec('serverless', ['deploy']);
@@ -67,9 +69,10 @@ class ServerlessFramework extends Component {
     }
 
     // Save state
-    if (this.inputs.cachePatterns) {
+    if (this.inputs.gitDiff) {
       this.state.inputs = this.inputs;
-      this.state.cacheHash = cacheHash;
+      // TODO handle the case where local changes have been deployed
+      this.state.deployedGitRef = currentGitRef;
       await this.save();
     }
 
@@ -208,25 +211,30 @@ class ServerlessFramework extends Component {
   }
 
   /**
-   * @return {Promise<string>}
+   * @return {string}
    */
-  async calculateCacheHash() {
-    const algorithm = 'md5'; // fastest
-
-    const allFilePaths = await globby(this.inputs.cachePatterns, {
+  getCurrentGitRef() {
+    return execSync('git rev-parse HEAD', {
       cwd: this.inputs.path,
-    });
+    }).toString().trim();
+  }
 
-    const promises = [];
-    for (const filePath of allFilePaths) {
-      promises.push(hasha.fromFile(path.join(this.inputs.path, filePath), { algorithm }));
+  /**
+   * @return {boolean}
+   */
+  hasChangesSinceCommit(previousGitRef) {
+    const gitDiff = execSync(`git diff --name-only "${previousGitRef}" .`, {
+      cwd: this.inputs.path,
+    }).toString().trim();
+    if (gitDiff.length > 0) {
+      return true;
     }
-    const hashes = await Promise.all(promises);
 
-    // Sort hashes to avoid having the final hash change just because files where read in a different order
-    hashes.sort();
-
-    return hasha(hashes.join(), { algorithm });
+    // We also consider untracked changes
+    const untrackedFiles = execSync('git status --porcelain .', {
+      cwd: this.inputs.path,
+    }).toString().trim();
+    return untrackedFiles.length > 0;
   }
 }
 
