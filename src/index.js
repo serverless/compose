@@ -6,11 +6,15 @@ require('@serverless/utils/log-reporters/node');
 const path = require('path');
 const args = require('minimist')(process.argv.slice(2));
 const traverse = require('traverse');
+const { clone } = require('ramda');
 const utils = require('./utils');
 const renderHelp = require('./render-help');
 const Context = require('./Context');
 const Component = require('./Component');
 const ComponentsService = require('./ComponentsService');
+const generateTelemetryPayload = require('./utils/telemetry/generate-payload');
+const storeTelemetryLocally = require('./utils/telemetry/store-locally');
+const sendTelemetry = require('./utils/telemetry/send');
 
 // Simplified support only for yml
 const getServerlessFile = (dir) => {
@@ -132,10 +136,12 @@ const runComponents = async () => {
 
   const context = new Context(contextConfig);
   await context.init();
-
-  // TODO: TRY/CATCH
   const configuration = await getConfiguration(serverlessFile);
   await resolveConfigurationVariables(configuration, context.stage);
+
+  // For telemetry we want to keep the configuration that has references to components outputs unresolved
+  // So we can properly count it
+  const configurationForTelemetry = clone(configuration);
 
   try {
     const componentsService = new ComponentsService(context, configuration);
@@ -150,10 +156,36 @@ const runComponents = async () => {
       await componentsService[method](options);
     }
 
+    storeTelemetryLocally(
+      {
+        ...generateTelemetryPayload({
+          configuration: configurationForTelemetry,
+          options,
+          command: method,
+          componentName,
+        }),
+        outcome: 'success',
+      },
+      context
+    );
+    await sendTelemetry(context);
     context.shutdown();
     process.exit(0);
   } catch (e) {
     context.logger.error(e);
+    storeTelemetryLocally(
+      {
+        ...generateTelemetryPayload({
+          configuration: configurationForTelemetry,
+          options,
+          command: method,
+          componentName,
+        }),
+        outcome: 'failure',
+      },
+      context
+    );
+    await sendTelemetry(context);
     process.exit(1);
   }
 };
