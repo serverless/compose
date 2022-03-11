@@ -4,7 +4,7 @@ const ci = require('ci-info');
 const userConfig = require('@serverless/utils/config');
 const traverse = require('traverse');
 
-module.exports = ({ command, options, configuration, componentName }) => {
+module.exports = ({ command, options, configuration, componentName, context, error }) => {
   let commandDurationMs;
 
   if (EvalError.$composeCommandStartTime) {
@@ -44,9 +44,21 @@ module.exports = ({ command, options, configuration, componentName }) => {
     };
   })();
 
+  const componentsOutcomes = Object.values(context.componentCommandsOutcomes);
+
+  const outcome = (() => {
+    if (error) return 'failure';
+    if (componentsOutcomes.includes('failure')) return 'failure';
+    if (componentsOutcomes.includes('success')) return 'success';
+    if (componentsOutcomes.includes('skip')) return 'skip';
+    return 'unrecognized';
+  })();
+
   const payload = {
     command,
     commandType: componentName ? 'single' : 'global',
+    outcome,
+    componentsOutcomes,
     cliName: '@serverless/compose',
     ciName,
     commandOptionNames: Object.keys(options),

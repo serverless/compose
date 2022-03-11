@@ -32,6 +32,8 @@ class Context {
     if (!config.verbose) {
       this.progresses.setFooterText(colors.darkGray('Press [?] to enable verbose logs'));
     }
+
+    this.componentCommandsOutcomes = {};
   }
 
   async init() {

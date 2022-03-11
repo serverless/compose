@@ -163,8 +163,8 @@ const runComponents = async () => {
           options,
           command: method,
           componentName,
+          context,
         }),
-        outcome: 'success',
       },
       context
     );
@@ -180,8 +180,9 @@ const runComponents = async () => {
           options,
           command: method,
           componentName,
+          context,
+          error: e,
         }),
-        outcome: 'failure',
       },
       context
     );

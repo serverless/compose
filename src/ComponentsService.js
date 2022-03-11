@@ -204,6 +204,7 @@ class ComponentsService {
     Object.keys(this.allComponents).forEach((componentName) => {
       if (this.context.progresses.isWaiting(componentName)) {
         this.context.progresses.skipped(componentName);
+        this.context.componentCommandsOutcomes[componentName] = 'skip';
       }
     });
   }
@@ -224,6 +225,7 @@ class ComponentsService {
     Object.keys(this.allComponents).forEach((componentName) => {
       if (this.context.progresses.isWaiting(componentName)) {
         this.context.progresses.skipped(componentName);
+        this.context.componentCommandsOutcomes[componentName] = 'skip';
       }
     });
   }
@@ -277,6 +279,7 @@ class ComponentsService {
     }
     try {
       await handler(options);
+      this.context.componentCommandsOutcomes[componentName] = 'success';
     } catch (e) {
       // If the component has an ongoing progress, we automatically set it to "error"
       if (this.context.progresses.exists(componentName)) {
@@ -284,6 +287,7 @@ class ComponentsService {
       } else {
         this.context.logger.error(e);
       }
+      this.context.componentCommandsOutcomes[componentName] = 'failure';
     }
   }
 
@@ -295,6 +299,7 @@ class ComponentsService {
       if (typeof instance[method] !== 'function') return;
       try {
         await instance[method](options);
+        this.context.componentCommandsOutcomes[instance.id] = 'success';
       } catch (e) {
         // If the component has an ongoing progress, we automatically set it to "error"
         if (this.context.progresses.exists(instance.id)) {
@@ -302,6 +307,7 @@ class ComponentsService {
         } else {
           this.context.logger.error(e);
         }
+        this.context.componentCommandsOutcomes[instance.id] = 'failure';
       }
     });
 
@@ -348,6 +354,7 @@ class ComponentsService {
           }
 
           await component[method]();
+          this.context.componentCommandsOutcomes[alias] = 'success';
 
           return true;
         } catch (e) {
@@ -357,6 +364,7 @@ class ComponentsService {
           } else {
             this.context.logger.error(e);
           }
+          this.context.componentCommandsOutcomes[alias] = 'failure';
           return false;
         }
       };
