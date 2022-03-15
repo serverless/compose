@@ -97,6 +97,31 @@ const getAllComponents = async (obj = {}) => {
   return allComponents;
 };
 
+const validateComponents = async (components) => {
+  // We want to validate that there are no services that use the same path
+  // Current implementation does not support that and running two `serverless` commands in the same
+  // project directory could cause unexpected results
+  for (const [componentKey, componentConfig] of Object.entries(components)) {
+    const componentsWithTheSamePathAndType = Object.entries(components).filter(
+      ([otherComponentKey, otherComponentConfig]) => {
+        return (
+          otherComponentKey !== componentKey &&
+          componentConfig.inputs.component === otherComponentConfig.inputs.component &&
+          componentConfig.inputs.path === otherComponentConfig.inputs.path
+        );
+      }
+    );
+
+    if (componentsWithTheSamePathAndType.length) {
+      throw new Error(
+        `Service "${componentKey}" has the same "path" and "type" as the following services: ${componentsWithTheSamePathAndType
+          .map((item) => `"${item[0]}"`)
+          .join(', ')}`
+      );
+    }
+  }
+};
+
 const setDependencies = (allComponents) => {
   const regex = /\${(\w*:?[\w\d.-]+)}/g;
 
@@ -183,6 +208,7 @@ class ComponentsService {
 
   async init() {
     const allComponents = await getAllComponents(this.configuration);
+    await validateComponents(allComponents);
     this.allComponents = setDependencies(allComponents);
 
     // TODO: THAT GRAPH MIGHT BE ADJUSTED OVER THE COURSE OF PROCESSING
