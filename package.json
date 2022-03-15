@@ -11,6 +11,8 @@
   "scripts": {
     "lint": "eslint .",
     "prettify": "prettier --write --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml}\"",
+    "prettier-check:updated": "pipe-git-updated --ext=css --ext=html --ext=js --ext=json --ext=md --ext=yaml --ext=yml --base=main -- prettier -c",
+    "lint:updated": "pipe-git-updated --ext=js --base=main -- eslint",
     "pkg:build": "node ./scripts/pkg/build.js",
     "test": "mocha \"test/**/*.js\""
   },
@@ -45,6 +47,7 @@
     "chai-as-promised": "^7.1.1",
     "child-process-ext": "^2.1.1",
     "eslint-plugin-import": "^2.25.4",
+    "git-list-updated": "^1.2.1",
     "mocha": "^9.2.1",
     "pkg": "^5.5.2",
     "prettier": "^2.5.1",
