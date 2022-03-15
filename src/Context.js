@@ -27,8 +27,12 @@ class Context {
     this.stage = config.stage;
     this.id = undefined;
     this.appName = config.appName;
+    this.interactiveDisabled = config.interactiveDisabled || false;
 
     this.progresses = new Progresses();
+    if (this.interactiveDisabled) {
+      this.progresses.enabled = false;
+    }
     if (!config.verbose) {
       this.progresses.setFooterText(colors.darkGray('Press [?] to enable verbose logs'));
     }
@@ -37,8 +41,9 @@ class Context {
   }
 
   async init() {
-    this.startInteractiveInput();
-
+    if (!this.interactiveDisabled) {
+      this.startInteractiveInput();
+    }
     const serviceState = await this.stateStorage.readServiceState({ id: utils.randomId() });
     this.id = serviceState.id;
   }
@@ -86,8 +91,10 @@ class Context {
   }
 
   shutdown() {
-    this.progresses.setFooterText('');
-    this.progresses.stopAll();
+    if (!this.interactiveDisabled) {
+      this.progresses.setFooterText('');
+      this.progresses.stopAll();
+    }
   }
 }
 
