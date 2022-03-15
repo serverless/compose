@@ -297,8 +297,11 @@ class AwsCloudformation extends Component {
     const outputs = {
       stack: this.stackName,
     };
-    for (const output of describeStackResponse.Stacks[0]?.Outputs) {
-      outputs[output.OutputKey] = output.OutputValue;
+    const stackOutputs = describeStackResponse.Stacks[0]?.Outputs;
+    if (stackOutputs) {
+      for (const output of stackOutputs) {
+        outputs[output.OutputKey] = output.OutputValue;
+      }
     }
     await this.updateOutputs(outputs);
   }

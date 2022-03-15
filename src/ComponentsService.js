@@ -376,7 +376,7 @@ class ComponentsService {
     const allSuccessful = results.reduce((carry, current) => carry && current, true);
     if (!allSuccessful) {
       // Skip next components if there was any error
-      return;
+      return {};
     }
 
     for (const alias of nodes) {
