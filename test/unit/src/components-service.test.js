@@ -115,7 +115,7 @@ describe('test/unit/src/components-service.test.js', () => {
     componentsService = new ComponentsService(context, configuration);
 
     await expect(componentsService.init()).to.eventually.be.rejectedWith(
-      'Service "resources" has the same "path" and "type" as the following services: "duplicated"'
+      'Service "resources" has the same "path" as the following services: "duplicated". This is currently not supported because deploying such services in parallel generates packages in the same ".serverless/" directory which can cause conflicts.'
     );
   });
 });

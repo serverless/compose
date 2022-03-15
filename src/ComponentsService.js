@@ -114,9 +114,11 @@ const validateComponents = async (components) => {
 
     if (componentsWithTheSamePathAndType.length) {
       throw new Error(
-        `Service "${componentKey}" has the same "path" and "type" as the following services: ${componentsWithTheSamePathAndType
+        `Service "${componentKey}" has the same "path" as the following services: ${componentsWithTheSamePathAndType
           .map((item) => `"${item[0]}"`)
-          .join(', ')}`
+          .join(
+            ', '
+          )}. This is currently not supported because deploying such services in parallel generates packages in the same ".serverless/" directory which can cause conflicts.`
       );
     }
   }
