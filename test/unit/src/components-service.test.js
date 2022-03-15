@@ -83,4 +83,39 @@ describe('test/unit/src/components-service.test.js', () => {
     expect(componentsService.componentsGraph.sinks()).to.deep.equal(['resources']);
     expect(componentsService.componentsGraph.sources()).to.deep.equal(['anotherservice']);
   });
+
+  it('throws an error when configuration has components with the same type and path', async () => {
+    const configuration = {
+      name: 'test-service',
+      services: {
+        resources: {
+          path: 'resources',
+        },
+        duplicated: {
+          path: 'resources',
+          params: {
+            workerQueueArn: '${resources.WorkerQueueArn}',
+          },
+        },
+        anotherservice: {
+          path: 'another',
+          dependsOn: 'consumer',
+        },
+      },
+    };
+    const contextConfig = {
+      root: process.cwd(),
+      stateRoot: path.join(process.cwd(), '.serverless'),
+      stage: 'dev',
+      appName: 'some-random-name',
+      interactiveDisabled: true,
+    };
+    const context = new Context(contextConfig);
+    await context.init();
+    componentsService = new ComponentsService(context, configuration);
+
+    await expect(componentsService.init()).to.eventually.be.rejectedWith(
+      'Service "resources" has the same "path" and "type" as the following services: "duplicated"'
+    );
+  });
 });
