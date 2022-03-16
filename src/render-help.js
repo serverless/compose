@@ -69,4 +69,15 @@ module.exports = async () => {
     logger.log(formatCommand(command));
     logger.log();
   }
+
+  logger.log(colors.darkGray('Service-specific usage'));
+  logger.log();
+  logger.log('serverless-compose <command> <options> --service=<service-name>');
+  logger.log('slsc <command> <options> --service=<service-name>');
+  logger.log();
+  logger.log(colors.darkGray('or alternatively'));
+  logger.log();
+  logger.log('serverless-compose <service-name>:<command>:<sub-command> <options>');
+  logger.log('slsc <service-name>:<command>:<sub-command> <options>');
+  logger.log();
 };

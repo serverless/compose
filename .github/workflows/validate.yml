@@ -11,7 +11,7 @@ env:
 
 jobs:
   linuxNode14:
-    name: '[Linux] Node.js 16: Lint, Formatting, Unit tests'
+    name: '[Linux] Node.js 14: Lint, Formatting, Unit tests'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
