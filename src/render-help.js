@@ -60,6 +60,7 @@ module.exports = async () => {
   logger.log(colors.darkGray('Usage'));
   logger.log();
   logger.log('serverless-compose <command> <options>');
+  logger.log('slsc <command> <options>');
   logger.log();
   logger.log(colors.darkGray('Commands'));
   logger.log();
