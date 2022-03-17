@@ -1,7 +1,7 @@
 'use strict';
 
 const { resolve } = require('path');
-const { isEmpty, path } = require('ramda');
+const { isEmpty, path, pick } = require('ramda');
 const { Graph, alg } = require('graphlib');
 const traverse = require('traverse');
 
@@ -262,13 +262,22 @@ class ComponentsService {
     await this.invokeComponentsInParallel('logs', options);
   }
 
-  async info() {
+  async info(options) {
     const outputs = await this.context.stateStorage.readComponentsOutputs();
 
     if (isEmpty(outputs)) {
       throw new Error('Could not find any deployed service');
-    } else {
+    } else if (options.verbose) {
       this.context.renderOutputs(outputs);
+    } else {
+      const filteredOutputs = {};
+      for (const [key, val] of Object.entries(outputs)) {
+        filteredOutputs[key] = pick(
+          ['region', 'function', 'functions', 'endpoint', 'endpoints'],
+          val
+        );
+      }
+      this.context.renderOutputs(filteredOutputs);
     }
   }
 

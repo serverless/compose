@@ -3,6 +3,8 @@
 const path = require('path');
 const ComponentsService = require('../../../src/ComponentsService');
 const Context = require('../../../src/Context');
+const overrideStdoutWrite = require('process-utils/override-stdout-write');
+const stripAnsi = require('strip-ansi');
 
 const expect = require('chai').expect;
 
@@ -116,6 +118,93 @@ describe('test/unit/src/components-service.test.js', () => {
 
     await expect(componentsService.init()).to.eventually.be.rejectedWith(
       'Service "resources" has the same "path" as the following services: "duplicated". This is currently not supported because deploying such services in parallel generates packages in the same ".serverless/" directory which can cause conflicts.'
+    );
+  });
+
+  it('correctly handles info command', async () => {
+    const configuration = {
+      name: 'test-service',
+      services: {
+        resources: {
+          path: 'resources',
+        },
+        anotherservice: {
+          path: 'another',
+          dependsOn: 'consumer',
+        },
+      },
+    };
+    const contextConfig = {
+      root: process.cwd(),
+      stateRoot: path.join(process.cwd(), '.serverless'),
+      stage: 'dev',
+      appName: 'some-random-name',
+      interactiveDisabled: true,
+    };
+    const mockedStateStorage = {
+      readServiceState: () => ({ id: 123 }),
+      readComponentsOutputs: () => {
+        return {
+          resources: {
+            region: 'us-east-1',
+            somethingelse: '123',
+          },
+          anotherservice: {
+            region: 'us-east-1',
+            endpoint: 'https://example.com',
+            functions: {
+              producer: 'some-function-123',
+            },
+            additional: '123',
+          },
+        };
+      },
+    };
+    const context = new Context(contextConfig);
+    context.stateStorage = mockedStateStorage;
+    await context.init();
+    componentsService = new ComponentsService(context, configuration);
+
+    let stdoutData = '';
+    await overrideStdoutWrite(
+      (data) => (stdoutData += data),
+      async () => await componentsService.info({})
+    );
+    expect(stripAnsi(stdoutData)).to.equal(
+      [
+        '',
+        'resources: ',
+        '  region: us-east-1',
+        'anotherservice: ',
+        '  region: us-east-1',
+        '  functions: ',
+        '    producer: some-function-123',
+        '  endpoint: https://example.com',
+        '',
+        '',
+      ].join('\n')
+    );
+
+    stdoutData = '';
+    await overrideStdoutWrite(
+      (data) => (stdoutData += data),
+      async () => await componentsService.info({ verbose: true })
+    );
+    expect(stripAnsi(stdoutData)).to.equal(
+      [
+        '',
+        'resources: ',
+        '  region: us-east-1',
+        '  somethingelse: 123',
+        'anotherservice: ',
+        '  region: us-east-1',
+        '  endpoint: https://example.com',
+        '  functions: ',
+        '    producer: some-function-123',
+        '  additional: 123',
+        '',
+        '',
+      ].join('\n')
     );
   });
 });
