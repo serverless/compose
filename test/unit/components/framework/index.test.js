@@ -48,18 +48,13 @@ describe('test/unit/components/framework/index.test.js', () => {
     const component = new FrameworkComponent('some-id', context, {});
     await component.deploy();
 
-    expect(spawnStub).to.be.calledWithExactly('serverless', ['deploy', '--stage', 'dev'], {
-      cwd: '.',
-      stdio: undefined,
-    });
-    expect(spawnStub).to.be.calledWithExactly(
-      'serverless',
-      ['info', '--verbose', '--stage', 'dev'],
-      {
-        cwd: '.',
-        stdio: undefined,
-      }
-    );
+    expect(spawnStub).to.be.calledTwice;
+    expect(spawnStub.getCall(0).args[0]).to.equal('serverless');
+    expect(spawnStub.getCall(0).args[1]).to.deep.equal(['deploy', '--stage', 'dev']);
+    expect(spawnStub.getCall(0).args[2].cwd).to.equal('.');
+    expect(spawnStub.getCall(1).args[0]).to.equal('serverless');
+    expect(spawnStub.getCall(1).args[1]).to.deep.equal(['info', '--verbose', '--stage', 'dev']);
+    expect(spawnStub.getCall(1).args[2].cwd).to.equal('.');
     expect(component.state).to.deep.equal({});
     expect(component.outputs).to.deep.equal({ Key: 'Output' });
   });
@@ -89,10 +84,10 @@ describe('test/unit/components/framework/index.test.js', () => {
 
     await component.remove();
 
-    expect(spawnStub).to.be.calledWithExactly('serverless', ['remove', '--stage', 'dev'], {
-      cwd: '.',
-      stdio: undefined,
-    });
+    expect(spawnStub).to.be.calledOnce;
+    expect(spawnStub.getCall(0).args[0]).to.equal('serverless');
+    expect(spawnStub.getCall(0).args[1]).to.deep.equal(['remove', '--stage', 'dev']);
+    expect(spawnStub.getCall(0).args[2].cwd).to.equal('.');
     expect(component.state).to.deep.equal({});
     expect(component.outputs).to.deep.equal({});
   });
@@ -116,10 +111,15 @@ describe('test/unit/components/framework/index.test.js', () => {
 
     await component.command('print', { key: 'val', flag: true });
 
-    expect(spawnStub).to.be.calledWithExactly(
-      'serverless',
-      ['print', '--key=val', '--flag', '--stage', 'dev'],
-      { cwd: 'custom-path', stdio: 'inherit' }
-    );
+    expect(spawnStub).to.be.calledOnce;
+    expect(spawnStub.getCall(0).args[0]).to.equal('serverless');
+    expect(spawnStub.getCall(0).args[1]).to.deep.equal([
+      'print',
+      '--key=val',
+      '--flag',
+      '--stage',
+      'dev',
+    ]);
+    expect(spawnStub.getCall(0).args[2].cwd).to.equal('custom-path');
   });
 });
