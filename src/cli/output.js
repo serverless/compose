@@ -14,7 +14,9 @@ function safeWrite(text, stream, prefix = '') {
     stream.write(`${prefix}${line}`);
     // But maybe the line already contained content (e.g. a progress)
     // so we clear the rest of line, up till its end (on the right side)
-    stream.clearLine(1);
+    if (stream.clearLine) {
+      stream.clearLine(1);
+    }
     // Then we can add a line return
     stream.write('\n');
   }

@@ -52,8 +52,10 @@ class Context {
     if (typeof outputs !== 'object' || Object.keys(outputs).length === 0) {
       return;
     }
+
     safeWrite(
       `\n${prettyoutput(outputs, {
+        alignKeyValues: false,
         colors: {
           keys: 'gray',
           dash: 'gray',
