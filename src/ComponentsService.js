@@ -83,7 +83,7 @@ const getAllComponents = async (obj = {}) => {
           inputs: val,
         };
       } else {
-        throw new Error(`Unrecognized component: ${obj[key].component}`);
+        throw new Error(`Unrecognized component: ${val.component}`);
       }
     } else {
       // By default assume `serverless-framework` component
