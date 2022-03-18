@@ -18,6 +18,8 @@ class Context {
   progresses;
   /** @type {Logger} */
   logger;
+  /** @type {Record<string, 'success'|'failure'|'skip'>} */
+  componentCommandsOutcomes = {};
 
   constructor(config) {
     this.version = packageJson.version;
@@ -36,8 +38,6 @@ class Context {
     if (!config.verbose) {
       this.progresses.setFooterText(colors.darkGray('Press [?] to enable verbose logs'));
     }
-
-    this.componentCommandsOutcomes = {};
   }
 
   async init() {
