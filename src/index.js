@@ -15,6 +15,7 @@ const ComponentsService = require('./ComponentsService');
 const generateTelemetryPayload = require('./utils/telemetry/generate-payload');
 const storeTelemetryLocally = require('./utils/telemetry/store-locally');
 const sendTelemetry = require('./utils/telemetry/send');
+const ServerlessError = require('./serverless-error');
 
 // Simplified support only for yml
 const getServerlessFile = (dir) => {
@@ -55,13 +56,17 @@ const getConfiguration = async (template) => {
       (!utils.isJsonPath(template) && !utils.isYamlPath(template)) ||
       !(await utils.fileExists(template))
     ) {
-      throw Error('the referenced template path does not exist');
+      throw new ServerlessError(
+        'the referenced template path does not exist',
+        'REFERENCED_TEMPLATE_PATH_DOES_NOT_EXIST'
+      );
     }
 
     return utils.readFile(template);
   } else if (typeof template !== 'object') {
-    throw Error(
-      'the template input could either be an object, or a string path to a template file'
+    throw new ServerlessError(
+      'the template input could either be an object, or a string path to a template file',
+      'INVALID_TEMPLATE_FORMAT'
     );
   }
   return template;
@@ -104,7 +109,10 @@ const runComponents = async () => {
   const serverlessFile = getServerlessFile(process.cwd());
 
   if (!serverlessFile) {
-    throw new Error('No serverless-compose.yml file found.');
+    throw new ServerlessError(
+      'No serverless-compose.yml file found.',
+      'CONFIGURATION_FILE_NOT_FOUND'
+    );
   }
 
   const options = args;
@@ -121,8 +129,9 @@ const runComponents = async () => {
   delete options._; // remove the method name if any
 
   if (!isComponentsTemplate(serverlessFile)) {
-    throw new Error(
-      'serverless-compose.yml file does not contain valid serverless-compose configuration'
+    throw new ServerlessError(
+      'serverless-compose.yml file does not contain valid serverless-compose configuration',
+      'INVALID_CONFIGURATION'
     );
   }
 
@@ -151,7 +160,7 @@ const runComponents = async () => {
       await componentsService.invokeComponentCommand(componentName, method, options);
     } else {
       if (typeof componentsService[method] !== 'function') {
-        throw new Error(`Command ${method} not found`);
+        throw new ServerlessError(`Command ${method} not found`, 'COMMAND_NOT_FOUND');
       }
       await componentsService[method](options);
     }
