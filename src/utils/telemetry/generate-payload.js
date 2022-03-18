@@ -101,6 +101,9 @@ module.exports = ({ command, options, configuration, componentName, context, err
 
   const commandTargetComponents = (() => {
     if (componentName) {
+      if (!configuration.services[componentName]) {
+        return ['unknown'];
+      }
       return [configuration.services[componentName].type || 'serverless-framework'];
     }
     return Object.values(configuration.services).map(
