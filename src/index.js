@@ -170,7 +170,13 @@ const runComponents = async () => {
     );
     await sendTelemetry(context);
     context.shutdown();
-    process.exit(0);
+
+    // If at least one of the internal commands failed, we want to exit with error code 1
+    if (Object.values(context.componentCommandsOutcomes).includes('failure')) {
+      process.exit(1);
+    } else {
+      process.exit(0);
+    }
   } catch (e) {
     context.logger.error(e);
     storeTelemetryLocally(
