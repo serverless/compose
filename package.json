@@ -33,6 +33,7 @@
     "js-yaml": "^4.1.0",
     "minimist": "^1.2.5",
     "node-fetch": "^2.6.7",
+    "path2": "^0.1.0",
     "prettyoutput": "^1.2.0",
     "ramda": "^0.28.0",
     "strip-ansi": "^6.0.1",
