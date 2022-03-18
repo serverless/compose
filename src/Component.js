@@ -1,5 +1,7 @@
 'use strict';
 
+const ServerlessError = require('./serverless-error');
+
 class Component {
   /** @type {string} */
   id;
@@ -31,7 +33,10 @@ class Component {
     this.context = context;
 
     if (typeof this.outputs === 'function') {
-      throw Error(`Cannot declare a "outputs" function in component "${this.id}"`);
+      throw new ServerlessError(
+        `Cannot declare a "outputs" function in component "${this.id}"`,
+        'INVALID_COMPONENT_OUTPUTS'
+      );
     }
   }
 

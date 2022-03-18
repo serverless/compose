@@ -4,6 +4,7 @@ const { resolve } = require('path');
 const { isEmpty, path, pick } = require('ramda');
 const { Graph, alg } = require('graphlib');
 const traverse = require('traverse');
+const ServerlessError = require('./serverless-error');
 
 const utils = require('./utils');
 const { loadComponent } = require('./load');
@@ -27,8 +28,9 @@ const resolveObject = (object, context) => {
       const referencedPropertyValue = path(referencedPropertyPath, context);
 
       if (referencedPropertyValue === undefined) {
-        throw Error(
-          `the variable ${match} cannot be resolved: the referenced output does not exist`
+        throw new ServerlessError(
+          `the variable ${match} cannot be resolved: the referenced output does not exist`,
+          'REFERENCED_OUTPUT_DOES_NOT_EXIST'
         );
       }
 
@@ -37,7 +39,10 @@ const resolveObject = (object, context) => {
       } else if (typeof referencedPropertyValue === 'string') {
         newValue = newValue.replace(match, referencedPropertyValue);
       } else {
-        throw Error('the referenced substring is not a string');
+        throw new ServerlessError(
+          'the referenced substring is not a string',
+          'REFERENCED_SUBSTRING_NOT_A_STRING'
+        );
       }
     }
     this.update(newValue);
@@ -59,7 +64,7 @@ const validateGraph = (graph) => {
       msg.push(fromAToB.padStart(padLength));
       msg.push(fromBToA.padStart(padLength));
     }, cycles);
-    throw new Error(msg.join('\n'));
+    throw new ServerlessError(msg.join('\n'), 'CIRCULAR_GRAPH_DEPENDENCIES');
   }
 };
 
@@ -71,7 +76,10 @@ const getAllComponents = async (obj = {}) => {
       if (val.component[0] === '.') {
         const localComponentPath = resolve(process.cwd(), val.component, 'serverless.js');
         if (!(await utils.fileExists(localComponentPath))) {
-          throw Error(`No serverless.js file found in ${val.component}`);
+          throw new ServerlessError(
+            `No serverless.js file found in ${val.component}`,
+            'MISSING_SERVERLESS_FILE_IN_COMPONENT_PATH'
+          );
         }
         allComponents[key] = {
           path: val.component,
@@ -83,7 +91,10 @@ const getAllComponents = async (obj = {}) => {
           inputs: val,
         };
       } else {
-        throw new Error(`Unrecognized component: ${val.component}`);
+        throw new ServerlessError(
+          `Unrecognized component: ${val.component}`,
+          'UNRECOGNIZED_COMPONENT'
+        );
       }
     } else {
       // By default assume `serverless-framework` component
@@ -113,12 +124,13 @@ const validateComponents = async (components) => {
     );
 
     if (componentsWithTheSamePathAndType.length) {
-      throw new Error(
+      throw new ServerlessError(
         `Service "${componentKey}" has the same "path" as the following services: ${componentsWithTheSamePathAndType
           .map((item) => `"${item[0]}"`)
           .join(
             ', '
-          )}. This is currently not supported because deploying such services in parallel generates packages in the same ".serverless/" directory which can cause conflicts.`
+          )}. This is currently not supported because deploying such services in parallel generates packages in the same ".serverless/" directory which can cause conflicts.`,
+        'DUPLICATED_COMPONENT_DEFINITION'
       );
     }
   }
@@ -135,7 +147,10 @@ const setDependencies = (allComponents) => {
           const referencedComponent = match.substring(2, match.length - 1).split('.')[0];
 
           if (!allComponents[referencedComponent]) {
-            throw Error(`the referenced service in expression ${match} does not exist`);
+            throw new ServerlessError(
+              `the referenced service in expression ${match} does not exist`,
+              'REFERENCED_COMPONENT_DOES_NOT_EXIST'
+            );
           }
 
           accum.add(referencedComponent);
@@ -148,8 +163,9 @@ const setDependencies = (allComponents) => {
     if (typeof allComponents[alias].inputs.dependsOn === 'string') {
       const explicitDependency = allComponents[alias].inputs.dependsOn;
       if (!allComponents[explicitDependency]) {
-        throw new Error(
-          `The service "${explicitDependency}" referenced in "dependsOn" of "${alias}" does not exist`
+        throw new ServerlessError(
+          `The service "${explicitDependency}" referenced in "dependsOn" of "${alias}" does not exist`,
+          'REFERENCED_COMPONENT_DOES_NOT_EXIST'
         );
       }
       dependencies.add(explicitDependency);
@@ -157,8 +173,9 @@ const setDependencies = (allComponents) => {
       const explicitDependencies = allComponents[alias].inputs.dependsOn || [];
       for (const explicitDependency of explicitDependencies) {
         if (!allComponents[explicitDependency]) {
-          throw new Error(
-            `The service "${explicitDependency}" referenced in "dependsOn" of "${alias}" does not exist`
+          throw new ServerlessError(
+            `The service "${explicitDependency}" referenced in "dependsOn" of "${alias}" does not exist`,
+            'REFERENCED_COMPONENT_DOES_NOT_EXIST'
           );
         }
         dependencies.add(explicitDependency);
@@ -266,7 +283,10 @@ class ComponentsService {
     const outputs = await this.context.stateStorage.readComponentsOutputs();
 
     if (isEmpty(outputs)) {
-      throw new Error('Could not find any deployed service');
+      throw new ServerlessError(
+        'Could not find any deployed service',
+        'NO_DEPLOYED_SERVICES_FOUND'
+      );
     } else if (options.verbose) {
       this.context.renderOutputs(outputs);
     } else {
@@ -286,7 +306,7 @@ class ComponentsService {
 
     const component = this.allComponents?.[componentName]?.instance;
     if (component === undefined) {
-      throw new Error(`Unknown service ${componentName}`);
+      throw new ServerlessError(`Unknown service ${componentName}`, 'COMPONENT_NOT_FOUND');
     }
     component.logVerbose(`Invoking "${command}" on service "${componentName}"`);
 
@@ -296,7 +316,10 @@ class ComponentsService {
     if (isDefaultCommand) {
       // Default command defined for all components (deploy, logs, dev, etc.)
       if (!component?.[command]) {
-        throw new Error(`No method "${command}" on service "${componentName}"`);
+        throw new ServerlessError(
+          `No method "${command}" on service "${componentName}"`,
+          'COMPONENT_COMMAND_NOT_FOUND'
+        );
       }
       handler = (opts) => component[command](opts);
     } else if (
@@ -309,7 +332,10 @@ class ComponentsService {
     } else {
       // Custom command: the handler is defined in the component's `commands` property
       if (!component.commands?.[command]) {
-        throw new Error(`No command ${command} on service ${componentName}`);
+        throw new ServerlessError(
+          `No command ${command} on service ${componentName}`,
+          'COMPONENT_COMMAND_NOT_FOUND'
+        );
       }
       const commandHandler = component.commands[command].handler;
       handler = (opts) => commandHandler.call(component, opts);
@@ -387,7 +413,10 @@ class ComponentsService {
 
           // Check the existence of the method on the component
           if (typeof component[method] !== 'function') {
-            throw new Error(`Missing method ${method} on service ${alias}`);
+            throw new ServerlessError(
+              `Missing method ${method} on service ${alias}`,
+              'COMPONENT_COMMAND_NOT_FOUND'
+            );
           }
 
           await component[method]();
