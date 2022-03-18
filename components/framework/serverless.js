@@ -203,7 +203,6 @@ class ServerlessFramework extends Component {
       ...outputs['Stack Outputs'],
     };
     delete outputs['Stack Outputs'];
-    delete outputs.ServerlessDeploymentBucketName; // useless info
 
     return outputs;
   }
