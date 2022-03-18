@@ -3,6 +3,8 @@
 const ci = require('ci-info');
 const userConfig = require('@serverless/utils/config');
 const traverse = require('traverse');
+const tokenizeException = require('../tokenize-exception');
+const resolveErrorLocation = require('../resolve-error-location');
 
 module.exports = ({ command, options, configuration, componentName, context, error }) => {
   let commandDurationMs;
@@ -112,6 +114,17 @@ module.exports = ({ command, options, configuration, componentName, context, err
   })();
 
   payload.commandTargetComponents = commandTargetComponents;
+
+  if (error) {
+    const exceptionTokens = tokenizeException(error);
+    const isUserError = exceptionTokens.isUserError;
+
+    const failureReason = { kind: isUserError ? 'user' : 'programmer', code: exceptionTokens.code };
+    if (!isUserError || !exceptionTokens.code) {
+      failureReason.location = resolveErrorLocation(exceptionTokens);
+    }
+    payload.failureReason = failureReason;
+  }
 
   return payload;
 };
