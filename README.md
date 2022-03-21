@@ -245,3 +245,16 @@ In these cases, you must run all commands from the root: `serverless-compose ser
 Unless documented here, expect any `serverless.yml` feature to not be supported in `serverless-compose.yml`. For example, it is not possible to include plugins or use `serverless.yml` variables (like `${env:`, `${opt:`, etc.) inside `serverless-compose.yml`.
 
 Feel free to open an issue if you need a feature that isn't supported at the moment.
+
+## Removing services
+
+To delete the whole project (and all its services), run `serverless-compose remove`. This will run [`serverless remove`](https://www.serverless.com/framework/docs/providers/aws/cli-reference/remove) in each service.
+
+To delete only one service:
+
+1. run `serverless-compose <component>:remove`
+2. then remove the service from `serverless-compose.yml`
+
+If you remove the service from `serverless-compose.yml` without doing step 1 first the service will still be deployed in your AWS account.
+
+Remember to do this for every stage you may have previously deployed.
