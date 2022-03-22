@@ -21,8 +21,8 @@
   "dependencies": {
     "@aws-sdk/client-cloudformation": "^3.54.1",
     "@serverless/utils": "^6.0.3",
-    "aws-cdk": "^2.1.0",
-    "aws-cdk-lib": "^2.1.0",
+    "aws-cdk": "2.1.0",
+    "aws-cdk-lib": "2.1.0",
     "chalk": "^4.1.2",
     "ci-info": "^3.3.0",
     "cli-cursor": "^3",
