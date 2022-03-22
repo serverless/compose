@@ -4,7 +4,7 @@ require('fs-extra');
 require('crypto');
 const Component = require('../../src/Component');
 require('../aws-cloudformation/serverless');
-const CdkDeploy = require('./Cdk');
+const CdkDeploy = require('../cdk/Cdk');
 const path = require('path');
 const {App, Stack} = require('aws-cdk-lib');
 

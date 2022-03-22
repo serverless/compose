@@ -21,6 +21,8 @@
   "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-cloudformation": "^3.54.1",
+    "@aws-sdk/client-cloudfront": "^3.55.0",
+    "@aws-sdk/client-s3": "^3.55.0",
     "@serverless/utils": "^6.0.3",
     "aws-cdk": "2.1.0",
     "aws-cdk-lib": "2.1.0",
@@ -35,6 +37,8 @@
     "is-interactive": "^1",
     "is-unicode-supported": "^0.1",
     "js-yaml": "^4.1.0",
+    "lodash": "^4.17.21",
+    "mime-types": "^2.1.35",
     "minimist": "^1.2.5",
     "node-fetch": "^2.6.7",
     "path2": "^0.1.0",
