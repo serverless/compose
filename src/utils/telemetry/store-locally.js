@@ -24,10 +24,14 @@ function storeLocally(payload, context) {
           fse.ensureDirSync(cacheDirPath);
           return self();
         } catch (ensureDirError) {
-          context.logger.verbose('Cache dir creation error:', ensureDirError);
+          if (context) {
+            context.logger.verbose('Cache dir creation error:', ensureDirError);
+          }
         }
       }
-      context.logger.verbose(`Write cache file error: ${id}`, error);
+      if (context) {
+        context.logger.verbose(`Write cache file error: ${id}`, error);
+      }
       return null;
     }
   })();

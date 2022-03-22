@@ -17,6 +17,32 @@ const storeTelemetryLocally = require('./utils/telemetry/store-locally');
 const sendTelemetry = require('./utils/telemetry/send');
 const ServerlessError = require('./serverless-error');
 
+let options;
+let method;
+let configurationForTelemetry;
+let componentName;
+let context;
+
+process.once('uncaughtException', (error) => {
+  // Refactor it to not rely heavily on context because it is only needed for logs
+  console.log(error.stack); // eslint-disable-line
+  const usedContext = context || new Context({ root: process.cwd() });
+  storeTelemetryLocally(
+    {
+      ...generateTelemetryPayload({
+        configuration: configurationForTelemetry,
+        options,
+        command: method,
+        componentName,
+        error,
+        context: usedContext,
+      }),
+    },
+    usedContext
+  );
+  sendTelemetry(usedContext).then(() => process.exit(1));
+});
+
 // Simplified support only for yml
 const getServerlessFile = (dir) => {
   const ymlFilePath = path.join(dir, 'serverless-compose.yml');
@@ -99,25 +125,15 @@ const runComponents = async () => {
     return;
   }
 
-  let method = args._;
+  method = args._;
   if (!method) {
     await renderHelp();
     return;
   }
   method = method.join(':');
 
-  const serverlessFile = getServerlessFile(process.cwd());
+  options = args;
 
-  if (!serverlessFile) {
-    throw new ServerlessError(
-      'No serverless-compose.yml file found.',
-      'CONFIGURATION_FILE_NOT_FOUND'
-    );
-  }
-
-  const options = args;
-
-  let componentName;
   if (options.service) {
     componentName = options.service;
     delete options.service;
@@ -127,6 +143,15 @@ const runComponents = async () => {
     method = methods.join(':');
   }
   delete options._; // remove the method name if any
+
+  const serverlessFile = getServerlessFile(process.cwd());
+
+  if (!serverlessFile) {
+    throw new ServerlessError(
+      'No serverless-compose.yml file found.',
+      'CONFIGURATION_FILE_NOT_FOUND'
+    );
+  }
 
   if (!isComponentsTemplate(serverlessFile)) {
     throw new ServerlessError(
@@ -143,14 +168,14 @@ const runComponents = async () => {
     appName: serverlessFile.name,
   };
 
-  const context = new Context(contextConfig);
+  context = new Context(contextConfig);
   await context.init();
   const configuration = await getConfiguration(serverlessFile);
   await resolveConfigurationVariables(configuration, context.stage);
 
   // For telemetry we want to keep the configuration that has references to components outputs unresolved
   // So we can properly count it
-  const configurationForTelemetry = clone(configuration);
+  configurationForTelemetry = clone(configuration);
 
   try {
     const componentsService = new ComponentsService(context, configuration);
