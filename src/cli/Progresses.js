@@ -37,7 +37,12 @@ class Progresses {
    * @type {Record<string, Progress>}
    */
   progresses = {};
-  constructor() {
+
+  /**
+   * @param {import('./Logger')} logger
+   */
+  constructor(logger) {
+    this.logger = logger;
     this.options = {
       spinner: isUnicodeSupported() ? dots : dashes,
     };
@@ -126,6 +131,9 @@ class Progresses {
    * @param {string|Error} [error]
    */
   error(name, error) {
+    if (error instanceof Error) {
+      this.logger.verbose(error.stack, [name]);
+    }
     error = error instanceof Error ? error.message : error;
 
     if (!this.progresses[name]) throw Error(`No progress with name ${name}`);

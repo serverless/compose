@@ -31,7 +31,7 @@ class Context {
     this.appName = config.appName;
     this.interactiveDisabled = config.interactiveDisabled || false;
 
-    this.progresses = new Progresses();
+    this.progresses = new Progresses(this.logger);
     if (this.interactiveDisabled) {
       this.progresses.enabled = false;
     }
