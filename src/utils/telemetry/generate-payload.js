@@ -46,7 +46,7 @@ module.exports = ({ command, options, configuration, componentName, context, err
     };
   })();
 
-  const componentsOutcomes = Object.values(context.componentCommandsOutcomes);
+  const componentsOutcomes = context ? Object.values(context.componentCommandsOutcomes) : [];
 
   const outcome = (() => {
     if (error) return 'failure';
@@ -63,7 +63,7 @@ module.exports = ({ command, options, configuration, componentName, context, err
     componentsOutcomes,
     cliName: '@serverless/compose',
     ciName,
-    commandOptionNames: Object.keys(options),
+    commandOptionNames: options ? Object.keys(options) : [],
     frameworkLocalUserId: userConfig.get('frameworkId'),
     timestamp: Date.now(),
     timezone,
@@ -74,46 +74,49 @@ module.exports = ({ command, options, configuration, componentName, context, err
     payload.commandDurationMs = commandDurationMs;
   }
 
-  const variablesReferenceCount = (() => {
-    const regex = /\${\w+\.\w+}/g;
-    let referenceCount = 0;
-    traverse(configuration).forEach((value) => {
-      const matches = typeof value === 'string' ? value.match(regex) : null;
-      if (matches) {
-        referenceCount += matches.length;
-      }
-    });
-    return referenceCount;
-  })();
-  payload.config = {
-    componentsOutputsVariablesCount: variablesReferenceCount,
-    components: Object.values(configuration.services).map((serviceDefinition) => {
-      const dependsOnCount = (() => {
-        if (!serviceDefinition.dependsOn) return 0;
-        if (typeof serviceDefinition.dependsOn === 'string') return 1;
-        return serviceDefinition.dependsOn.length;
-      })();
-      return {
-        type: serviceDefinition.type || 'serverless-framework',
-        dependsOnCount,
-        paramsCount: Object.values(serviceDefinition.params || {}).length,
-      };
-    }),
-  };
+  if (configuration) {
+    const variablesReferenceCount = (() => {
+      const regex = /\${\w+\.\w+}/g;
+      let referenceCount = 0;
+      traverse(configuration).forEach((value) => {
+        const matches = typeof value === 'string' ? value.match(regex) : null;
+        if (matches) {
+          referenceCount += matches.length;
+        }
+      });
+      return referenceCount;
+    })();
 
-  const commandTargetComponents = (() => {
-    if (componentName) {
-      if (!configuration.services[componentName]) {
-        return ['unknown'];
-      }
-      return [configuration.services[componentName].type || 'serverless-framework'];
-    }
-    return Object.values(configuration.services).map(
-      (serviceDefinition) => serviceDefinition.type || 'serverless-framework'
-    );
-  })();
+    payload.config = {
+      componentsOutputsVariablesCount: variablesReferenceCount,
+      components: Object.values(configuration.services).map((serviceDefinition) => {
+        const dependsOnCount = (() => {
+          if (!serviceDefinition.dependsOn) return 0;
+          if (typeof serviceDefinition.dependsOn === 'string') return 1;
+          return serviceDefinition.dependsOn.length;
+        })();
+        return {
+          type: serviceDefinition.type || 'serverless-framework',
+          dependsOnCount,
+          paramsCount: Object.values(serviceDefinition.params || {}).length,
+        };
+      }),
+    };
 
-  payload.commandTargetComponents = commandTargetComponents;
+    const commandTargetComponents = (() => {
+      if (componentName) {
+        if (!configuration.services[componentName]) {
+          return ['unknown'];
+        }
+        return [configuration.services[componentName].type || 'serverless-framework'];
+      }
+      return Object.values(configuration.services).map(
+        (serviceDefinition) => serviceDefinition.type || 'serverless-framework'
+      );
+    })();
+
+    payload.commandTargetComponents = commandTargetComponents;
+  }
 
   if (error) {
     const exceptionTokens = tokenizeException(error);

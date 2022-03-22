@@ -136,4 +136,41 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
     expect(payload.failureReason.kind).to.equal('user');
     expect(payload.failureReason.code).to.equal('ERROR_CODE');
   });
+
+  it('recognizes uncaught error in telemetry without configuration', () => {
+    const contextConfig = {
+      root: process.cwd(),
+      interactiveDisabled: true,
+    };
+    const context = new Context(contextConfig);
+    const error = new ServerlessError('some error with code', 'ERROR_CODE');
+    const payload = generatePayload({
+      command: 'deploy',
+      context,
+      error,
+    });
+
+    expect(payload).to.have.property('frameworkLocalUserId');
+    delete payload.frameworkLocalUserId;
+    expect(payload).to.have.property('timestamp');
+    delete payload.timestamp;
+    expect(payload).to.have.property('timezone');
+    delete payload.timezone;
+    expect(payload).to.have.property('ciName');
+    delete payload.ciName;
+
+    expect(payload).to.deep.equal({
+      cliName: '@serverless/compose',
+      command: 'deploy',
+      commandOptionNames: [],
+      commandType: 'global',
+      componentsOutcomes: [],
+      outcome: 'failure',
+      versions,
+      failureReason: {
+        code: 'ERROR_CODE',
+        kind: 'user',
+      },
+    });
+  });
 });
