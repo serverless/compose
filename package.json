@@ -23,6 +23,7 @@
     "@aws-sdk/client-cloudformation": "^3.54.1",
     "@aws-sdk/client-cloudfront": "^3.55.0",
     "@aws-sdk/client-s3": "^3.55.0",
+    "@aws-sdk/client-sqs": "^3.55.0",
     "@serverless/utils": "^6.0.3",
     "aws-cdk": "2.1.0",
     "aws-cdk-lib": "2.1.0",

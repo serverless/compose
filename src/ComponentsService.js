@@ -13,6 +13,7 @@ const INTERNAL_COMPONENTS = {
   'serverless-framework': resolve(__dirname, '../components/framework'),
   'aws-cloudformation': resolve(__dirname, '../components/aws-cloudformation'),
   'website': resolve(__dirname, '../components/website'),
+  'queue': resolve(__dirname, '../components/queue'),
 };
 
 const resolveObject = (object, context) => {
