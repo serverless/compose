@@ -63,6 +63,7 @@ class Cdk {
     const deployResult = await cloudFormation.deployStack({
       stack: stackArtifact,
       toolkitStackName: 'serverless-cdk-toolkit',
+      quiet: true,
     });
 
     this.state.cloudFormationTemplateHash = cloudFormationTemplateHash;
