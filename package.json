@@ -31,6 +31,7 @@
     "ci-info": "^3.3.0",
     "cli-cursor": "^3",
     "constructs": "^10.0.77",
+    "esbuild": "^0.14.27",
     "fs-extra": "^10.0.1",
     "globby": "^11.1.0",
     "graphlib": "^2.1.8",
