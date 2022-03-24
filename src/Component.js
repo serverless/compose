@@ -60,6 +60,10 @@ class Component {
     // To be implemented by components
   }
 
+  async refreshOutputs() {
+    // To be implemented by components
+  }
+
   async save() {
     await this.context.stateStorage.writeComponentState(this.id, this.state);
   }

@@ -191,6 +191,7 @@ On top of `serverless-compose deploy`, the following commands can be run globall
 
 - `serverless-compose info` to view all services outputs
 - `serverless-compose remove` to remove all services
+- `serverless-compose refresh-outputs` to refresh outputs of all services
 - `serverless-compose logs` to fetch logs from **all functions across all services**
 
 For example, it is possible to tail logs for all functions at once:
@@ -245,6 +246,14 @@ In these cases, you must run all commands from the root: `serverless-compose ser
 Unless documented here, expect any `serverless.yml` feature to not be supported in `serverless-compose.yml`. For example, it is not possible to include plugins or use `serverless.yml` variables (like `${env:`, `${opt:`, etc.) inside `serverless-compose.yml`.
 
 Feel free to open an issue if you need a feature that isn't supported at the moment.
+
+## Refreshing outputs of already deployed services
+
+If you need to refresh outputs of services that you already deployed previously, e.g. from different development machine, you can do it with the following command:
+
+```
+serverless-compose refresh-outputs
+```
 
 ## Removing services
 

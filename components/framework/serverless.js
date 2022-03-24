@@ -126,6 +126,12 @@ class ServerlessFramework extends Component {
     }
   }
 
+  async refreshOutputs() {
+    this.startProgress('refreshing outputs');
+    await this.updateOutputs(await this.retrieveOutputs());
+    this.successProgress('outputs refreshed');
+  }
+
   /**
    * @return {Promise<{ stdout: string, stderr: string }>}
    */

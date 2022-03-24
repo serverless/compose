@@ -119,6 +119,13 @@ const resolveConfigurationVariables = async (configuration, stage) => {
   return resolvedConfiguration;
 };
 
+const mapMethodName = (methodName) => {
+  if (methodName === 'refresh-outputs') {
+    return 'refreshOutputs';
+  }
+  return methodName;
+};
+
 const runComponents = async () => {
   if (args.help || args._[0] === 'help') {
     await renderHelp();
@@ -131,7 +138,6 @@ const runComponents = async () => {
     return;
   }
   method = method.join(':');
-
   options = args;
 
   if (options.service) {
@@ -143,6 +149,9 @@ const runComponents = async () => {
     method = methods.join(':');
   }
   delete options._; // remove the method name if any
+
+  // Map CLI method names to internal method names
+  method = mapMethodName(method);
 
   const serverlessFile = getServerlessFile(process.cwd());
 
