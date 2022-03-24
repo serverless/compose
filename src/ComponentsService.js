@@ -275,6 +275,27 @@ class ComponentsService {
     });
   }
 
+  async refreshOutputs() {
+    this.context.logger.log();
+    this.context.logger.log(`Refreshing outputs of ${this.configuration.name}`);
+
+    Object.keys(this.allComponents).forEach((componentName) => {
+      this.context.progresses.add(componentName);
+    });
+
+    // We have to execute it in graph similar to deploy as some outputs might be needed
+    // to refresh outputs of components deeper in the dependency tree
+    await this.executeComponentsGraph({ method: 'refreshOutputs' });
+
+    // Resolve the status of components that were not removed
+    Object.keys(this.allComponents).forEach((componentName) => {
+      if (this.context.progresses.isWaiting(componentName)) {
+        this.context.progresses.skipped(componentName);
+        this.context.componentCommandsOutcomes[componentName] = 'skip';
+      }
+    });
+  }
+
   async logs(options) {
     await this.invokeComponentsInParallel('logs', options);
   }

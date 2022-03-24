@@ -38,6 +38,14 @@ const commands = [
       tail: 'Tail the log in real time',
     },
   },
+  {
+    command: 'refreshOutputs',
+    description: 'Refresh the outptus for all services',
+    options: {
+      verbose: 'Show verbose logs',
+      stage: 'Stage of the service',
+    },
+  },
 ];
 
 const formatCommand = (command) => {
