@@ -98,17 +98,37 @@ const getConfiguration = async (template) => {
   return template;
 };
 
-// For now, only supported variable is `${sls:stage}`;
+// For now, only supported variables are `${sls:stage}` and `${env:<key>}`;
+// TODO: After merging into Framework CLI, unify the configuration resolution handling with Framework logic
 const resolveConfigurationVariables = async (configuration, stage) => {
+  const regex = /\${(\w*:?[\w\d.-]+)}/g;
   const slsStageRegex = /\${sls:stage}/g;
+  const envRegex = /\${env:(\w*[\w.-_]+)}/g;
+
   let variableResolved = false;
   const resolvedConfiguration = traverse(configuration).forEach(function (value) {
-    const matches = typeof value === 'string' ? value.match(slsStageRegex) : null;
+    const matches = typeof value === 'string' ? value.match(regex) : null;
     if (matches) {
       let newValue = value;
       for (const match of matches) {
-        variableResolved = true;
-        newValue = newValue.replace(match, stage);
+        if (slsStageRegex.test(match)) {
+          variableResolved = true;
+          newValue = newValue.replace(match, stage);
+        } else if (envRegex.test(match)) {
+          const referencedPropertyPath = match.substring(2, match.length - 1).split(':');
+          if (process.env[referencedPropertyPath[1]] == null) {
+            throw new ServerlessError(
+              `Referenced environment variable "${referencedPropertyPath[1]}" is not defined.`,
+              'CANNOT_FIND_ENVIRONMENT_VARIABLE'
+            );
+          }
+          if (match === value) {
+            newValue = process.env[referencedPropertyPath[1]];
+          } else {
+            newValue = value.replace(match, process.env[referencedPropertyPath[1]]);
+          }
+          variableResolved = true;
+        }
       }
       this.update(newValue);
     }
