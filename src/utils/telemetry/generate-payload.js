@@ -6,7 +6,15 @@ const traverse = require('traverse');
 const tokenizeException = require('../tokenize-exception');
 const resolveErrorLocation = require('../resolve-error-location');
 
-module.exports = ({ command, options, configuration, componentName, context, error }) => {
+module.exports = ({
+  command,
+  options,
+  configuration,
+  componentName,
+  context,
+  error,
+  interruptSignal,
+}) => {
   let commandDurationMs;
 
   if (EvalError.$composeCommandStartTime) {
@@ -49,6 +57,7 @@ module.exports = ({ command, options, configuration, componentName, context, err
   const componentsOutcomes = context ? Object.values(context.componentCommandsOutcomes) : [];
 
   const outcome = (() => {
+    if (interruptSignal) return 'interrupt';
     if (error) return 'failure';
     if (componentsOutcomes.includes('failure')) return 'failure';
     if (componentsOutcomes.includes('success')) return 'success';
@@ -65,6 +74,7 @@ module.exports = ({ command, options, configuration, componentName, context, err
     ciName,
     commandOptionNames: options ? Object.keys(options) : [],
     frameworkLocalUserId: userConfig.get('frameworkId'),
+    interruptSignal,
     timestamp: Date.now(),
     timezone,
     versions: usedVersions,
