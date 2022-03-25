@@ -72,6 +72,7 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
         ],
         componentsOutputsVariablesCount: 1,
       },
+      interruptSignal: undefined,
       outcome: 'unrecognized',
       versions,
     });
@@ -165,12 +166,47 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
       commandOptionNames: [],
       commandType: 'global',
       componentsOutcomes: [],
+      interruptSignal: undefined,
       outcome: 'failure',
       versions,
       failureReason: {
         code: 'ERROR_CODE',
         kind: 'user',
       },
+    });
+  });
+
+  it('recognizes interrupt', () => {
+    const contextConfig = {
+      root: process.cwd(),
+      interactiveDisabled: true,
+    };
+    const interruptSignal = 'SIGINT';
+    const context = new Context(contextConfig);
+    const payload = generatePayload({
+      command: 'deploy',
+      context,
+      interruptSignal,
+    });
+
+    expect(payload).to.have.property('frameworkLocalUserId');
+    delete payload.frameworkLocalUserId;
+    expect(payload).to.have.property('timestamp');
+    delete payload.timestamp;
+    expect(payload).to.have.property('timezone');
+    delete payload.timezone;
+    expect(payload).to.have.property('ciName');
+    delete payload.ciName;
+
+    expect(payload).to.deep.equal({
+      cliName: '@serverless/compose',
+      command: 'deploy',
+      commandOptionNames: [],
+      commandType: 'global',
+      componentsOutcomes: [],
+      outcome: 'interrupt',
+      interruptSignal,
+      versions,
     });
   });
 });

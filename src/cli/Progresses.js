@@ -238,7 +238,6 @@ class Progresses {
   }
 
   bindSigint() {
-    process.removeAllListeners('SIGINT');
     process.on('SIGINT', () => {
       cliCursor.show();
       this.stream.moveCursor(0, this.lineCount);
