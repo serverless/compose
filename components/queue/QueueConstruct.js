@@ -1,6 +1,6 @@
 const { Stack, CfnOutput, Duration } = require('aws-cdk-lib');
 const { Key } = require('aws-cdk-lib/aws-kms');
-const { NodejsFunction } = require('aws-cdk-lib/aws-lambda-nodejs');
+const { NodejsFunction, LogLevel } = require('aws-cdk-lib/aws-lambda-nodejs');
 const { Queue, QueueEncryption } = require('aws-cdk-lib/aws-sqs');
 const ServerlessError = require('../../src/serverless-error');
 const { SqsEventSource } = require('aws-cdk-lib/aws-lambda-event-sources');
@@ -85,6 +85,9 @@ class QueueConstruct extends Stack {
       entry: props.worker.entry,
       handler: props.worker.handler,
       timeout: Duration.seconds(functionTimeout),
+      bundling: {
+        logLevel: LogLevel.ERROR,
+      },
     });
     worker.addEventSource(
       new SqsEventSource(queue, {
