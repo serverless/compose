@@ -39,7 +39,7 @@ const commands = [
     },
   },
   {
-    command: 'refreshOutputs',
+    command: 'refresh-outputs',
     description: 'Refresh the outptus for all services',
     options: {
       verbose: 'Show verbose logs',
