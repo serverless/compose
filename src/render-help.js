@@ -39,6 +39,13 @@ const commands = [
     },
   },
   {
+    command: 'outputs',
+    description: 'Display outputs of deployed services',
+    options: {
+      stage: 'Stage of the service',
+    },
+  },
+  {
     command: 'refresh-outputs',
     description: 'Refresh the outptus for all services',
     options: {
