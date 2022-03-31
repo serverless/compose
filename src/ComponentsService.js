@@ -29,7 +29,7 @@ const resolveObject = (object, context) => {
 
       if (referencedPropertyValue === undefined) {
         throw new ServerlessError(
-          `the variable ${match} cannot be resolved: the referenced output does not exist`,
+          `The variable "${match}" cannot be resolved: the referenced output does not exist`,
           'REFERENCED_OUTPUT_DOES_NOT_EXIST'
         );
       }
@@ -40,7 +40,7 @@ const resolveObject = (object, context) => {
         newValue = newValue.replace(match, referencedPropertyValue);
       } else {
         throw new ServerlessError(
-          'the referenced substring is not a string',
+          'The referenced substring is not a string',
           'REFERENCED_SUBSTRING_NOT_A_STRING'
         );
       }
@@ -77,7 +77,7 @@ const getAllComponents = async (obj = {}) => {
         const localComponentPath = resolve(process.cwd(), val.component, 'serverless.js');
         if (!(await utils.fileExists(localComponentPath))) {
           throw new ServerlessError(
-            `No serverless.js file found in ${val.component}`,
+            `The component "${val.component}" (used by service "${key}") is invalid: no serverless.js file found`,
             'MISSING_SERVERLESS_FILE_IN_COMPONENT_PATH'
           );
         }
@@ -92,7 +92,7 @@ const getAllComponents = async (obj = {}) => {
         };
       } else {
         throw new ServerlessError(
-          `Unrecognized component: ${val.component}`,
+          `Unrecognized component type "${val.component}" for service "${key}"`,
           'UNRECOGNIZED_COMPONENT'
         );
       }
@@ -129,7 +129,7 @@ const validateComponents = async (components) => {
           .map((item) => `"${item[0]}"`)
           .join(
             ', '
-          )}. This is currently not supported because deploying such services in parallel generates packages in the same ".serverless/" directory which can cause conflicts.`,
+          )}. This is currently not supported because deploying the same service in parallel generates packages in the same ".serverless/" directory which can cause conflicts.`,
         'DUPLICATED_COMPONENT_DEFINITION'
       );
     }
@@ -148,7 +148,7 @@ const setDependencies = (allComponents) => {
 
           if (!allComponents[referencedComponent]) {
             throw new ServerlessError(
-              `the referenced service in expression ${match} does not exist`,
+              `The service "${referencedComponent}" does not exist. It is referenced by "${alias}" in expression "${match}".`,
               'REFERENCED_COMPONENT_DOES_NOT_EXIST'
             );
           }
@@ -305,7 +305,7 @@ class ComponentsService {
 
     if (isEmpty(outputs)) {
       throw new ServerlessError(
-        'Could not find any deployed service',
+        'Could not find any deployed service.\nYou can deploy the project via "serverless-compose deploy".\nIf the project is already deployed, you can synchronize your local state via "serverless-compose refresh-outputs".',
         'NO_DEPLOYED_SERVICES_FOUND'
       );
     } else if (options.verbose) {
@@ -327,7 +327,7 @@ class ComponentsService {
 
     const component = this.allComponents?.[componentName]?.instance;
     if (component === undefined) {
-      throw new ServerlessError(`Unknown service ${componentName}`, 'COMPONENT_NOT_FOUND');
+      throw new ServerlessError(`Unknown service "${componentName}"`, 'COMPONENT_NOT_FOUND');
     }
     component.logVerbose(`Invoking "${command}" on service "${componentName}"`);
 
@@ -354,7 +354,7 @@ class ComponentsService {
       // Custom command: the handler is defined in the component's `commands` property
       if (!component.commands?.[command]) {
         throw new ServerlessError(
-          `No command ${command} on service ${componentName}`,
+          `No command "${command}" on service "${componentName}"`,
           'COMPONENT_COMMAND_NOT_FOUND'
         );
       }
@@ -435,7 +435,7 @@ class ComponentsService {
           // Check the existence of the method on the component
           if (typeof component[method] !== 'function') {
             throw new ServerlessError(
-              `Missing method ${method} on service ${alias}`,
+              `Missing method "${method}" on service "${alias}"`,
               'COMPONENT_COMMAND_NOT_FOUND'
             );
           }
