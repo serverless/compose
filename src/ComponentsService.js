@@ -300,6 +300,18 @@ class ComponentsService {
     await this.invokeComponentsInParallel('logs', options);
   }
 
+  async outputs() {
+    const outputs = await this.context.stateStorage.readComponentsOutputs();
+
+    if (isEmpty(outputs)) {
+      throw new ServerlessError(
+        'Could not find any deployed service',
+        'NO_DEPLOYED_SERVICES_FOUND'
+      );
+    }
+    this.context.renderOutputs(outputs);
+  }
+
   async info(options) {
     const outputs = await this.context.stateStorage.readComponentsOutputs();
 

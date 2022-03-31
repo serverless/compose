@@ -121,6 +121,64 @@ describe('test/unit/src/components-service.test.js', () => {
     );
   });
 
+  it('correctly handles outputs command', async () => {
+    const configuration = {
+      name: 'test-service',
+      services: {
+        resources: {
+          path: 'resources',
+        },
+        anotherservice: {
+          path: 'another',
+          dependsOn: 'consumer',
+        },
+      },
+    };
+    const contextConfig = {
+      root: process.cwd(),
+      stateRoot: path.join(process.cwd(), '.serverless'),
+      stage: 'dev',
+      appName: 'some-random-name',
+      interactiveDisabled: true,
+    };
+    const mockedStateStorage = {
+      readServiceState: () => ({ id: 123 }),
+      readComponentsOutputs: () => {
+        return {
+          resources: {
+            somethingelse: '123',
+          },
+          anotherservice: {
+            endpoint: 'https://example.com',
+            additional: '123',
+          },
+        };
+      },
+    };
+    const context = new Context(contextConfig);
+    context.stateStorage = mockedStateStorage;
+    await context.init();
+    componentsService = new ComponentsService(context, configuration);
+
+    let stdoutData = '';
+    await overrideStdoutWrite(
+      (data) => (stdoutData += data),
+      async () => await componentsService.outputs()
+    );
+    expect(stripAnsi(stdoutData)).to.equal(
+      [
+        '',
+        'resources: ',
+        '  somethingelse: 123',
+        'anotherservice: ',
+        '  endpoint: https://example.com',
+        '  additional: 123',
+        '',
+        '',
+      ].join('\n')
+    );
+  });
+
   it('correctly handles info command', async () => {
     const configuration = {
       name: 'test-service',

@@ -193,6 +193,7 @@ On top of `serverless-compose deploy`, the following commands can be run globall
 - `serverless-compose remove` to remove all services
 - `serverless-compose refresh-outputs` to refresh outputs of all services
 - `serverless-compose logs` to fetch logs from **all functions across all services**
+- `serverless-compose outputs` to view all services outputs
 
 For example, it is possible to tail logs for all functions at once:
 
