@@ -32,7 +32,7 @@ describe('test/unit/components/framework/index.test.js', () => {
       },
       stdout: {
         on: (arg, cb) => {
-          const data = 'Stack Outputs:\nKey: Output';
+          const data = 'region: us-east-1\n\nStack Outputs:\n  Key: Output';
           if (arg === 'data') cb(data);
         },
       },
@@ -59,14 +59,46 @@ describe('test/unit/components/framework/index.test.js', () => {
     expect(component.outputs).to.deep.equal({ Key: 'Output' });
   });
 
-  it('correctly handles refreshOutputs', async () => {
+  it('correctly handles refresh-outputs', async () => {
     const spawnStub = sinon.stub().returns({
       on: (arg, cb) => {
         if (arg === 'close') cb(0);
       },
       stdout: {
         on: (arg, cb) => {
-          const data = 'Stack Outputs:\nKey: Output';
+          const data = 'region: us-east-1\n\nStack Outputs:\n  Key: Output';
+          if (arg === 'data') cb(data);
+        },
+      },
+      kill: () => {},
+    });
+    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+      child_process: {
+        spawn: spawnStub,
+      },
+    });
+
+    const context = await getContext();
+    const component = new FrameworkComponent('some-id', context, {});
+    await component.refreshOutputs();
+
+    expect(spawnStub).to.be.calledOnce;
+    expect(spawnStub.getCall(0).args[0]).to.equal('serverless');
+    expect(spawnStub.getCall(0).args[1]).to.deep.equal(['info', '--verbose', '--stage', 'dev']);
+    expect(spawnStub.getCall(0).args[2].cwd).to.equal('.');
+    expect(component.state).to.deep.equal({});
+    expect(component.outputs).to.deep.equal({ Key: 'Output' });
+  });
+
+  it('correctly handles refresh-outputs with malformed info outputs', async () => {
+    const spawnStub = sinon.stub().returns({
+      on: (arg, cb) => {
+        if (arg === 'close') cb(0);
+      },
+      stdout: {
+        on: (arg, cb) => {
+          const data =
+            'region: us-east-1\n\nStack Outputs:\n  Key: Output\n\n SOME ADDITONAL NON-YAML TEXT';
           if (arg === 'data') cb(data);
         },
       },

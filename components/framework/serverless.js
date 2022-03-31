@@ -193,22 +193,23 @@ class ServerlessFramework extends Component {
     const { stdout: infoOutput } = await this.exec('serverless', ['info', '--verbose']);
     let outputs;
     try {
-      outputs = YAML.load(infoOutput.toString());
+      outputs = YAML.load(infoOutput.toString())['Stack Outputs'];
     } catch (e) {
-      throw new Error(`Impossible to parse the output of "serverless info":\n${infoOutput}`);
+      if (infoOutput.toString()) {
+        // Try to extract the section with `Stack Outputs` and parse it
+        const res = infoOutput.toString().match(/Stack Outputs:[\s\S]+\n\n/);
+        if (res) {
+          try {
+            outputs = YAML.load(res[0])['Stack Outputs'];
+          } catch {
+            // Pass to generic error
+          }
+        }
+      }
+      if (!outputs) {
+        throw new Error(`Impossible to parse the output of "serverless info":\n${infoOutput}`);
+      }
     }
-
-    // Exclude some useless fields from the outputs
-    delete outputs.service; // this duplicates the component ID
-    delete outputs.stage; // stage is global across all components anyway
-    delete outputs.stack; // stage is global across all components anyway
-    delete outputs.endpoints; // TODO present them better
-    // Merge CF outputs into the list
-    outputs = {
-      ...outputs,
-      ...outputs['Stack Outputs'],
-    };
-    delete outputs['Stack Outputs'];
 
     return outputs;
   }
