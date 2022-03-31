@@ -27,7 +27,7 @@ module.exports = async (exception, logger) => {
   const errorMsg = stripAnsi(
     exceptionTokens.stack && !isUserError ? exceptionTokens.stack : exceptionTokens.message
   );
-  logger.writeText(`${colors.red('Error')}:\n${errorMsg}`);
+  logger.writeText(`${colors.red('Error:')}\n${errorMsg}`);
 
   process.exitCode = 1;
 };

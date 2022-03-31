@@ -34,7 +34,7 @@ class Component {
 
     if (typeof this.outputs === 'function') {
       throw new ServerlessError(
-        `Cannot declare a "outputs" function in component "${this.id}"`,
+        `Cannot declare an "outputs" function in component "${this.id}"`,
         'INVALID_COMPONENT_OUTPUTS'
       );
     }

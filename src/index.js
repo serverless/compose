@@ -113,7 +113,7 @@ const getConfiguration = async (template) => {
       !(await utils.fileExists(template))
     ) {
       throw new ServerlessError(
-        'the referenced template path does not exist',
+        'The referenced template path does not exist',
         'REFERENCED_TEMPLATE_PATH_DOES_NOT_EXIST'
       );
     }
@@ -121,7 +121,7 @@ const getConfiguration = async (template) => {
     return utils.readFile(template);
   } else if (typeof template !== 'object') {
     throw new ServerlessError(
-      'the template input could either be an object, or a string path to a template file',
+      'The template input could either be an object, or a string path to a template file',
       'INVALID_TEMPLATE_FORMAT'
     );
   }
@@ -148,7 +148,7 @@ const resolveConfigurationVariables = async (configuration, stage) => {
           const referencedPropertyPath = match.substring(2, match.length - 1).split(':');
           if (process.env[referencedPropertyPath[1]] == null) {
             throw new ServerlessError(
-              `Referenced environment variable "${referencedPropertyPath[1]}" is not defined.`,
+              `The environment variable "${referencedPropertyPath[1]}" is referenced but is not defined`,
               'CANNOT_FIND_ENVIRONMENT_VARIABLE'
             );
           }
@@ -181,7 +181,7 @@ const runComponents = async () => {
     await spawnExt('serverless', ['--version']);
   } catch (err) {
     throw new ServerlessError(
-      'Could not find Serverless Framework installation. Ensure Serverless Framework is installed before continuing.',
+      'Could not find the Serverless Framework CLI. Ensure Serverless Framework is installed before continuing.\nhttps://serverless.com/framework/docs/getting-started',
       'SERVERLESS_COMMAND_NOT_AVAILABLE'
     );
   }
@@ -216,14 +216,14 @@ const runComponents = async () => {
 
   if (!serverlessFile) {
     throw new ServerlessError(
-      'No serverless-compose.yml file found.',
+      'No serverless-compose.yml file found',
       'CONFIGURATION_FILE_NOT_FOUND'
     );
   }
 
   if (!isComponentsTemplate(serverlessFile)) {
     throw new ServerlessError(
-      'serverless-compose.yml file does not contain valid serverless-compose configuration',
+      'serverless-compose.yml does not contain valid Serverless Compose configuration.\nRead about Serverless Compose in the documentation: https://github.com/serverless/compose',
       'INVALID_CONFIGURATION'
     );
   }
@@ -253,7 +253,7 @@ const runComponents = async () => {
       await componentsService.invokeComponentCommand(componentName, method, options);
     } else {
       if (typeof componentsService[method] !== 'function') {
-        throw new ServerlessError(`Command ${method} not found`, 'COMMAND_NOT_FOUND');
+        throw new ServerlessError(`Command "${method}" not found`, 'COMMAND_NOT_FOUND');
       }
       await componentsService[method](options);
     }
