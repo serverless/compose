@@ -1,7 +1,7 @@
 'use strict';
 
 const { resolve } = require('path');
-const { isEmpty, path, pick } = require('ramda');
+const { isEmpty, path } = require('ramda');
 const { Graph, alg } = require('graphlib');
 const traverse = require('traverse');
 const ServerlessError = require('./serverless-error');
@@ -12,6 +12,14 @@ const { loadComponent } = require('./load');
 const INTERNAL_COMPONENTS = {
   'serverless-framework': resolve(__dirname, '../components/framework'),
   'aws-cloudformation': resolve(__dirname, '../components/aws-cloudformation'),
+};
+
+const formatError = (e) => {
+  let formattedError = e instanceof Error ? e.message : e;
+  if (formattedError.startsWith('Error:\n')) {
+    formattedError = formattedError.slice(7);
+  }
+  return formattedError;
 };
 
 const resolveObject = (object, context) => {
@@ -300,6 +308,10 @@ class ComponentsService {
     await this.invokeComponentsInParallel('logs', options);
   }
 
+  async info(options) {
+    await this.invokeComponentsInParallel('info', options);
+  }
+
   async outputs(options = {}) {
     let outputs;
     if (options.componentName) {
@@ -308,35 +320,13 @@ class ComponentsService {
       outputs = await this.context.stateStorage.readComponentsOutputs();
       if (isEmpty(outputs)) {
         throw new ServerlessError(
-          'Could not find any deployed service',
+          'Could not find any deployed service.\nYou can deploy the project via "serverless-compose deploy".\nIf the project is already deployed, you can synchronize your local state via "serverless-compose refresh-outputs".',
           'NO_DEPLOYED_SERVICES_FOUND'
         );
       }
     }
 
     this.context.renderOutputs(outputs);
-  }
-
-  async info(options) {
-    const outputs = await this.context.stateStorage.readComponentsOutputs();
-
-    if (isEmpty(outputs)) {
-      throw new ServerlessError(
-        'Could not find any deployed service.\nYou can deploy the project via "serverless-compose deploy".\nIf the project is already deployed, you can synchronize your local state via "serverless-compose refresh-outputs".',
-        'NO_DEPLOYED_SERVICES_FOUND'
-      );
-    } else if (options.verbose) {
-      this.context.renderOutputs(outputs);
-    } else {
-      const filteredOutputs = {};
-      for (const [key, val] of Object.entries(outputs)) {
-        filteredOutputs[key] = pick(
-          ['region', 'function', 'functions', 'endpoint', 'endpoints'],
-          val
-        );
-      }
-      this.context.renderOutputs(filteredOutputs);
-    }
   }
 
   async invokeComponentCommand(componentName, command, options) {
@@ -352,11 +342,11 @@ class ComponentsService {
 
       const component = this.allComponents?.[componentName]?.instance;
       if (component === undefined) {
-        throw new ServerlessError(`Unknown service ${componentName}`, 'COMPONENT_NOT_FOUND');
+        throw new ServerlessError(`Unknown service "${componentName}"`, 'COMPONENT_NOT_FOUND');
       }
       component.logVerbose(`Invoking "${command}" on service "${componentName}"`);
 
-      const isDefaultCommand = ['deploy', 'remove', 'logs'].includes(command);
+      const isDefaultCommand = ['deploy', 'remove', 'logs', 'info'].includes(command);
 
       if (isDefaultCommand) {
         // Default command defined for all components (deploy, logs, dev, etc.)
@@ -395,7 +385,7 @@ class ComponentsService {
       if (this.context.progresses.exists(componentName)) {
         this.context.progresses.error(componentName, e);
       } else {
-        this.context.logger.error(e);
+        this.context.logger.error(`\n${formatError(e)}`);
       }
       this.context.componentCommandsOutcomes[componentName] = 'failure';
     }
@@ -415,7 +405,9 @@ class ComponentsService {
         if (this.context.progresses.exists(instance.id)) {
           this.context.progresses.error(instance.id, e);
         } else {
-          this.context.logger.error(e);
+          this.context.logger.error(
+            `\nCommand failed for service "${instance.id}": ${formatError(e)}`
+          );
         }
         this.context.componentCommandsOutcomes[instance.id] = 'failure';
       }
