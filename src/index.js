@@ -17,6 +17,7 @@ const generateTelemetryPayload = require('./utils/telemetry/generate-payload');
 const storeTelemetryLocally = require('./utils/telemetry/store-locally');
 const sendTelemetry = require('./utils/telemetry/send');
 const ServerlessError = require('./serverless-error');
+const handleError = require('./handle-error');
 
 let options;
 let method;
@@ -26,7 +27,6 @@ let context;
 
 process.once('uncaughtException', (error) => {
   // Refactor it to not rely heavily on context because it is only needed for logs
-  console.log(error.stack); // eslint-disable-line
   const usedContext = context || new Context({ root: process.cwd() });
   storeTelemetryLocally(
     {
@@ -41,6 +41,7 @@ process.once('uncaughtException', (error) => {
     },
     usedContext
   );
+  handleError(error, context.logger);
   sendTelemetry(usedContext).then(() => process.exit(1));
 });
 
@@ -279,7 +280,7 @@ const runComponents = async () => {
       process.exit(0);
     }
   } catch (e) {
-    context.logger.error(e);
+    handleError(e, context.logger);
     storeTelemetryLocally(
       {
         ...generateTelemetryPayload({
