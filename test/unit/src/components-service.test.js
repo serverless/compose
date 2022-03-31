@@ -174,9 +174,49 @@ describe('test/unit/src/components-service.test.js', () => {
         '  endpoint: https://example.com',
         '  additional: 123',
         '',
-        '',
       ].join('\n')
     );
+  });
+
+  it('correctly handles outputs command for single component', async () => {
+    const configuration = {
+      name: 'test-service',
+      services: {
+        resources: {
+          path: 'resources',
+        },
+        anotherservice: {
+          path: 'another',
+          dependsOn: 'consumer',
+        },
+      },
+    };
+    const contextConfig = {
+      root: process.cwd(),
+      stateRoot: path.join(process.cwd(), '.serverless'),
+      stage: 'dev',
+      appName: 'some-random-name',
+      interactiveDisabled: true,
+    };
+    const mockedStateStorage = {
+      readServiceState: () => ({ id: 123 }),
+      readComponentOutputs: () => {
+        return {
+          somethingelse: '123',
+        };
+      },
+    };
+    const context = new Context(contextConfig);
+    context.stateStorage = mockedStateStorage;
+    await context.init();
+    componentsService = new ComponentsService(context, configuration);
+
+    let stdoutData = '';
+    await overrideStdoutWrite(
+      (data) => (stdoutData += data),
+      async () => await componentsService.outputs({ componentName: 'resources' })
+    );
+    expect(stripAnsi(stdoutData)).to.equal(['', 'somethingelse: 123', ''].join('\n'));
   });
 
   it('correctly handles info command', async () => {
@@ -239,7 +279,6 @@ describe('test/unit/src/components-service.test.js', () => {
         '    producer: some-function-123',
         '  endpoint: https://example.com',
         '',
-        '',
       ].join('\n')
     );
 
@@ -260,7 +299,6 @@ describe('test/unit/src/components-service.test.js', () => {
         '  functions: ',
         '    producer: some-function-123',
         '  additional: 123',
-        '',
         '',
       ].join('\n')
     );
