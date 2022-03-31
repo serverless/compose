@@ -63,7 +63,7 @@ class Context {
           true: 'white',
           false: 'white',
         },
-      })}`,
+      })}`.trimEnd(),
       process.stdout
     );
   }

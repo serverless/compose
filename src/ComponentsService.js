@@ -300,15 +300,20 @@ class ComponentsService {
     await this.invokeComponentsInParallel('logs', options);
   }
 
-  async outputs() {
-    const outputs = await this.context.stateStorage.readComponentsOutputs();
-
-    if (isEmpty(outputs)) {
-      throw new ServerlessError(
-        'Could not find any deployed service',
-        'NO_DEPLOYED_SERVICES_FOUND'
-      );
+  async outputs(options = {}) {
+    let outputs;
+    if (options.componentName) {
+      outputs = await this.context.stateStorage.readComponentOutputs(options.componentName);
+    } else {
+      outputs = await this.context.stateStorage.readComponentsOutputs();
+      if (isEmpty(outputs)) {
+        throw new ServerlessError(
+          'Could not find any deployed service',
+          'NO_DEPLOYED_SERVICES_FOUND'
+        );
+      }
     }
+
     this.context.renderOutputs(outputs);
   }
 
@@ -335,44 +340,53 @@ class ComponentsService {
   }
 
   async invokeComponentCommand(componentName, command, options) {
-    await this.instantiateComponents();
-
-    const component = this.allComponents?.[componentName]?.instance;
-    if (component === undefined) {
-      throw new ServerlessError(`Unknown service "${componentName}"`, 'COMPONENT_NOT_FOUND');
-    }
-    component.logVerbose(`Invoking "${command}" on service "${componentName}"`);
-
-    const isDefaultCommand = ['deploy', 'remove', 'logs'].includes(command);
-
+    // We can have commands that do not have to call commands directly on the component,
+    // but are global commands that can accept the componentName parameter
+    // to filter out data
+    const isGlobalComponentCommand = ['outputs'].includes(command);
     let handler;
-    if (isDefaultCommand) {
-      // Default command defined for all components (deploy, logs, dev, etc.)
-      if (!component?.[command]) {
-        throw new ServerlessError(
-          `No method "${command}" on service "${componentName}"`,
-          'COMPONENT_COMMAND_NOT_FOUND'
-        );
-      }
-      handler = (opts) => component[command](opts);
-    } else if (
-      !component.commands?.[command] &&
-      component.inputs.component === 'serverless-framework'
-    ) {
-      // Workaround to invoke all custom Framework commands
-      // TODO: Support options and validation
-      handler = (opts) => component.command(command, opts);
+    if (isGlobalComponentCommand) {
+      handler = (opts) => this[command]({ ...opts, componentName });
     } else {
-      // Custom command: the handler is defined in the component's `commands` property
-      if (!component.commands?.[command]) {
-        throw new ServerlessError(
-          `No command "${command}" on service "${componentName}"`,
-          'COMPONENT_COMMAND_NOT_FOUND'
-        );
+      await this.instantiateComponents();
+
+      const component = this.allComponents?.[componentName]?.instance;
+      if (component === undefined) {
+        throw new ServerlessError(`Unknown service ${componentName}`, 'COMPONENT_NOT_FOUND');
       }
-      const commandHandler = component.commands[command].handler;
-      handler = (opts) => commandHandler.call(component, opts);
+      component.logVerbose(`Invoking "${command}" on service "${componentName}"`);
+
+      const isDefaultCommand = ['deploy', 'remove', 'logs'].includes(command);
+
+      if (isDefaultCommand) {
+        // Default command defined for all components (deploy, logs, dev, etc.)
+        if (!component?.[command]) {
+          throw new ServerlessError(
+            `No method "${command}" on service "${componentName}"`,
+            'COMPONENT_COMMAND_NOT_FOUND'
+          );
+        }
+        handler = (opts) => component[command](opts);
+      } else if (
+        !component.commands?.[command] &&
+        component.inputs.component === 'serverless-framework'
+      ) {
+        // Workaround to invoke all custom Framework commands
+        // TODO: Support options and validation
+        handler = (opts) => component.command(command, opts);
+      } else {
+        // Custom command: the handler is defined in the component's `commands` property
+        if (!component.commands?.[command]) {
+          throw new ServerlessError(
+            `No command "${command}" on service ${componentName}`,
+            'COMPONENT_COMMAND_NOT_FOUND'
+          );
+        }
+        const commandHandler = component.commands[command].handler;
+        handler = (opts) => commandHandler.call(component, opts);
+      }
     }
+
     try {
       await handler(options);
       this.context.componentCommandsOutcomes[componentName] = 'success';
