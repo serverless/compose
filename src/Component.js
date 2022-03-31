@@ -60,6 +60,10 @@ class Component {
     // To be implemented by components
   }
 
+  async info() {
+    // To be implemented by components
+  }
+
   async refreshOutputs() {
     // To be implemented by components
   }
