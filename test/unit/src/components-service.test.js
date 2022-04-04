@@ -142,7 +142,7 @@ describe('test/unit/src/components-service.test.js', () => {
       interactiveDisabled: true,
     };
     const mockedStateStorage = {
-      readServiceState: () => ({ id: 123 }),
+      readServiceState: () => ({ id: 123, detectedFrameworkVersion: '9.9.9' }),
       readComponentsOutputs: () => {
         return {
           resources: {
@@ -199,7 +199,7 @@ describe('test/unit/src/components-service.test.js', () => {
       interactiveDisabled: true,
     };
     const mockedStateStorage = {
-      readServiceState: () => ({ id: 123 }),
+      readServiceState: () => ({ id: 123, detectedFrameworkVersion: '9.9.9' }),
       readComponentOutputs: () => {
         return {
           somethingelse: '123',

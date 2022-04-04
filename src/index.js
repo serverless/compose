@@ -7,7 +7,6 @@ const path = require('path');
 const args = require('minimist')(process.argv.slice(2));
 const traverse = require('traverse');
 const { clone } = require('ramda');
-const spawnExt = require('child-process-ext/spawn');
 const utils = require('./utils');
 const renderHelp = require('./render-help');
 const Context = require('./Context');
@@ -177,15 +176,6 @@ const mapMethodName = (methodName) => {
 };
 
 const runComponents = async () => {
-  try {
-    await spawnExt('serverless', ['--version']);
-  } catch (err) {
-    throw new ServerlessError(
-      'Could not find the Serverless Framework CLI. Ensure Serverless Framework is installed before continuing.\nhttps://serverless.com/framework/docs/getting-started',
-      'SERVERLESS_COMMAND_NOT_AVAILABLE'
-    );
-  }
-
   if (args.help || args._[0] === 'help') {
     await renderHelp();
     return;

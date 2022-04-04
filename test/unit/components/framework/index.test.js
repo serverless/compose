@@ -46,6 +46,7 @@ describe('test/unit/components/framework/index.test.js', () => {
 
     const context = await getContext();
     const component = new FrameworkComponent('some-id', context, {});
+    component.state.detectedFrameworkVersion = '9.9.9';
     await component.deploy();
 
     expect(spawnStub).to.be.calledTwice;
@@ -55,7 +56,7 @@ describe('test/unit/components/framework/index.test.js', () => {
     expect(spawnStub.getCall(1).args[0]).to.equal('serverless');
     expect(spawnStub.getCall(1).args[1]).to.deep.equal(['info', '--verbose', '--stage', 'dev']);
     expect(spawnStub.getCall(1).args[2].cwd).to.equal('.');
-    expect(component.state).to.deep.equal({});
+    expect(component.state).to.deep.equal({ detectedFrameworkVersion: '9.9.9' });
     expect(component.outputs).to.deep.equal({ Key: 'Output' });
   });
 
@@ -80,13 +81,14 @@ describe('test/unit/components/framework/index.test.js', () => {
 
     const context = await getContext();
     const component = new FrameworkComponent('some-id', context, {});
+    component.state.detectedFrameworkVersion = '9.9.9';
     await component.refreshOutputs();
 
     expect(spawnStub).to.be.calledOnce;
     expect(spawnStub.getCall(0).args[0]).to.equal('serverless');
     expect(spawnStub.getCall(0).args[1]).to.deep.equal(['info', '--verbose', '--stage', 'dev']);
     expect(spawnStub.getCall(0).args[2].cwd).to.equal('.');
-    expect(component.state).to.deep.equal({});
+    expect(component.state).to.deep.equal({ detectedFrameworkVersion: '9.9.9' });
     expect(component.outputs).to.deep.equal({ Key: 'Output' });
   });
 
@@ -112,13 +114,14 @@ describe('test/unit/components/framework/index.test.js', () => {
 
     const context = await getContext();
     const component = new FrameworkComponent('some-id', context, {});
+    component.state.detectedFrameworkVersion = '9.9.9';
     await component.refreshOutputs();
 
     expect(spawnStub).to.be.calledOnce;
     expect(spawnStub.getCall(0).args[0]).to.equal('serverless');
     expect(spawnStub.getCall(0).args[1]).to.deep.equal(['info', '--verbose', '--stage', 'dev']);
     expect(spawnStub.getCall(0).args[2].cwd).to.equal('.');
-    expect(component.state).to.deep.equal({});
+    expect(component.state).to.deep.equal({ detectedFrameworkVersion: '9.9.9' });
     expect(component.outputs).to.deep.equal({ Key: 'Output' });
   });
 
@@ -140,6 +143,7 @@ describe('test/unit/components/framework/index.test.js', () => {
     const component = new FrameworkComponent('some-id', context, {});
     component.state = {
       key: 'val',
+      detectedFrameworkVersion: '9.9.9',
     };
     component.outputs = {
       outputkey: 'outputval',
@@ -171,6 +175,7 @@ describe('test/unit/components/framework/index.test.js', () => {
 
     const context = await getContext();
     const component = new FrameworkComponent('some-id', context, { path: 'custom-path' });
+    component.state.detectedFrameworkVersion = '9.9.9';
 
     await component.command('print', { key: 'val', flag: true });
 
@@ -184,5 +189,21 @@ describe('test/unit/components/framework/index.test.js', () => {
       'dev',
     ]);
     expect(spawnStub.getCall(0).args[2].cwd).to.equal('custom-path');
+  });
+
+  it('reports detected unsupported framework version', async () => {
+    const spawnExtStub = sinon.stub().resolves({
+      stdoutBuffer: Buffer.from('Framework Core: 2.1.0'),
+    });
+
+    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+      'child-process-ext/spawn': spawnExtStub,
+    });
+
+    const context = await getContext();
+    const component = new FrameworkComponent('some-id', context, {});
+    await expect(component.deploy()).to.eventually.be.rejectedWith(
+      'The installed version of Serverless Framework (2.1.0) is not supported by Serverless Compose. Please upgrade Serverless Framework to a version greater or equal to "3.7.7"'
+    );
   });
 });
