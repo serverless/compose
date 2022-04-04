@@ -130,8 +130,12 @@ const getConfiguration = async (template) => {
 
 // For now, only supported variables are `${sls:stage}` and `${env:<key>}`;
 // TODO: After merging into Framework CLI, unify the configuration resolution handling with Framework logic
-const resolveConfigurationVariables = async (configuration, stage) => {
-  const regex = /\${(\w*:?[\w\d.-]+)}/g;
+const resolveConfigurationVariables = async (
+  configuration,
+  stage,
+  unrecognizedVariableSources = new Set()
+) => {
+  const regex = /\${(\w*:[\w\d.-]+)}/g;
   const slsStageRegex = /\${sls:stage}/g;
   const envRegex = /\${env:(\w*[\w.-_]+)}/g;
 
@@ -158,13 +162,24 @@ const resolveConfigurationVariables = async (configuration, stage) => {
             newValue = value.replace(match, process.env[referencedPropertyPath[1]]);
           }
           variableResolved = true;
+        } else {
+          const variableSource = match.slice(2).split(':')[0];
+          unrecognizedVariableSources.add(variableSource);
         }
       }
       this.update(newValue);
     }
   });
   if (variableResolved) {
-    return resolveConfigurationVariables(resolvedConfiguration);
+    return resolveConfigurationVariables(resolvedConfiguration, stage, unrecognizedVariableSources);
+  }
+  if (unrecognizedVariableSources.size) {
+    throw new ServerlessError(
+      `Unrecognized configuration variable sources: "${Array.from(unrecognizedVariableSources).join(
+        '", "'
+      )}"`,
+      'UNRECOGNIZED_VARIABLE_SOURCES'
+    );
   }
   return resolvedConfiguration;
 };
