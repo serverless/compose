@@ -1,11 +1,10 @@
 'use strict';
 
-const stripAnsi = require('strip-ansi');
 const slscVersion = require('../package').version;
 const tokenizeException = require('./utils/tokenize-exception');
 const colors = require('./cli/colors');
 
-module.exports = async (exception, logger) => {
+module.exports = (exception, logger) => {
   const exceptionTokens = tokenizeException(exception);
   const isUserError = exceptionTokens.isUserError;
 
@@ -24,9 +23,8 @@ module.exports = async (exception, logger) => {
   logger.log(colors.darkGray(detailsTextTokens.join('\n')));
   logger.log();
 
-  const errorMsg = stripAnsi(
-    exceptionTokens.stack && !isUserError ? exceptionTokens.stack : exceptionTokens.message
-  );
+  const errorMsg =
+    exceptionTokens.stack && !isUserError ? exceptionTokens.stack : exceptionTokens.message;
   logger.writeText(`${colors.red('Error:')}\n${errorMsg}`);
 
   process.exitCode = 1;
