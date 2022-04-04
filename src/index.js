@@ -235,6 +235,19 @@ const runComponents = async () => {
   // So we can properly count it
   configurationForTelemetry = clone(configuration);
 
+  // Catch early Framework CLI-wide options that aren't supported here
+  // Since these are reserved options, we don't even want component-specific commands to support them
+  // so we detect these early for _all_ commands.
+  const unsupportedGlobalCliOptions = ['debug', 'config', 'param'];
+  unsupportedGlobalCliOptions.forEach((option) => {
+    if (options[option]) {
+      throw new ServerlessError(
+        `The "--${option}" option is not supported (yet) in Serverless Compose`,
+        'INVALID_CLI_OPTION'
+      );
+    }
+  });
+
   try {
     const componentsService = new ComponentsService(context, configuration);
     await componentsService.init();
