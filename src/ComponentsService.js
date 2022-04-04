@@ -8,6 +8,7 @@ const ServerlessError = require('./serverless-error');
 
 const utils = require('./utils');
 const { loadComponent } = require('./load');
+const colors = require('./cli/colors');
 
 const INTERNAL_COMPONENTS = {
   'serverless-framework': resolve(__dirname, '../components/framework'),
@@ -329,6 +330,48 @@ class ComponentsService {
     this.context.renderOutputs(outputs);
   }
 
+  async invokeGlobalCommand(command, options) {
+    const globalCommands = ['deploy', 'remove', 'info', 'logs', 'outputs', 'refresh-outputs'];
+    // Specific error messages for popular Framework commands
+    if (command === 'package') {
+      throw new ServerlessError(
+        `"package" is not a global command in Serverless Compose.\nAvailable global commands: ${globalCommands.join(
+          ', '
+        )}.\nYou can package each Serverless Framework service by running "serverless-compose <service-name>:${command}".`,
+        'COMMAND_NOT_FOUND'
+      );
+    }
+    if (command === 'invoke') {
+      throw new ServerlessError(
+        `"invoke" is not a global command in Serverless Compose.\nAvailable global commands: ${globalCommands.join(
+          ', '
+        )}.\nYou can invoke functions by running "serverless-compose <service-name>:invoke --function <function>".`,
+        'COMMAND_NOT_FOUND'
+      );
+    }
+    if (command === 'offline') {
+      throw new ServerlessError(
+        `"offline" is not a global command in Serverless Compose.\nAvailable global commands: ${globalCommands.join(
+          ', '
+        )}.\nYou can run serverless-offline in each Serverless Framework service by running "serverless-compose <service-name>:${command}".`,
+        'COMMAND_NOT_FOUND'
+      );
+    }
+    if (!globalCommands.includes(command)) {
+      const extraText = colors.gray(
+        `Available commands: ${globalCommands.join(
+          ', '
+        )}.\nIf this is a service-specific command, run it using the component name: "serverless-compose <service-name>:${command}"`
+      );
+      throw new ServerlessError(
+        `Command "${command}" doesn't exist.\n${extraText}`,
+        'COMMAND_NOT_FOUND'
+      );
+    }
+    const method = this.mapCommandToMethodName(command);
+    await this[method](options);
+  }
+
   async invokeComponentCommand(componentName, command, options) {
     // We can have commands that do not have to call commands directly on the component,
     // but are global commands that can accept the componentName parameter
@@ -528,6 +571,13 @@ class ComponentsService {
     }
 
     await this.instantiateComponents();
+  }
+
+  mapCommandToMethodName(methodName) {
+    if (methodName === 'refresh-outputs') {
+      return 'refreshOutputs';
+    }
+    return methodName;
   }
 }
 

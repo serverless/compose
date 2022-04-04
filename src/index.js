@@ -169,13 +169,6 @@ const resolveConfigurationVariables = async (configuration, stage) => {
   return resolvedConfiguration;
 };
 
-const mapMethodName = (methodName) => {
-  if (methodName === 'refresh-outputs') {
-    return 'refreshOutputs';
-  }
-  return methodName;
-};
-
 const runComponents = async () => {
   try {
     await spawnExt('serverless', ['--version']);
@@ -208,9 +201,6 @@ const runComponents = async () => {
     method = methods.join(':');
   }
   delete options._; // remove the method name if any
-
-  // Map CLI method names to internal method names
-  method = mapMethodName(method);
 
   const serverlessFile = getServerlessFile(process.cwd());
 
@@ -252,10 +242,7 @@ const runComponents = async () => {
     if (componentName) {
       await componentsService.invokeComponentCommand(componentName, method, options);
     } else {
-      if (typeof componentsService[method] !== 'function') {
-        throw new ServerlessError(`Command "${method}" not found`, 'COMMAND_NOT_FOUND');
-      }
-      await componentsService[method](options);
+      await componentsService.invokeGlobalCommand(method, options);
     }
 
     storeTelemetryLocally(
