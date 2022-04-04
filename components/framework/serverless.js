@@ -6,6 +6,13 @@ const YAML = require('js-yaml');
 const hasha = require('hasha');
 const globby = require('globby');
 const path = require('path');
+const spawnExt = require('child-process-ext/spawn');
+const semver = require('semver');
+
+const MINIMAL_FRAMEWORK_VERSION = '3.7.7';
+
+const doesSatisfyRequiredFrameworkVersion = (version) =>
+  semver.gte(version, MINIMAL_FRAMEWORK_VERSION);
 
 class ServerlessFramework extends Component {
   constructor(id, context, inputs) {
@@ -135,10 +142,46 @@ class ServerlessFramework extends Component {
     this.successProgress('outputs refreshed');
   }
 
+  async ensureFrameworkVersion() {
+    if (
+      !this.state.detectedFrameworkVersion ||
+      !doesSatisfyRequiredFrameworkVersion(this.state.detectedFrameworkVersion)
+    ) {
+      let stdoutResult;
+      try {
+        const { stdoutBuffer } = await spawnExt('serverless', ['--version']);
+        stdoutResult = stdoutBuffer.toString();
+      } catch (e) {
+        throw new Error(
+          'Could not find the Serverless Framework CLI installation. Ensure Serverless Framework is installed before continuing.\nhttps://serverless.com/framework/docs/getting-started'
+        );
+      }
+      const matchResult = stdoutResult.match(/Framework Core: ([0-9]+\.[0-9]+\.[0-9]+)/);
+      if (matchResult) {
+        const version = matchResult[1];
+        if (doesSatisfyRequiredFrameworkVersion(version)) {
+          // Stored to avoid checking it on each invocation
+          // We ignore edge case when someone downgrades or uninstalls serverless afterwards
+          this.state.detectedFrameworkVersion = version;
+          this.save();
+        } else {
+          throw new Error(
+            `The installed version of Serverless Framework (${version}) is not supported by Serverless Compose. Please upgrade Serverless Framework to a version greater or equal to "${MINIMAL_FRAMEWORK_VERSION}"`
+          );
+        }
+      } else {
+        throw new Error(
+          'Could not verify Serverless Framework CLI installation. Ensure Serverless Framework is installed before continuing.\nhttps://serverless.com/framework/docs/getting-started'
+        );
+      }
+    }
+  }
+
   /**
    * @return {Promise<{ stdout: string, stderr: string }>}
    */
   async exec(command, args, streamStdout = false, stdoutCallback = undefined) {
+    await this.ensureFrameworkVersion();
     // Add stage
     args.push('--stage', this.stage);
     // Add config file name if necessary
