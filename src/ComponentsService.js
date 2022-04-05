@@ -459,6 +459,11 @@ class ComponentsService {
     await Promise.all(promises);
   }
 
+  /**
+   * @private
+   * @param {{method: string, reverse?: boolean}} _
+   * @return {Promise<void>}
+   */
   async executeComponentsGraph({ method, reverse }) {
     let nodes;
     if (reverse) {
@@ -468,7 +473,7 @@ class ComponentsService {
     }
 
     if (isEmpty(nodes)) {
-      return this.allComponents;
+      return;
     }
 
     /** @type {Promise<boolean>[]} */
@@ -524,14 +529,14 @@ class ComponentsService {
     const allSuccessful = results.reduce((carry, current) => carry && current, true);
     if (!allSuccessful) {
       // Skip next components if there was any error
-      return {};
+      return;
     }
 
     for (const alias of nodes) {
       this.componentsGraph.removeNode(alias);
     }
 
-    return this.executeComponentsGraph({ method, reverse });
+    await this.executeComponentsGraph({ method, reverse });
   }
 
   async instantiateComponents() {
