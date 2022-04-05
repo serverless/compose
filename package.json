@@ -64,8 +64,7 @@
     "extends": "@serverless/eslint-config/node",
     "root": true,
     "ignorePatterns": [
-      "api/*.js",
-      "otherapi/*.js"
+      "demo/*"
     ],
     "parserOptions": {
       "ecmaVersion": 2022
