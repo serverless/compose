@@ -6,6 +6,10 @@ const traverse = require('traverse');
 const tokenizeException = require('../tokenize-exception');
 const resolveErrorLocation = require('../resolve-error-location');
 
+/**
+ * @param {any} _
+ * @return {any}
+ */
 module.exports = ({
   command,
   options,
