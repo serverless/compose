@@ -3,7 +3,7 @@
 // @ts-nocheck Types do not work with chalk for some reason
 const chalk = require('chalk');
 
-const colorSupportLevel = chalk.supportsColor.level;
+const colorSupportLevel = chalk.supportsColor ? chalk.supportsColor.level : 0;
 
 module.exports = {
   white: chalk.white,
