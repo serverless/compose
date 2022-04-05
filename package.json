@@ -47,6 +47,7 @@
   "devDependencies": {
     "@serverless/eslint-config": "^4.0.0",
     "@serverless/test": "^10.0.2",
+    "@types/mocha": "^9.1.0",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "eslint": "^8.12.0",
