@@ -98,7 +98,7 @@ class ServerlessFramework extends Component {
 
   async info() {
     const { stdout: infoOutput } = await this.exec('serverless', ['info']);
-    this.context.logger.writeText(infoOutput, [this.id]);
+    this.writeText(infoOutput);
   }
 
   async logs(options) {
