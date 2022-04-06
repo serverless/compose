@@ -17,6 +17,7 @@ const storeTelemetryLocally = require('./utils/telemetry/store-locally');
 const sendTelemetry = require('./utils/telemetry/send');
 const ServerlessError = require('./serverless-error');
 const handleError = require('./handle-error');
+const colors = require('./cli/colors');
 
 let options;
 let method;
@@ -280,6 +281,10 @@ const runComponents = async () => {
 
     // If at least one of the internal commands failed, we want to exit with error code 1
     if (Object.values(context.componentCommandsOutcomes).includes('failure')) {
+      context.logger.log();
+      context.logger.log(
+        colors.darkGray('Verbose logs are available in ".serverless/compose.log"')
+      );
       process.exit(1);
     } else {
       process.exit(0);

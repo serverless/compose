@@ -27,5 +27,8 @@ module.exports = (exception, logger) => {
     exceptionTokens.stack && !isUserError ? exceptionTokens.stack : exceptionTokens.message;
   logger.writeText(`${colors.red('Error:')}\n${errorMsg}`);
 
+  logger.log();
+  logger.log(colors.darkGray('Verbose logs are available in ".serverless/compose.log"'));
+
   process.exitCode = 1;
 };
