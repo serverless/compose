@@ -57,13 +57,15 @@ describe('test/unit/lib/cli/Logger.test.js', () => {
   it('can write verbose logs', async () => {
     logger = new Logger(true, true);
 
-    logger.verbose('Message');
+    logger.verbose('Message', ['foo']);
 
     expect(await readStream(logger.stdout)).to.equal('');
     // Verbose logs are written (with colors) to stderr
-    expect(await readStream(logger.stderr)).to.equal(`${colors.gray('Message')}\n`);
+    expect(await readStream(logger.stderr)).to.equal(
+      `${colors.gray('foo › ')}${colors.gray('Message')}\n`
+    );
     // And (without colors) to the log file
-    expect(await readStream(logger.logsFileStream)).to.equal('Message\n');
+    expect(await readStream(logger.logsFileStream)).to.equal('foo › Message\n');
   });
 
   it('can switch to verbose logs at runtime', async () => {
