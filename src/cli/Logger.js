@@ -71,7 +71,7 @@ class Logger {
   verbose(message, namespace) {
     if (!message || message === '') return;
 
-    this.writeToLogsFile(message);
+    this.writeToLogsFile(this.namespaceLogMessage(message, namespace));
 
     if (this.verboseMode) {
       this.doLogVerbose(message, namespace);
