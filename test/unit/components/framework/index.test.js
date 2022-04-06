@@ -17,7 +17,7 @@ const getContext = async () => {
     stateRoot: path.join(process.cwd(), '.serverless'),
     stage: 'dev',
     appName: 'some-random-name',
-    interactiveDisabled: true,
+    disableIO: true,
   };
   const context = new Context(contextConfig);
   await context.init();

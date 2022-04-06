@@ -1,15 +1,15 @@
 'use strict';
 
-const { PassThrough } = require('stream');
 const expect = require('chai').expect;
 const Logger = require('../../../../src/cli/Logger');
 const colors = require('../../../../src/cli/colors');
+const readStream = require('../../read-stream');
 
 describe('test/unit/lib/cli/Logger.test.js', () => {
   /** @type {Logger} */
   let logger;
   beforeEach(() => {
-    logger = new Logger(false, mockedStreams());
+    logger = new Logger(false, true);
   });
 
   it('writes text', async () => {
@@ -55,7 +55,7 @@ describe('test/unit/lib/cli/Logger.test.js', () => {
   });
 
   it('can write verbose logs', async () => {
-    logger = new Logger(true, mockedStreams());
+    logger = new Logger(true, true);
 
     logger.verbose('Message');
 
@@ -92,7 +92,7 @@ describe('test/unit/lib/cli/Logger.test.js', () => {
   });
 
   it('logs errors with stack traces in verbose', async () => {
-    logger = new Logger(true, mockedStreams());
+    logger = new Logger(true, true);
 
     logger.error(new TypeError('An error'));
 
@@ -105,25 +105,3 @@ describe('test/unit/lib/cli/Logger.test.js', () => {
     );
   });
 });
-
-function mockedStreams() {
-  return {
-    stdout: new PassThrough(),
-    stderr: new PassThrough(),
-    logsFileStream: new PassThrough(),
-  };
-}
-
-/**
- * @param {NodeJS.WritableStream} stream
- * @return {Promise<string>}
- */
-function readStream(stream) {
-  stream.end();
-  const chunks = [];
-  return new Promise((resolve, reject) => {
-    stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-    stream.on('error', (err) => reject(err));
-    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-  });
-}

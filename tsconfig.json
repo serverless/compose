@@ -5,7 +5,8 @@
     "sourceMap": true,
     "allowJs": true,
     "checkJs": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "strictNullChecks": true
   },
   "exclude": ["node_modules"]
 }
