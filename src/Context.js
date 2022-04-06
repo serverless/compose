@@ -53,7 +53,7 @@ class Context {
       return;
     }
 
-    safeWrite(
+    this.logger.writeText(
       `\n${prettyoutput(outputs, {
         alignKeyValues: false,
         colors: {
@@ -63,8 +63,7 @@ class Context {
           true: 'white',
           false: 'white',
         },
-      })}`.trimEnd(),
-      process.stdout
+      })}`.trimEnd()
     );
   }
 
