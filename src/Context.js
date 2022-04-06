@@ -9,7 +9,6 @@ const Logger = require('./cli/Logger');
 const readline = require('readline');
 const Progresses = require('./cli/Progresses');
 const colors = require('./cli/colors');
-const { safeWrite } = require('./cli/output');
 
 class Context {
   /** @type {StateStorage} */
@@ -24,26 +23,20 @@ class Context {
   constructor(config) {
     this.version = packageJson.version;
     this.root = path.resolve(config.root) || process.cwd();
-    this.logger = new Logger(config.verbose || false);
+    this.logger = new Logger(config.verbose || false, config.disableIO);
     this.stateStorage = new StateStorage(config.stage);
     this.stage = config.stage;
     this.id = undefined;
     this.appName = config.appName;
-    this.interactiveDisabled = config.interactiveDisabled || false;
 
-    this.progresses = new Progresses();
-    if (this.interactiveDisabled) {
-      this.progresses.enabled = false;
-    }
+    this.progresses = new Progresses(this.logger);
     if (!config.verbose) {
       this.progresses.setFooterText(colors.darkGray('Press [?] to enable verbose logs'));
     }
   }
 
   async init() {
-    if (!this.interactiveDisabled) {
-      this.startInteractiveInput();
-    }
+    this.startInteractiveInput();
     const serviceState = await this.stateStorage.readServiceState({ id: utils.randomId() });
     this.id = serviceState.id;
   }
@@ -72,9 +65,12 @@ class Context {
   }
 
   startInteractiveInput() {
+    if (!this.logger.interactiveStdin) {
+      return;
+    }
     // Start listening to specific keypresses
-    readline.emitKeypressEvents(process.stdin);
-    process.stdin.on('keypress', (character, key) => {
+    readline.emitKeypressEvents(this.logger.interactiveStdin);
+    this.logger.interactiveStdin.on('keypress', (character, key) => {
       if (character === '?') {
         this.logger.enableVerbose();
         this.progresses.setFooterText();
@@ -88,14 +84,12 @@ class Context {
     // This is the line that enables the interactive mode
     // If later we need user input (e.g. prompts), we need to disable this
     // See https://nodejs.org/api/tty.html#readstreamsetrawmodemode
-    process.stdin.setRawMode(true);
+    this.logger.interactiveStdin.setRawMode(true);
   }
 
   shutdown() {
-    if (!this.interactiveDisabled) {
-      this.progresses.setFooterText('');
-      this.progresses.stopAll();
-    }
+    this.progresses.setFooterText('');
+    this.progresses.stopAll();
   }
 }
 

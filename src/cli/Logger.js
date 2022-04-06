@@ -2,25 +2,44 @@
 
 const colors = require('./colors');
 const symbols = require('./symbols');
-const { safeWrite } = require('./output');
 const fs = require('fs');
 const stripAnsi = require('strip-ansi');
 const path = require('path');
+const isInteractiveTerminal = require('is-interactive');
+const { PassThrough } = require('stream');
 
 class Logger {
+  /** @type {NodeJS.WritableStream} */
+  stdout;
+  /** @type {undefined | NodeJS.WriteStream} Undefined if not interactive */
+  interactiveStdout;
+  /** @type {NodeJS.WritableStream} */
+  stderr;
+  /** @type {undefined | NodeJS.WriteStream} Undefined if not interactive */
+  interactiveStderr;
+  /** @type {undefined | NodeJS.ReadStream} Undefined if not interactive */
+  interactiveStdin;
+  /** @type {NodeJS.WritableStream} */
+  logsFileStream;
+
   /** @type {Array<{ namespace?: string[], message: string }>} */
   verboseLogs = [];
   logsFilePath = '.serverless/compose.log';
 
   /**
    * @param {boolean} verboseMode
-   * @param {Record<string, NodeJS.WritableStream>} [streams] To allow mocking in tests
+   * @param {boolean} [disableIO] To allow mocking in tests
    */
-  constructor(verboseMode, streams) {
+  constructor(verboseMode, disableIO = false) {
     this.verboseMode = verboseMode;
-    this.stdout = streams?.stdout ? streams.stdout : process.stdout;
-    this.stderr = streams?.stderr ? streams.stderr : process.stderr;
-    this.logsFileStream = streams?.logsFileStream ? streams.logsFileStream : this.openLogsFile();
+    this.stdout = disableIO ? new PassThrough() : process.stdout;
+    this.stderr = disableIO ? new PassThrough() : process.stderr;
+    this.logsFileStream = disableIO ? new PassThrough() : this.openLogsFile();
+    if (!disableIO && isInteractiveTerminal()) {
+      this.interactiveStdout = process.stdout;
+      this.interactiveStderr = process.stderr;
+      this.interactiveStdin = process.stdin;
+    }
   }
 
   /**
@@ -30,7 +49,7 @@ class Logger {
    */
   writeText(message, namespace = []) {
     message = this.namespaceLogMessage(message, namespace);
-    safeWrite(message, this.stdout);
+    this.safeWrite(message);
     this.writeToLogsFile(message);
   }
 
@@ -41,7 +60,7 @@ class Logger {
    */
   log(message, namespace = []) {
     message = this.namespaceLogMessage(message, namespace);
-    safeWrite(message, this.stderr);
+    this.safeWrite(message, false);
     this.writeToLogsFile(message);
   }
 
@@ -95,7 +114,7 @@ class Logger {
   doLogVerbose(message, namespace) {
     message = colors.gray(message);
     message = this.namespaceLogMessage(message, namespace);
-    safeWrite(message, this.stderr);
+    this.safeWrite(message, false);
   }
 
   /**
@@ -144,6 +163,31 @@ class Logger {
       fs.mkdirSync(directory);
     }
     return fs.createWriteStream(this.logsFilePath);
+  }
+
+  /**
+   * Safely writes text to a stream.
+   * It takes into account dynamic content that may be written below.
+   * @private
+   * @param {string | undefined} text
+   * @param {boolean} [stdout] If false, stderr is used.
+   */
+  safeWrite(text, stdout = true) {
+    const stream = stdout ? this.stdout : this.stderr;
+    const interactiveStream = stdout ? this.interactiveStdout : this.interactiveStderr;
+
+    text = text ?? '';
+    for (const line of text.split('\n')) {
+      // This writes from the cursor
+      stream.write(line);
+      // But maybe the line already contained content (e.g. a progress)
+      // so we clear the rest of line, up till its end (on the right side)
+      if (interactiveStream) {
+        interactiveStream.clearLine(1);
+      }
+      // Then we can add a line return
+      stream.write('\n');
+    }
   }
 }
 

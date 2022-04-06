@@ -18,7 +18,7 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
       stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
       appName: 'some-random-name',
-      interactiveDisabled: true,
+      disableIO: true,
     };
     const context = new Context(contextConfig);
     const payload = generatePayload({
@@ -84,7 +84,7 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
       stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
       appName: 'some-random-name',
-      interactiveDisabled: true,
+      disableIO: true,
     };
     const context = new Context(contextConfig);
     const error = new Error('some error without code');
@@ -114,7 +114,7 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
       stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
       appName: 'some-random-name',
-      interactiveDisabled: true,
+      disableIO: true,
     };
     const context = new Context(contextConfig);
     const error = new ServerlessError('some error with code', 'ERROR_CODE');
@@ -141,7 +141,7 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
   it('recognizes uncaught error in telemetry without configuration', () => {
     const contextConfig = {
       root: process.cwd(),
-      interactiveDisabled: true,
+      disableIO: true,
     };
     const context = new Context(contextConfig);
     const error = new ServerlessError('some error with code', 'ERROR_CODE');
@@ -179,7 +179,7 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
   it('recognizes interrupt', () => {
     const contextConfig = {
       root: process.cwd(),
-      interactiveDisabled: true,
+      disableIO: true,
     };
     const interruptSignal = 'SIGINT';
     const context = new Context(contextConfig);

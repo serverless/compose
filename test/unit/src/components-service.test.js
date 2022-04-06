@@ -3,8 +3,8 @@
 const path = require('path');
 const ComponentsService = require('../../../src/ComponentsService');
 const Context = require('../../../src/Context');
-const overrideStdoutWrite = require('process-utils/override-stdout-write');
 const stripAnsi = require('strip-ansi');
+const readStream = require('../read-stream');
 
 const expect = require('chai').expect;
 
@@ -38,7 +38,7 @@ describe('test/unit/src/components-service.test.js', () => {
       stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
       appName: 'some-random-name',
-      interactiveDisabled: true,
+      disableIO: true,
     };
     const context = new Context(contextConfig);
     await context.init();
@@ -110,7 +110,7 @@ describe('test/unit/src/components-service.test.js', () => {
       stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
       appName: 'some-random-name',
-      interactiveDisabled: true,
+      disableIO: true,
     };
     const context = new Context(contextConfig);
     await context.init();
@@ -139,7 +139,7 @@ describe('test/unit/src/components-service.test.js', () => {
       stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
       appName: 'some-random-name',
-      interactiveDisabled: true,
+      disableIO: true,
     };
     const mockedStateStorage = {
       readServiceState: () => ({ id: 123, detectedFrameworkVersion: '9.9.9' }),
@@ -160,12 +160,8 @@ describe('test/unit/src/components-service.test.js', () => {
     await context.init();
     componentsService = new ComponentsService(context, configuration);
 
-    let stdoutData = '';
-    await overrideStdoutWrite(
-      (data) => (stdoutData += data),
-      async () => await componentsService.outputs()
-    );
-    expect(stripAnsi(stdoutData)).to.equal(
+    await componentsService.outputs();
+    expect(stripAnsi(await readStream(context.logger.stdout))).to.equal(
       [
         '',
         'resources: ',
@@ -196,7 +192,7 @@ describe('test/unit/src/components-service.test.js', () => {
       stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
       appName: 'some-random-name',
-      interactiveDisabled: true,
+      disableIO: true,
     };
     const mockedStateStorage = {
       readServiceState: () => ({ id: 123, detectedFrameworkVersion: '9.9.9' }),
@@ -211,11 +207,9 @@ describe('test/unit/src/components-service.test.js', () => {
     await context.init();
     componentsService = new ComponentsService(context, configuration);
 
-    let stdoutData = '';
-    await overrideStdoutWrite(
-      (data) => (stdoutData += data),
-      async () => await componentsService.outputs({ componentName: 'resources' })
+    await componentsService.outputs({ componentName: 'resources' });
+    expect(stripAnsi(await readStream(context.logger.stdout))).to.equal(
+      ['', 'somethingelse: 123', ''].join('\n')
     );
-    expect(stripAnsi(stdoutData)).to.equal(['', 'somethingelse: 123', ''].join('\n'));
   });
 });
