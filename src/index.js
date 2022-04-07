@@ -5,9 +5,7 @@ require('@serverless/utils/log-reporters/node');
 
 const path = require('path');
 const args = require('minimist')(process.argv.slice(2));
-const traverse = require('traverse');
 const { clone } = require('ramda');
-const utils = require('./utils');
 const renderHelp = require('./render-help');
 const Context = require('./Context');
 const Component = require('./Component');
@@ -18,6 +16,11 @@ const sendTelemetry = require('./utils/telemetry/send');
 const ServerlessError = require('./serverless-error');
 const handleError = require('./handle-error');
 const colors = require('./cli/colors');
+const {
+  readConfigurationFile,
+  validateConfiguration,
+  resolveConfigurationVariables,
+} = require('./configuration/configuration');
 
 let options;
 let method;
@@ -41,7 +44,7 @@ process.once('uncaughtException', (error) => {
     },
     usedContext
   );
-  handleError(error, context.logger);
+  handleError(error, usedContext.logger);
   sendTelemetry(usedContext).then(() => process.exit(1));
 });
 
@@ -73,117 +76,6 @@ require('signal-exit/signals').forEach((signal) => {
   });
 });
 
-// Simplified support only for yml
-const getServerlessFile = (dir) => {
-  const ymlFilePath = path.join(dir, 'serverless-compose.yml');
-  const yamlFilePath = path.join(dir, 'serverless-compose.yaml');
-
-  if (utils.fileExistsSync(ymlFilePath)) {
-    return utils.readFileSync(ymlFilePath);
-  }
-  if (utils.fileExistsSync(yamlFilePath)) {
-    return utils.readFileSync(yamlFilePath);
-  }
-
-  return false;
-};
-
-const isComponentsTemplate = (serverlessFile) => {
-  if (typeof serverlessFile !== 'object') {
-    return false;
-  }
-
-  // make sure it's NOT a framework file
-  if (serverlessFile.provider && serverlessFile.provider.name) {
-    return false;
-  }
-
-  // make sure it IS a serverless-compose file
-  if (serverlessFile.services) {
-    return true;
-  }
-
-  return false;
-};
-
-const getConfiguration = async (template) => {
-  if (typeof template === 'string') {
-    if (
-      (!utils.isJsonPath(template) && !utils.isYamlPath(template)) ||
-      !(await utils.fileExists(template))
-    ) {
-      throw new ServerlessError(
-        'The referenced template path does not exist',
-        'REFERENCED_TEMPLATE_PATH_DOES_NOT_EXIST'
-      );
-    }
-
-    return utils.readFile(template);
-  } else if (typeof template !== 'object') {
-    throw new ServerlessError(
-      'The template input could either be an object, or a string path to a template file',
-      'INVALID_TEMPLATE_FORMAT'
-    );
-  }
-  return template;
-};
-
-// For now, only supported variables are `${sls:stage}` and `${env:<key>}`;
-// TODO: After merging into Framework CLI, unify the configuration resolution handling with Framework logic
-const resolveConfigurationVariables = async (
-  configuration,
-  stage,
-  unrecognizedVariableSources = new Set()
-) => {
-  const regex = /\${(\w*:[\w\d.-]+)}/g;
-  const slsStageRegex = /\${sls:stage}/g;
-  const envRegex = /\${env:(\w*[\w.-_]+)}/g;
-
-  let variableResolved = false;
-  const resolvedConfiguration = traverse(configuration).forEach(function (value) {
-    const matches = typeof value === 'string' ? value.match(regex) : null;
-    if (matches) {
-      let newValue = value;
-      for (const match of matches) {
-        if (slsStageRegex.test(match)) {
-          variableResolved = true;
-          newValue = newValue.replace(match, stage);
-        } else if (envRegex.test(match)) {
-          const referencedPropertyPath = match.substring(2, match.length - 1).split(':');
-          if (process.env[referencedPropertyPath[1]] == null) {
-            throw new ServerlessError(
-              `The environment variable "${referencedPropertyPath[1]}" is referenced but is not defined`,
-              'CANNOT_FIND_ENVIRONMENT_VARIABLE'
-            );
-          }
-          if (match === value) {
-            newValue = process.env[referencedPropertyPath[1]];
-          } else {
-            newValue = value.replace(match, process.env[referencedPropertyPath[1]]);
-          }
-          variableResolved = true;
-        } else {
-          const variableSource = match.slice(2).split(':')[0];
-          unrecognizedVariableSources.add(variableSource);
-        }
-      }
-      this.update(newValue);
-    }
-  });
-  if (variableResolved) {
-    return resolveConfigurationVariables(resolvedConfiguration, stage, unrecognizedVariableSources);
-  }
-  if (unrecognizedVariableSources.size) {
-    throw new ServerlessError(
-      `Unrecognized configuration variable sources: "${Array.from(unrecognizedVariableSources).join(
-        '", "'
-      )}"`,
-      'UNRECOGNIZED_VARIABLE_SOURCES'
-    );
-  }
-  return resolvedConfiguration;
-};
-
 const runComponents = async () => {
   if (args.help || args._[0] === 'help') {
     await renderHelp();
@@ -208,33 +100,19 @@ const runComponents = async () => {
   }
   delete options._; // remove the method name if any
 
-  const serverlessFile = getServerlessFile(process.cwd());
-
-  if (!serverlessFile) {
-    throw new ServerlessError(
-      'No serverless-compose.yml file found',
-      'CONFIGURATION_FILE_NOT_FOUND'
-    );
-  }
-
-  if (!isComponentsTemplate(serverlessFile)) {
-    throw new ServerlessError(
-      'serverless-compose.yml does not contain valid Serverless Compose configuration.\nRead about Serverless Compose in the documentation: https://github.com/serverless/compose',
-      'INVALID_CONFIGURATION'
-    );
-  }
+  const configuration = readConfigurationFile(process.cwd());
+  validateConfiguration(configuration);
 
   const contextConfig = {
     root: process.cwd(),
     stateRoot: path.join(process.cwd(), '.serverless'),
     verbose: options.verbose,
     stage: options.stage || 'dev',
-    appName: serverlessFile.name,
+    appName: configuration.name,
   };
 
   context = new Context(contextConfig);
   await context.init();
-  const configuration = await getConfiguration(serverlessFile);
   await resolveConfigurationVariables(configuration, context.stage);
 
   // For telemetry we want to keep the configuration that has references to components outputs unresolved
