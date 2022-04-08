@@ -28,6 +28,7 @@ let method;
 let configurationForTelemetry;
 let componentName;
 let context;
+let optionsForTelemetry;
 
 process.once('uncaughtException', (error) => {
   // Refactor it to not rely heavily on context because it is only needed for logs
@@ -37,6 +38,7 @@ process.once('uncaughtException', (error) => {
       ...generateTelemetryPayload({
         configuration: configurationForTelemetry,
         options,
+        optionsForTelemetry,
         command: method,
         componentName,
         error,
@@ -60,7 +62,7 @@ require('signal-exit/signals').forEach((signal) => {
       {
         ...generateTelemetryPayload({
           configuration: configurationForTelemetry,
-          options,
+          options: optionsForTelemetry,
           command: method,
           componentName,
           context: usedContext,
@@ -90,6 +92,7 @@ const runComponents = async () => {
   }
   method = method.join(':');
   options = args;
+  optionsForTelemetry = clone(args);
 
   if (options.service) {
     componentName = options.service;
@@ -147,7 +150,7 @@ const runComponents = async () => {
       {
         ...generateTelemetryPayload({
           configuration: configurationForTelemetry,
-          options,
+          options: optionsForTelemetry,
           command: method,
           componentName,
           context,
@@ -179,7 +182,7 @@ const runComponents = async () => {
       {
         ...generateTelemetryPayload({
           configuration: configurationForTelemetry,
-          options,
+          options: optionsForTelemetry,
           command: method,
           componentName,
           context,

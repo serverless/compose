@@ -69,14 +69,16 @@ module.exports = ({
     return 'unrecognized';
   })();
 
+  const commandType = componentName ? 'single' : 'global';
+
   const payload = {
     command,
-    commandType: componentName ? 'single' : 'global',
+    commandType,
     outcome,
     componentsOutcomes,
     cliName: '@serverless/compose',
     ciName,
-    commandOptionNames: options ? Object.keys(options) : [],
+    commandOptionNames: options ? Object.keys(options).filter((key) => key !== '_') : [],
     frameworkLocalUserId: userConfig.get('frameworkId'),
     interruptSignal,
     timestamp: Date.now(),
@@ -86,6 +88,10 @@ module.exports = ({
 
   if (commandDurationMs != null) {
     payload.commandDurationMs = commandDurationMs;
+  }
+
+  if (commandType === 'single') {
+    payload.singleCommandType = options.service ? 'withCliOption' : 'withSemicolon';
   }
 
   if (configuration) {
