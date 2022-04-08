@@ -21,6 +21,7 @@ const {
   validateConfiguration,
   resolveConfigurationVariables,
 } = require('./configuration/configuration');
+const processBackendNotificationRequest = require('./utils/process-backend-notification-request');
 
 let options;
 let method;
@@ -154,8 +155,13 @@ const runComponents = async () => {
       },
       context
     );
-    await sendTelemetry(context);
     context.shutdown();
+
+    const backendNotificationRequest = await sendTelemetry(context);
+    if (backendNotificationRequest && !componentName && method === 'deploy') {
+      // Only display notifications on global deploy command
+      await processBackendNotificationRequest(backendNotificationRequest, context.logger);
+    }
 
     // If at least one of the internal commands failed, we want to exit with error code 1
     if (Object.values(context.componentCommandsOutcomes).includes('failure')) {
