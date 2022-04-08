@@ -73,6 +73,7 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
         componentsOutputsVariablesCount: 1,
       },
       interruptSignal: undefined,
+      singleCommandType: 'withSemicolon',
       outcome: 'unrecognized',
       versions,
     });
@@ -208,5 +209,38 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
       interruptSignal,
       versions,
     });
+  });
+
+  it('properly resolves singleCommandType with option', () => {
+    const contextConfig = {
+      root: process.cwd(),
+      stateRoot: path.join(process.cwd(), '.serverless'),
+      stage: 'dev',
+      appName: 'some-random-name',
+      disableIO: true,
+    };
+    const context = new Context(contextConfig);
+    const payload = generatePayload({
+      command: 'deploy',
+      options: { someoption: 'abc', service: 'componentName' },
+      configuration: {
+        name: 'test-service',
+        services: {
+          resources: {
+            path: 'resources',
+          },
+          consumer: {
+            path: 'consumer',
+            params: {
+              workerQueueArn: '${resources.WorkerQueueArn}',
+            },
+          },
+        },
+      },
+      componentName: 'resources',
+      context,
+    });
+
+    expect(payload.singleCommandType).to.equal('withCliOption');
   });
 });
