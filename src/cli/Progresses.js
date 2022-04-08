@@ -36,15 +36,15 @@ class Progresses {
   progresses = {};
 
   /**
-   * @param {import('./Logger')} logger
+   * @param {import('./Output')} output
    */
-  constructor(logger) {
+  constructor(output) {
     this.options = {
       spinner: isUnicodeSupported() ? dots : dashes,
     };
     this.isCursorHidden = false;
     this.currentInterval = null;
-    this.logger = logger;
+    this.output = output;
     this.lineCount = 0;
     this.currentFrameIndex = 0;
     this.footerText = '';
@@ -154,10 +154,10 @@ class Progresses {
         this.progresses[name].status = 'stopped';
       }
     });
-    if (this.logger.interactiveStderr) {
+    if (this.output.interactiveStderr) {
       // Refresh the output one last time
       this.setStreamOutput();
-      this.logger.interactiveStderr.moveCursor(0, this.lineCount);
+      this.output.interactiveStderr.moveCursor(0, this.lineCount);
       if (this.currentInterval) {
         clearInterval(this.currentInterval);
       }
@@ -168,7 +168,7 @@ class Progresses {
   }
 
   updateSpinnerState() {
-    if (!this.logger.interactiveStderr) return;
+    if (!this.output.interactiveStderr) return;
     if (this.currentInterval) {
       clearInterval(this.currentInterval);
     }
@@ -188,7 +188,7 @@ class Progresses {
   }
 
   setStreamOutput(frame = ' ') {
-    if (!this.logger.interactiveStderr) {
+    if (!this.output.interactiveStderr) {
       return;
     }
 
@@ -239,24 +239,24 @@ class Progresses {
     output = this.limitOutputToTerminalHeight(output);
 
     // Erase the current progresses output
-    this.logger.interactiveStderr.clearScreenDown();
+    this.output.interactiveStderr.clearScreenDown();
     // Re-write the updated progresses
     const lineCount = output.split('\n').length - 1;
-    this.logger.interactiveStderr.write(output);
-    this.logger.interactiveStderr.moveCursor(0, -lineCount);
+    this.output.interactiveStderr.write(output);
+    this.output.interactiveStderr.moveCursor(0, -lineCount);
     this.lineCount = lineCount;
   }
 
   bindSigint() {
     process.on('SIGINT', () => {
       cliCursor.show();
-      this.logger.interactiveStderr?.moveCursor(0, this.lineCount);
+      this.output.interactiveStderr?.moveCursor(0, this.lineCount);
       process.exit(0);
     });
   }
 
   ellipsis(text) {
-    const columns = this.logger.interactiveStderr?.columns || 95;
+    const columns = this.output.interactiveStderr?.columns || 95;
     const extraCharacters = stripAnsi(text).length - columns;
     // If we go beyond the terminal width, we strip colors (because preserving ANSI while trimming is HARD)
     return extraCharacters > 0
@@ -272,7 +272,7 @@ class Progresses {
   }
 
   wrapLine(line) {
-    const columns = this.logger.interactiveStderr?.columns || 95;
+    const columns = this.output.interactiveStderr?.columns || 95;
     const strippedLine = stripAnsi(line);
     const lineLength = strippedLine.length;
     // If the line doesn't wrap, we don't touch it
@@ -286,12 +286,12 @@ class Progresses {
   }
 
   limitOutputToTerminalHeight(output) {
-    if (!this.logger.interactiveStderr?.rows) {
+    if (!this.output.interactiveStderr?.rows) {
       return '';
     }
     const lines = output.split('\n');
-    const overflows = lines.length > this.logger.interactiveStderr.rows;
-    return overflows ? lines.slice(-this.logger.interactiveStderr.rows).join('\n') : output;
+    const overflows = lines.length > this.output.interactiveStderr.rows;
+    return overflows ? lines.slice(-this.output.interactiveStderr.rows).join('\n') : output;
   }
 }
 

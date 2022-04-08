@@ -5,7 +5,7 @@ const prettyoutput = require('prettyoutput');
 const utils = require('./utils');
 const packageJson = require('../package.json');
 const StateStorage = require('./StateStorage');
-const Logger = require('./cli/Logger');
+const Output = require('./cli/Output');
 const readline = require('readline');
 const Progresses = require('./cli/Progresses');
 const colors = require('./cli/colors');
@@ -15,21 +15,21 @@ class Context {
   stateStorage;
   /** @type {Progresses} */
   progresses;
-  /** @type {Logger} */
-  logger;
+  /** @type {Output} */
+  output;
   /** @type {Record<string, 'success'|'failure'|'skip'>} */
   componentCommandsOutcomes = {};
 
   constructor(config) {
     this.version = packageJson.version;
     this.root = path.resolve(config.root) || process.cwd();
-    this.logger = new Logger(config.verbose || false, config.disableIO);
+    this.output = new Output(config.verbose || false, config.disableIO);
     this.stateStorage = new StateStorage(config.stage);
     this.stage = config.stage;
     this.id = undefined;
     this.appName = config.appName;
 
-    this.progresses = new Progresses(this.logger);
+    this.progresses = new Progresses(this.output);
     if (!config.verbose) {
       this.progresses.setFooterText(colors.darkGray('Press [?] to enable verbose logs'));
     }
@@ -46,7 +46,7 @@ class Context {
       return;
     }
 
-    this.logger.writeText(
+    this.output.writeText(
       `\n${prettyoutput(outputs, {
         alignKeyValues: false,
         colors: {
@@ -61,18 +61,18 @@ class Context {
   }
 
   logVerbose(message) {
-    this.logger.verbose(message, ['serverless']);
+    this.output.verbose(message, ['serverless']);
   }
 
   startInteractiveInput() {
-    if (!this.logger.interactiveStdin) {
+    if (!this.output.interactiveStdin) {
       return;
     }
     // Start listening to specific keypresses
-    readline.emitKeypressEvents(this.logger.interactiveStdin);
-    this.logger.interactiveStdin.on('keypress', (character, key) => {
+    readline.emitKeypressEvents(this.output.interactiveStdin);
+    this.output.interactiveStdin.on('keypress', (character, key) => {
       if (character === '?') {
-        this.logger.enableVerbose();
+        this.output.enableVerbose();
         this.progresses.setFooterText();
       }
       if (key && key.ctrl && key.name === 'c') {
@@ -84,7 +84,7 @@ class Context {
     // This is the line that enables the interactive mode
     // If later we need user input (e.g. prompts), we need to disable this
     // See https://nodejs.org/api/tty.html#readstreamsetrawmodemode
-    this.logger.interactiveStdin.setRawMode(true);
+    this.output.interactiveStdin.setRawMode(true);
   }
 
   shutdown() {

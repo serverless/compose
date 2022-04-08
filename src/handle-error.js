@@ -4,7 +4,10 @@ const slscVersion = require('../package').version;
 const tokenizeException = require('./utils/tokenize-exception');
 const colors = require('./cli/colors');
 
-module.exports = (exception, logger) => {
+/**
+ * @param {import('./cli/Output')} output
+ */
+module.exports = (exception, output) => {
   const exceptionTokens = tokenizeException(exception);
   const isUserError = exceptionTokens.isUserError;
 
@@ -20,15 +23,15 @@ module.exports = (exception, logger) => {
     'Bugs:        github.com/serverless/compose/issues'
   );
 
-  logger.log(colors.darkGray(detailsTextTokens.join('\n')));
-  logger.log();
+  output.log(colors.darkGray(detailsTextTokens.join('\n')));
+  output.log();
 
   const errorMsg =
     exceptionTokens.stack && !isUserError ? exceptionTokens.stack : exceptionTokens.message;
-  logger.writeText(`${colors.red('Error:')}\n${errorMsg}`);
+  output.writeText(`${colors.red('Error:')}\n${errorMsg}`);
 
-  logger.log();
-  logger.log(colors.darkGray('Verbose logs are available in ".serverless/compose.log"'));
+  output.log();
+  output.log(colors.darkGray('Verbose logs are available in ".serverless/compose.log"'));
 
   process.exitCode = 1;
 };

@@ -47,7 +47,7 @@ process.once('uncaughtException', (error) => {
     },
     usedContext
   );
-  handleError(error, usedContext.logger);
+  handleError(error, usedContext.output);
   sendTelemetry(usedContext).then(() => process.exit(1));
 });
 
@@ -163,13 +163,13 @@ const runComponents = async () => {
     const backendNotificationRequest = await sendTelemetry(context);
     if (backendNotificationRequest && !componentName && method === 'deploy') {
       // Only display notifications on global deploy command
-      await processBackendNotificationRequest(backendNotificationRequest, context.logger);
+      await processBackendNotificationRequest(backendNotificationRequest, context.output);
     }
 
     // If at least one of the internal commands failed, we want to exit with error code 1
     if (Object.values(context.componentCommandsOutcomes).includes('failure')) {
-      context.logger.log();
-      context.logger.log(
+      context.output.log();
+      context.output.log(
         colors.darkGray('Verbose logs are available in ".serverless/compose.log"')
       );
       process.exit(1);
@@ -177,7 +177,7 @@ const runComponents = async () => {
       process.exit(0);
     }
   } catch (e) {
-    handleError(e, context.logger);
+    handleError(e, context.output);
     storeTelemetryLocally(
       {
         ...generateTelemetryPayload({

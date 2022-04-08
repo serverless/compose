@@ -8,8 +8,11 @@ const { v1: uuid } = require('uuid');
 const fse = require('fs-extra');
 const ensurePlainObject = require('type/plain-object/ensure');
 
-// This method is explicitly kept as synchronous. The reason for it being the fact that in the future in will need to be
-// be executed in such manner due to its potential use in `process.on('SIGINT')` handler.
+/**
+ * This method is explicitly kept as synchronous. The reason for it being the fact that in the future in will need to be
+ * be executed in such manner due to its potential use in `process.on('SIGINT')` handler.
+ * @param {import('../../Context')} context
+ */
 function storeLocally(payload, context) {
   ensurePlainObject(payload);
   if (!telemetryUrl || isTelemetryDisabled || !cacheDirPath) return null;
@@ -25,12 +28,12 @@ function storeLocally(payload, context) {
           return self();
         } catch (ensureDirError) {
           if (context) {
-            context.logger.verbose('Cache dir creation error:', ensureDirError);
+            context.output.verbose('Cache dir creation error:', ensureDirError);
           }
         }
       }
       if (context) {
-        context.logger.verbose(`Write cache file error: ${id}`, error);
+        context.output.verbose(`Write cache file error: ${id}`, error);
       }
       return null;
     }
