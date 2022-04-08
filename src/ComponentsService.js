@@ -244,8 +244,8 @@ class ComponentsService {
   }
 
   async deploy() {
-    this.context.logger.log();
-    this.context.logger.log(`Deploying to stage ${this.context.stage}`);
+    this.context.output.log();
+    this.context.output.log(`Deploying to stage ${this.context.stage}`);
 
     // Pre-emptively add all components to the progress list
     Object.keys(this.allComponents).forEach((componentName) => {
@@ -264,8 +264,8 @@ class ComponentsService {
   }
 
   async remove() {
-    this.context.logger.log();
-    this.context.logger.log(`Removing stage ${this.context.stage} of ${this.configuration.name}`);
+    this.context.output.log();
+    this.context.output.log(`Removing stage ${this.context.stage} of ${this.configuration.name}`);
 
     // Pre-emptively add all components to the progress list
     Object.keys(this.allComponents).forEach((componentName) => {
@@ -285,8 +285,8 @@ class ComponentsService {
   }
 
   async refreshOutputs() {
-    this.context.logger.log();
-    this.context.logger.log(`Refreshing outputs of ${this.configuration.name}`);
+    this.context.output.log();
+    this.context.output.log(`Refreshing outputs of ${this.configuration.name}`);
 
     Object.keys(this.allComponents).forEach((componentName) => {
       this.context.progresses.add(componentName);
@@ -428,7 +428,7 @@ class ComponentsService {
       if (this.context.progresses.exists(componentName)) {
         this.context.progresses.error(componentName, e);
       } else {
-        this.context.logger.error(`\n${formatError(e)}`);
+        this.context.output.error(`\n${formatError(e)}`);
       }
       this.context.componentCommandsOutcomes[componentName] = 'failure';
     }
@@ -448,7 +448,7 @@ class ComponentsService {
         if (this.context.progresses.exists(instance.id)) {
           this.context.progresses.error(instance.id, e);
         } else {
-          this.context.logger.error(
+          this.context.output.error(
             `\nCommand failed for service "${instance.id}": ${formatError(e)}`
           );
         }
@@ -515,7 +515,7 @@ class ComponentsService {
           if (this.context.progresses.exists(alias)) {
             this.context.progresses.error(alias, e);
           } else {
-            this.context.logger.error(e);
+            this.context.output.error(e);
           }
           this.context.componentCommandsOutcomes[alias] = 'failure';
           return false;

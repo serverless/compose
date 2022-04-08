@@ -85,7 +85,7 @@ class Component {
    * @param {string[]} [namespace]
    */
   writeText(message, namespace = []) {
-    this.context.logger.writeText(message, [this.id, ...namespace]);
+    this.context.output.writeText(message, [this.id, ...namespace]);
   }
 
   /**
@@ -93,7 +93,7 @@ class Component {
    * @param {string[]} [namespace]
    */
   logVerbose(message, namespace = []) {
-    this.context.logger.verbose(message, [this.id, ...namespace]);
+    this.context.output.verbose(message, [this.id, ...namespace]);
   }
 
   /**
@@ -101,7 +101,7 @@ class Component {
    * @param {string[]} [namespace]
    */
   logError(error, namespace = []) {
-    this.context.logger.error(error, [this.id, ...namespace]);
+    this.context.output.error(error, [this.id, ...namespace]);
   }
 
   startProgress(text) {

@@ -161,7 +161,7 @@ describe('test/unit/src/components-service.test.js', () => {
     componentsService = new ComponentsService(context, configuration);
 
     await componentsService.outputs();
-    expect(stripAnsi(await readStream(context.logger.stdout))).to.equal(
+    expect(stripAnsi(await readStream(context.output.stdout))).to.equal(
       [
         '',
         'resources: ',
@@ -208,7 +208,7 @@ describe('test/unit/src/components-service.test.js', () => {
     componentsService = new ComponentsService(context, configuration);
 
     await componentsService.outputs({ componentName: 'resources' });
-    expect(stripAnsi(await readStream(context.logger.stdout))).to.equal(
+    expect(stripAnsi(await readStream(context.output.stdout))).to.equal(
       ['', 'somethingelse: 123', ''].join('\n')
     );
   });

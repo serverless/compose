@@ -1,7 +1,7 @@
 'use strict';
 
 const { version } = require('../package.json');
-const Logger = require('./cli/Logger');
+const Output = require('./cli/Output');
 const colors = require('./cli/colors');
 
 const commands = [
@@ -69,30 +69,30 @@ const formatCommand = (command) => {
 };
 
 module.exports = async () => {
-  const logger = new Logger(false);
-  logger.log(`serverless-compose v${version}`);
-  logger.log();
-  logger.log(colors.darkGray('Usage'));
-  logger.log();
-  logger.log('serverless-compose <command> <options>');
-  logger.log('slsc <command> <options>');
-  logger.log();
-  logger.log(colors.darkGray('Commands'));
-  logger.log();
+  const output = new Output(false);
+  output.log(`serverless-compose v${version}`);
+  output.log();
+  output.log(colors.darkGray('Usage'));
+  output.log();
+  output.log('serverless-compose <command> <options>');
+  output.log('slsc <command> <options>');
+  output.log();
+  output.log(colors.darkGray('Commands'));
+  output.log();
 
   for (const command of commands) {
-    logger.log(formatCommand(command));
-    logger.log();
+    output.log(formatCommand(command));
+    output.log();
   }
 
-  logger.log(colors.darkGray('Service-specific usage'));
-  logger.log();
-  logger.log('serverless-compose <command> <options> --service=<service-name>');
-  logger.log('slsc <command> <options> --service=<service-name>');
-  logger.log();
-  logger.log(colors.darkGray('or alternatively'));
-  logger.log();
-  logger.log('serverless-compose <service-name>:<command>:<sub-command> <options>');
-  logger.log('slsc <service-name>:<command>:<sub-command> <options>');
-  logger.log();
+  output.log(colors.darkGray('Service-specific usage'));
+  output.log();
+  output.log('serverless-compose <command> <options> --service=<service-name>');
+  output.log('slsc <command> <options> --service=<service-name>');
+  output.log();
+  output.log(colors.darkGray('or alternatively'));
+  output.log();
+  output.log('serverless-compose <service-name>:<command>:<sub-command> <options>');
+  output.log('slsc <service-name>:<command>:<sub-command> <options>');
+  output.log();
 };

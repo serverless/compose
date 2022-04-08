@@ -19,7 +19,7 @@ const processResponseBody = async (response, ids, context) => {
   try {
     result = await response.json();
   } catch (error) {
-    context.logger.verbose(`Response processing error for ${ids || '<no id>'}: ${error}`);
+    context.output.verbose(`Response processing error for ${ids || '<no id>'}: ${error}`);
     return null;
   }
   return result;
@@ -38,12 +38,12 @@ async function request(payload, { ids, timeout, context } = {}) {
       body,
     });
   } catch (networkError) {
-    context.logger.verbose(`Request network error: ${networkError}`);
+    context.output.verbose(`Request network error: ${networkError}`);
     return null;
   }
 
   if (response.status < 200 || response.status >= 300) {
-    context.logger.verbose(`Unexpected request response: ${response}`);
+    context.output.verbose(`Unexpected request response: ${response}`);
     return processResponseBody(response, ids, context);
   }
 
@@ -55,7 +55,7 @@ async function request(payload, { ids, timeout, context } = {}) {
       try {
         await fsp.unlink(cachePath);
       } catch (error) {
-        context.logger.verbose(`Could not remove cache file ${id}: ${error}`);
+        context.output.verbose(`Could not remove cache file ${id}: ${error}`);
       }
     })
   );
@@ -63,6 +63,9 @@ async function request(payload, { ids, timeout, context } = {}) {
   return processResponseBody(response, ids, context);
 }
 
+/**
+ * @param {import('../../Context')} context
+ */
 async function send(context) {
   if (!telemetryUrl || isTelemetryDisabled || !cacheDirPath) return null;
   let dirFilenames;
@@ -70,7 +73,7 @@ async function send(context) {
     dirFilenames = await fsp.readdir(cacheDirPath);
   } catch (readdirError) {
     if (readdirError.code !== 'ENOENT') {
-      context.logger.verbose(`Cannot access cache dir: ${readdirError}`);
+      context.output.verbose(`Cannot access cache dir: ${readdirError}`);
     }
     return null;
   }
@@ -84,12 +87,12 @@ async function send(context) {
           data = await fse.readJson(join(cacheDirPath, dirFilename));
         } catch (readJsonError) {
           if (readJsonError.code === 'ENOENT') return null; // Race condition
-          context.logger.verbose(`Cannot read cache file: ${dirFilename}: ${readJsonError}`);
+          context.output.verbose(`Cannot read cache file: ${dirFilename}: ${readJsonError}`);
           const cacheFile = join(cacheDirPath, dirFilename);
           try {
             return await fsp.unlink(cacheFile);
           } catch (error) {
-            context.logger.verbose(`Could not remove cache file ${dirFilename}: ${error}`);
+            context.output.verbose(`Could not remove cache file ${dirFilename}: ${error}`);
           }
         }
 
@@ -102,14 +105,14 @@ async function send(context) {
             };
           }
         } else {
-          context.logger.verbose(`Invalid cached data ${dirFilename}: ${data}`);
+          context.output.verbose(`Invalid cached data ${dirFilename}: ${data}`);
         }
 
         const cacheFile = join(cacheDirPath, dirFilename);
         try {
           return await fsp.unlink(cacheFile);
         } catch (error) {
-          context.logger.verbose(`Could not remove cache file ${dirFilename}: ${error}`);
+          context.output.verbose(`Could not remove cache file ${dirFilename}: ${error}`);
         }
         return null;
       })

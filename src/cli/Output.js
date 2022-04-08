@@ -8,7 +8,7 @@ const path = require('path');
 const isInteractiveTerminal = require('is-interactive');
 const { PassThrough } = require('stream');
 
-class Logger {
+class Output {
   /** @type {NodeJS.WritableStream} */
   stdout;
   /** @type {undefined | NodeJS.WriteStream} Undefined if not interactive */
@@ -191,4 +191,4 @@ class Logger {
   }
 }
 
-module.exports = Logger;
+module.exports = Output;
