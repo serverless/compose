@@ -8,91 +8,62 @@ const commands = [
   {
     command: 'deploy',
     description: 'Deploy all services',
-    options: {
-      verbose: 'Show verbose logs',
-      stage: 'Stage of the service',
-    },
   },
   {
     command: 'remove',
     description: 'Remove all services',
-    options: {
-      verbose: 'Show verbose logs',
-      stage: 'Stage of the service',
-    },
   },
   {
     command: 'info',
     description: 'Display information about deployed services',
-    options: {
-      verbose: 'Show verbose logs',
-      stage: 'Stage of the service',
-    },
   },
   {
     command: 'logs',
     description: 'Output the logs for all services',
     options: {
-      verbose: 'Show verbose logs',
-      stage: 'Stage of the service',
       tail: 'Tail the log in real time',
     },
   },
   {
     command: 'outputs',
     description: 'Display outputs of deployed services',
-    options: {
-      stage: 'Stage of the service',
-    },
   },
   {
     command: 'refresh-outputs',
     description: 'Refresh the outptus for all services',
-    options: {
-      verbose: 'Show verbose logs',
-      stage: 'Stage of the service',
-    },
   },
 ];
 
-const formatCommand = (command) => {
+function formatLine(commandOrOption, description) {
   const indentFillLength = 25;
-
-  const commandLine = `${command.command} ${' '.repeat(
-    indentFillLength - command.command.length
-  )} ${colors.darkGray(command.description)}`;
-  const optionsLines = Object.entries(command.options).map(
-    ([key, desc]) =>
-      `  --${key} ${' '.repeat(indentFillLength - 4 - key.length)} ${colors.darkGray(desc)}`
-  );
-  return `${commandLine}\n${optionsLines.join('\n')}`;
-};
+  const spacing = ' '.repeat(indentFillLength - commandOrOption.length);
+  return `${commandOrOption} ${spacing} ${colors.darkGray(description)}`;
+}
 
 module.exports = async () => {
   const output = new Output(false);
-  output.log(`serverless-compose v${version}`);
-  output.log();
-  output.log(colors.darkGray('Usage'));
-  output.log();
-  output.log('serverless-compose <command> <options>');
-  output.log('slsc <command> <options>');
-  output.log();
-  output.log(colors.darkGray('Commands'));
-  output.log();
+  output.writeText(`Serverless Compose v${version}`);
+  output.writeText();
+  output.writeText(colors.darkGray('Usage'));
+  output.writeText('serverless-compose <command> <options>');
+  output.writeText('slsc <command> <options>');
+  output.writeText();
+  output.writeText(colors.darkGray('Service-specific commands'));
+  output.writeText('serverless-compose <command> <options> --service=<service-name>');
+  output.writeText(colors.darkGray('or the shortcut:'));
+  output.writeText('serverless-compose <service-name>:<command> <options>');
+  output.writeText();
+  output.writeText(colors.darkGray('Global options'));
+  output.writeText(formatLine('--verbose', 'Enable verbose logs'));
+  output.writeText(formatLine('--stage', 'Stage of the service'));
+  output.writeText();
+  output.writeText(colors.darkGray('Commands'));
 
   for (const command of commands) {
-    output.log(formatCommand(command));
-    output.log();
+    output.writeText(formatLine(command.command, command.description));
+    Object.entries(command.options ?? {}).forEach(([key, desc]) => {
+      output.writeText(formatLine(`  --${key}`, desc));
+    });
   }
-
-  output.log(colors.darkGray('Service-specific usage'));
-  output.log();
-  output.log('serverless-compose <command> <options> --service=<service-name>');
-  output.log('slsc <command> <options> --service=<service-name>');
-  output.log();
-  output.log(colors.darkGray('or alternatively'));
-  output.log();
-  output.log('serverless-compose <service-name>:<command>:<sub-command> <options>');
-  output.log('slsc <service-name>:<command>:<sub-command> <options>');
-  output.log();
+  output.writeText();
 };
