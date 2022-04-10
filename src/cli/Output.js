@@ -44,10 +44,10 @@ class Output {
 
   /**
    * Writes text to stdout.
-   * @param {string} message
+   * @param {string} [message]
    * @param {string[]} [namespace]
    */
-  writeText(message, namespace = []) {
+  writeText(message = '', namespace = []) {
     message = this.namespaceLogMessage(message, namespace);
     this.safeWrite(message);
     this.writeToLogsFile(message);
