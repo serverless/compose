@@ -104,7 +104,7 @@ class AwsCloudformation extends Component {
           // Supports scenarios where the stack was deployed separately and we don't have it tracked
           const hasOutputs = this.outputs && Object.keys(this.outputs).length > 0;
           if (!hasOutputs) {
-            await this.refreshOutputs(cloudFormation);
+            await this.fetchAndUpdateOutputs(cloudFormation);
           }
           // Update state
           this.state.templateHash = templateHash;
@@ -170,8 +170,8 @@ class AwsCloudformation extends Component {
           StackName: this.stackName,
         })
       );
-      const stackStatus = response.Stacks[0].StackStatus;
-      const reason = response.Stacks[0].StackStatusReason
+      const stackStatus = response.Stacks?.[0].StackStatus;
+      const reason = response.Stacks?.[0].StackStatusReason
         ? response.Stacks[0].StackStatusReason
         : stackStatus;
       throw new Error(reason);
@@ -185,7 +185,7 @@ class AwsCloudformation extends Component {
     const stackStatus = response.Stacks ? response.Stacks[0].StackStatus : undefined;
     if (stackStatus === 'CREATE_FAILED' || stackStatus === 'ROLLBACK_COMPLETE') {
       throw new Error(
-        response.Stacks[0].StackStatusReason ? response.Stacks[0].StackStatusReason : stackStatus
+        response.Stacks?.[0].StackStatusReason ? response.Stacks[0].StackStatusReason : stackStatus
       );
     }
 
@@ -193,7 +193,7 @@ class AwsCloudformation extends Component {
     this.state.templateHash = templateHash;
     await this.save();
 
-    await this.refreshOutputs(cloudFormation, response);
+    await this.fetchAndUpdateOutputs(cloudFormation, response);
 
     this.successProgress('deployed');
   }
@@ -285,7 +285,7 @@ class AwsCloudformation extends Component {
    * @param {CloudFormationClient} cloudFormation
    * @param {import('@aws-sdk/client-cloudformation').DescribeStacksCommandOutput} [describeStackResponse]
    */
-  async refreshOutputs(cloudFormation, describeStackResponse) {
+  async fetchAndUpdateOutputs(cloudFormation, describeStackResponse) {
     if (!describeStackResponse) {
       describeStackResponse = await cloudFormation.send(
         new DescribeStacksCommand({
@@ -297,7 +297,7 @@ class AwsCloudformation extends Component {
     const outputs = {
       stack: this.stackName,
     };
-    const stackOutputs = describeStackResponse.Stacks[0]?.Outputs;
+    const stackOutputs = describeStackResponse.Stacks?.[0]?.Outputs;
     if (stackOutputs) {
       for (const output of stackOutputs) {
         outputs[output.OutputKey] = output.OutputValue;
