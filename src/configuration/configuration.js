@@ -1,27 +1,12 @@
 'use strict';
 
-const path = require('path');
 const traverse = require('traverse');
-const utils = require('../utils');
 const ServerlessError = require('../serverless-error');
-
-function readConfigurationFile(dir) {
-  // Simplified support only for yml
-  const ymlFilePath = path.join(dir, 'serverless-compose.yml');
-  const yamlFilePath = path.join(dir, 'serverless-compose.yaml');
-
-  if (utils.fileExistsSync(ymlFilePath)) {
-    return utils.readFileSync(ymlFilePath);
-  }
-  if (utils.fileExistsSync(yamlFilePath)) {
-    return utils.readFileSync(yamlFilePath);
-  }
-
-  throw new ServerlessError('No serverless-compose.yml file found', 'CONFIGURATION_FILE_NOT_FOUND');
-}
 
 function validateConfiguration(configuration) {
   if (typeof configuration !== 'object') {
+    // As the default will be `serverless-compose.yml`, let's provide users with a more actionable error message,
+    // Even if we support more configuration formats
     throw new ServerlessError(
       'serverless-compose.yml does not contain valid Serverless Compose configuration.\n' +
         'Read about Serverless Compose in the documentation: https://github.com/serverless/compose',
@@ -30,6 +15,8 @@ function validateConfiguration(configuration) {
   }
 
   if (!configuration.name || !configuration.services) {
+    // As the default will be `serverless-compose.yml`, let's provide users with a more actionable error message,
+    // Even if we support more configuration formats
     throw new ServerlessError(
       'Invalid configuration: serverless-compose.yml must contain "name" and "services" properties.\n' +
         'Read about Serverless Compose configuration in the documentation: https://github.com/serverless/compose',
@@ -52,6 +39,8 @@ function validateConfiguration(configuration) {
   ];
   frameworkConfigKeys.forEach((key) => {
     if (key in configuration) {
+      // As the default will be `serverless-compose.yml`, let's provide users with a more actionable error message,
+      // Even if we support more configuration formats
       throw new ServerlessError(
         `Invalid property "${key}" in serverless-compose.yml.\n` +
           'This is a Serverless Framework option (serverless.yml) that is not supported in serverless-compose.yml.\n' +
@@ -65,6 +54,8 @@ function validateConfiguration(configuration) {
     (key) => key !== 'name' && key !== 'services'
   );
   if (extraProperties.length > 0) {
+    // As the default will be `serverless-compose.yml`, let's provide users with a more actionable error message,
+    // Even if we support more configuration formats
     throw new ServerlessError(
       `Unrecognized property ${extraProperties.join(', ')} in serverless-compose.yml.\n` +
         'Read about Serverless Compose configuration in the documentation: https://github.com/serverless/compose',
@@ -130,7 +121,6 @@ const resolveConfigurationVariables = async (
 };
 
 module.exports = {
-  readConfigurationFile,
   validateConfiguration,
   resolveConfigurationVariables,
 };
