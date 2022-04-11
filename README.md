@@ -75,6 +75,8 @@ my-app/
 
 You can now create a `serverless-compose.yml` configuration file at the root of your monorepository.
 
+_Note: You can also define your configuration with `serverless-compose.{ts,js,json,yaml}` files._
+
 In that new file, you can reference existing Serverless Framework projects by their **relative paths**:
 
 ```yaml
