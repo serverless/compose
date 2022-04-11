@@ -126,14 +126,18 @@ class Progresses {
    * @param {string|Error} [error]
    */
   error(name, error) {
-    error = error instanceof Error ? error.message : error;
+    const errorMessage = error instanceof Error ? error.message : error;
 
     if (!this.progresses[name]) throw Error(`No progress with name ${name}`);
     this.progresses[name].status = 'error';
     this.progresses[name].text = 'error';
     this.progresses[name].endTime = Date.now();
-    this.progresses[name].content = error;
+    this.progresses[name].content = errorMessage;
     this.updateSpinnerState();
+
+    if (error instanceof Error && error.stack) {
+      this.output.verbose(error.stack, [name]);
+    }
   }
 
   /**
