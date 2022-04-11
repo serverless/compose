@@ -20,7 +20,7 @@ const formatError = (e) => {
   if (formattedError.startsWith('Error:\n')) {
     formattedError = formattedError.slice(7);
   }
-  return formattedError;
+  return formattedError.trimEnd();
 };
 
 const resolveObject = (object, context, method) => {
@@ -450,9 +450,7 @@ class ComponentsService {
         if (this.context.progresses.exists(instance.id)) {
           this.context.progresses.error(instance.id, e);
         } else {
-          this.context.output.error(
-            `\nCommand failed for service "${instance.id}": ${formatError(e)}`
-          );
+          this.context.output.error(formatError(e), [instance.id]);
         }
         this.context.componentCommandsOutcomes[instance.id] = 'failure';
       }
