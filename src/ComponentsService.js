@@ -23,7 +23,7 @@ const formatError = (e) => {
   return formattedError;
 };
 
-const resolveObject = (object, context) => {
+const resolveObject = (object, context, method) => {
   const regex = /\${(\w*:?[\w\d.-]+)}/g;
 
   const resolvedObject = traverse(object).forEach(function (value) {
@@ -37,10 +37,12 @@ const resolveObject = (object, context) => {
       const referencedPropertyValue = path(referencedPropertyPath, context);
 
       if (referencedPropertyValue === undefined) {
-        throw new ServerlessError(
-          `The variable "${match}" cannot be resolved: the referenced output does not exist`,
-          'REFERENCED_OUTPUT_DOES_NOT_EXIST'
-        );
+        let errMsg = `The variable "${match}" cannot be resolved: the referenced output does not exist.`;
+        if (method && !['refreshOutputs', 'deploy'].includes(method)) {
+          errMsg +=
+            '\n\nIf your project is not deployed, you can deploy it via "serverless-compose deploy". If the project is already deployed, you can synchronize your local state via "serverless-compose refresh-outputs".';
+        }
+        throw new ServerlessError(errMsg, 'REFERENCED_OUTPUT_DOES_NOT_EXIST');
       }
 
       if (match === value) {
@@ -484,7 +486,7 @@ class ComponentsService {
 
       const fn = async () => {
         const availableOutputs = await this.context.stateStorage.readComponentsOutputs();
-        const inputs = resolveObject(this.allComponents[alias].inputs, availableOutputs);
+        const inputs = resolveObject(this.allComponents[alias].inputs, availableOutputs, method);
 
         try {
           inputs.service = this.configuration.name;
