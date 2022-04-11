@@ -1,9 +1,9 @@
 'use strict';
 
 const expect = require('chai').expect;
-const { validateConfiguration } = require('../../../../src/configuration/configuration');
+const validateConfiguration = require('../../../../src/configuration/validate');
 
-describe('test/unit/src/configuration/configuration', () => {
+describe('test/unit/src/configuration/validate.test.js', () => {
   it('validates the configuration', () => {
     // Not an object
     expect(() => validateConfiguration('string')).to.throw();

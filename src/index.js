@@ -16,12 +16,10 @@ const sendTelemetry = require('./utils/telemetry/send');
 const ServerlessError = require('./serverless-error');
 const handleError = require('./handle-error');
 const colors = require('./cli/colors');
-const {
-  validateConfiguration,
-  resolveConfigurationVariables,
-} = require('./configuration/configuration');
+const { resolveConfigurationVariables } = require('./configuration/configuration');
 const resolveConfigurationPath = require('./configuration/resolve-path');
 const readConfiguration = require('./configuration/read');
+const validateConfiguration = require('./configuration/validate');
 const processBackendNotificationRequest = require('./utils/process-backend-notification-request');
 
 let options;
