@@ -37,7 +37,7 @@
     "path2": "^0.1.0",
     "prettyoutput": "^1.2.0",
     "ramda": "^0.28.0",
-    "semver": "^7.3.6",
+    "semver": "^7.3.7",
     "signal-exit": "^3.0.7",
     "strip-ansi": "^6.0.1",
     "traverse": "^0.6.6",
