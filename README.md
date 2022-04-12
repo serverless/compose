@@ -38,8 +38,10 @@ We use GitHub issues to discuss ideas and features. We encourage you to:
 While in beta, the feature ships as a separate package and CLI. Install it via NPM:
 
 ```bash
-npm -g i @serverless/compose-beta
+npm -g i @serverless/compose
 ```
+
+_Note: Versions prior to "v0.0.11" are published under `@serverless/compose-beta` package name._
 
 The CLI can now be used via the following command:
 
