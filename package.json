@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "repository": "serverless/compose",
   "bin": {
-    "serverless-compose": "./bin/bin",
-    "slsc": "./bin/bin"
+    "serverless-compose": "./bin/serverless-compose",
+    "slsc": "./bin/serverless-compose"
   },
   "scripts": {
     "lint": "eslint .",
