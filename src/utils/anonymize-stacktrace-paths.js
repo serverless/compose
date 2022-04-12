@@ -11,7 +11,7 @@ const anonymizeStacktracePaths = (stackFrames) => {
     commonPathPrefix = commonPath(...stackFramesWithAbsolutePaths);
 
     const lastServerlessPathIndex = commonPathPrefix.lastIndexOf(
-      `${path.sep}@serverless${path.sep}compose-beta${path.sep}`
+      `${path.sep}@serverless${path.sep}compose${path.sep}`
     );
 
     if (lastServerlessPathIndex !== -1) {
