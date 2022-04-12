@@ -105,7 +105,7 @@ const runComponents = async () => {
 
   const configurationPath = await resolveConfigurationPath();
   const configuration = await readConfiguration(configurationPath);
-  validateConfiguration(configuration);
+  validateConfiguration(configuration, configurationPath);
 
   const contextConfig = {
     root: process.cwd(),
