@@ -5,39 +5,39 @@ const anonymizeStacktracePaths = require('../../../../src/utils/anonymize-stackt
 
 describe('test/unit/lib/utils/anonymize-stacktrace-paths.test.js', () => {
   if (process.platform !== 'win32') {
-    it('Should remove common prefix up to last `@serverless/compose-beta` occurence', () => {
+    it('Should remove common prefix up to last `@serverless/compose` occurence', () => {
       const stacktracePaths = [
-        '/home/xxx/serverless/yyy/zzz-serverless/@serverless/compose-beta/lib/plugins/aws/package/lib/getHashForFilePath.js:23:13',
-        '/home/xxx/serverless/yyy/zzz-serverless/@serverless/compose-beta/lib/plugins/otherfile.js:100:10',
-        '/home/xxx/serverless/yyy/zzz-serverless/@serverless/compose-beta/lib/plugins/another.js:100:10',
+        '/home/xxx/serverless/yyy/zzz-serverless/@serverless/compose/lib/plugins/aws/package/lib/getHashForFilePath.js:23:13',
+        '/home/xxx/serverless/yyy/zzz-serverless/@serverless/compose/lib/plugins/otherfile.js:100:10',
+        '/home/xxx/serverless/yyy/zzz-serverless/@serverless/compose/lib/plugins/another.js:100:10',
       ];
 
       const result = anonymizeStacktracePaths(stacktracePaths);
       expect(result).to.deep.equal([
-        '/@serverless/compose-beta/lib/plugins/aws/package/lib/getHashForFilePath.js:23:13',
-        '/@serverless/compose-beta/lib/plugins/otherfile.js:100:10',
-        '/@serverless/compose-beta/lib/plugins/another.js:100:10',
+        '/@serverless/compose/lib/plugins/aws/package/lib/getHashForFilePath.js:23:13',
+        '/@serverless/compose/lib/plugins/otherfile.js:100:10',
+        '/@serverless/compose/lib/plugins/another.js:100:10',
       ]);
     });
 
     it('Should leave relative paths unaltered and do not consider them for common prefix', () => {
       const stacktracePaths = [
-        '/home/xxx/serverless/yyy/zzz-serverless/@serverless/compose-beta/lib/plugins/aws/package/lib/getHashForFilePath.js:23:13',
-        '/home/xxx/serverless/yyy/zzz-serverless/@serverless/compose-beta/lib/plugins/otherfile.js:100:10',
+        '/home/xxx/serverless/yyy/zzz-serverless/@serverless/compose/lib/plugins/aws/package/lib/getHashForFilePath.js:23:13',
+        '/home/xxx/serverless/yyy/zzz-serverless/@serverless/compose/lib/plugins/otherfile.js:100:10',
         'somefile.js:100:10',
         'another.js:100:10',
       ];
 
       const result = anonymizeStacktracePaths(stacktracePaths);
       expect(result).to.deep.equal([
-        '/@serverless/compose-beta/lib/plugins/aws/package/lib/getHashForFilePath.js:23:13',
-        '/@serverless/compose-beta/lib/plugins/otherfile.js:100:10',
+        '/@serverless/compose/lib/plugins/aws/package/lib/getHashForFilePath.js:23:13',
+        '/@serverless/compose/lib/plugins/otherfile.js:100:10',
         'somefile.js:100:10',
         'another.js:100:10',
       ]);
     });
 
-    it('Should remove common prefix if `/@serverless/compose-beta/` or `/node_modules/` not found in path', () => {
+    it('Should remove common prefix if `/@serverless/compose/` or `/node_modules/` not found in path', () => {
       const stacktracePaths = [
         '/home/xxx/yyy/zzz-serverless/lib/plugins/aws/package/lib/getHashForFilePath.js:23:13',
         '/home/xxx/yyy/zzz-serverless/lib/plugins/otherfile.js:100:10',
@@ -52,7 +52,7 @@ describe('test/unit/lib/utils/anonymize-stacktrace-paths.test.js', () => {
       ]);
     });
 
-    it('Should remove common prefix up to last `node_modules` occurence if `@serverless/compose-beta` not found', () => {
+    it('Should remove common prefix up to last `node_modules` occurence if `@serverless/compose` not found', () => {
       const stacktracePaths = [
         '/home/xxx/yyy/zzz-serverless/node_modules/lib/plugins/aws/package/lib/getHashForFilePath.js:23:13',
         '/home/xxx/yyy/zzz-serverless/node_modules/lib/plugins/otherfile.js:100:10',
@@ -95,37 +95,37 @@ describe('test/unit/lib/utils/anonymize-stacktrace-paths.test.js', () => {
   });
 
   if (process.platform === 'win32') {
-    it('Should remove common prefix up to last `@serverless\\compose-beta` occurence for windows-style paths', () => {
+    it('Should remove common prefix up to last `@serverless\\compose` occurence for windows-style paths', () => {
       const stacktracePaths = [
-        'C:\\home\\xxx\\serverless\\yyy\\zzz-serverless\\@serverless\\compose-beta\\lib\\plugins\\aws\\package\\lib\\getHashForFilePath.js:23:13',
-        'C:\\home\\xxx\\serverless\\yyy\\zzz-serverless\\@serverless\\compose-beta\\lib\\plugins\\otherfile.js:100:10',
-        'C:\\home\\xxx\\serverless\\yyy\\zzz-serverless\\@serverless\\compose-beta\\lib\\plugins\\another.js:100:10',
+        'C:\\home\\xxx\\serverless\\yyy\\zzz-serverless\\@serverless\\compose\\lib\\plugins\\aws\\package\\lib\\getHashForFilePath.js:23:13',
+        'C:\\home\\xxx\\serverless\\yyy\\zzz-serverless\\@serverless\\compose\\lib\\plugins\\otherfile.js:100:10',
+        'C:\\home\\xxx\\serverless\\yyy\\zzz-serverless\\@serverless\\compose\\lib\\plugins\\another.js:100:10',
       ];
 
       const result = anonymizeStacktracePaths(stacktracePaths);
       expect(result).to.deep.equal([
-        '\\@serverless\\compose-beta\\lib\\plugins\\aws\\package\\lib\\getHashForFilePath.js:23:13',
-        '\\@serverless\\compose-beta\\lib\\plugins\\otherfile.js:100:10',
-        '\\@serverless\\compose-beta\\lib\\plugins\\another.js:100:10',
+        '\\@serverless\\compose\\lib\\plugins\\aws\\package\\lib\\getHashForFilePath.js:23:13',
+        '\\@serverless\\compose\\lib\\plugins\\otherfile.js:100:10',
+        '\\@serverless\\compose\\lib\\plugins\\another.js:100:10',
       ]);
     });
 
-    it('Should remove common prefix up to last `@serverless\\compose-beta` occurence for windows-style paths', () => {
+    it('Should remove common prefix up to last `@serverless\\compose` occurence for windows-style paths', () => {
       const stacktracePaths = [
-        'C:\\home\\xxx\\serverless\\yyy\\zzz-serverless\\@serverless\\compose-beta\\lib\\plugins\\aws\\package\\lib\\getHashForFilePath.js:23:13',
-        'C:\\home\\xxx\\serverless\\yyy\\zzz-serverless\\@serverless\\compose-beta\\lib\\plugins\\otherfile.js:100:10',
+        'C:\\home\\xxx\\serverless\\yyy\\zzz-serverless\\@serverless\\compose\\lib\\plugins\\aws\\package\\lib\\getHashForFilePath.js:23:13',
+        'C:\\home\\xxx\\serverless\\yyy\\zzz-serverless\\@serverless\\compose\\lib\\plugins\\otherfile.js:100:10',
         'another.js:100:10',
       ];
 
       const result = anonymizeStacktracePaths(stacktracePaths);
       expect(result).to.deep.equal([
-        '\\@serverless\\compose-beta\\lib\\plugins\\aws\\package\\lib\\getHashForFilePath.js:23:13',
-        '\\@serverless\\compose-beta\\lib\\plugins\\otherfile.js:100:10',
+        '\\@serverless\\compose\\lib\\plugins\\aws\\package\\lib\\getHashForFilePath.js:23:13',
+        '\\@serverless\\compose\\lib\\plugins\\otherfile.js:100:10',
         'another.js:100:10',
       ]);
     });
 
-    it('Should remove common prefix if `\\@serverless\\compose-beta\\` not found in path', () => {
+    it('Should remove common prefix if `\\@serverless\\compose\\` not found in path', () => {
       const stacktracePaths = [
         'C:\\home\\xxx\\yyy\\zzz-serverless\\lib\\plugins\\aws\\package\\lib\\getHashForFilePath.js:23:13',
         'C:\\home\\xxx\\yyy\\zzz-serverless\\lib\\plugins\\otherfile.js:100:10',
@@ -140,7 +140,7 @@ describe('test/unit/lib/utils/anonymize-stacktrace-paths.test.js', () => {
       ]);
     });
 
-    it('Should remove common prefix up to last `node_modules` occurence if `@serverless\\compose-beta` not found', () => {
+    it('Should remove common prefix up to last `node_modules` occurence if `@serverless\\compose` not found', () => {
       const stacktracePaths = [
         'C:\\home\\xxx\\yyy\\zzz-serverless\\node_modules\\lib\\plugins\\aws\\package\\lib\\getHashForFilePath.js:23:13',
         'C:\\home\\xxx\\yyy\\zzz-serverless\\node_modules\\lib\\plugins\\otherfile.js:100:10',
