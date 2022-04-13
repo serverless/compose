@@ -8,5 +8,5 @@ module.exports = (notifications, output) => {
   if (!notification) return;
 
   output.log();
-  output.log(colors.darkGray(notification.message));
+  output.log(colors.gray(notification.message));
 };

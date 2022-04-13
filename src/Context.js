@@ -30,7 +30,7 @@ class Context {
 
     this.progresses = new Progresses(this.output);
     if (!config.verbose) {
-      this.progresses.setFooterText(colors.darkGray('Press [?] to enable verbose logs'));
+      this.progresses.setFooterText(colors.gray('Press [?] to enable verbose logs'));
     }
   }
 

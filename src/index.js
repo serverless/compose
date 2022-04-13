@@ -168,9 +168,7 @@ const runComponents = async () => {
     // If at least one of the internal commands failed, we want to exit with error code 1
     if (Object.values(context.componentCommandsOutcomes).includes('failure')) {
       context.output.log();
-      context.output.log(
-        colors.darkGray('Verbose logs are available in ".serverless/compose.log"')
-      );
+      context.output.log(colors.gray('Verbose logs are available in ".serverless/compose.log"'));
       process.exit(1);
     } else {
       process.exit(0);
