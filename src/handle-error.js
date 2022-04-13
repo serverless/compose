@@ -23,7 +23,7 @@ module.exports = (exception, output) => {
     'Bugs:        github.com/serverless/compose/issues'
   );
 
-  output.log(colors.darkGray(detailsTextTokens.join('\n')));
+  output.log(colors.gray(detailsTextTokens.join('\n')));
   output.log();
 
   const errorMsg =
@@ -31,7 +31,7 @@ module.exports = (exception, output) => {
   output.writeText(`${colors.red('Error:')}\n${errorMsg}`);
 
   output.log();
-  output.log(colors.darkGray('Verbose logs are available in ".serverless/compose.log"'));
+  output.log(colors.gray('Verbose logs are available in ".serverless/compose.log"'));
 
   process.exitCode = 1;
 };
