@@ -8,8 +8,6 @@ _**BETA:** This repository contains a beta version of a new Serverless Framework
 - Run commands across multiple services
 
 ```yaml
-name: myapp
-
 services:
   subscriptions:
     path: subscriptions
@@ -82,9 +80,6 @@ _Note: You can also define your configuration with `serverless-compose.{ts,js,js
 In that new file, you can reference existing Serverless Framework projects by their **relative paths**:
 
 ```yaml
-# Name of the application
-name: myapp
-
 services:
   service-a:
     # Relative path to the Serverless Framework service

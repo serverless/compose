@@ -13,9 +13,9 @@ function validateConfiguration(configuration, configurationPath) {
     );
   }
 
-  if (!configuration.name || !configuration.services) {
+  if (!configuration.services) {
     throw new ServerlessError(
-      `Invalid configuration: "${configurationFilename}" must contain "name" and "services" properties.\n` +
+      `Invalid configuration: "${configurationFilename}" must contain "services" property.\n` +
         'Read about Serverless Compose configuration in the documentation: https://github.com/serverless/compose',
       'INVALID_CONFIGURATION'
     );
@@ -45,9 +45,7 @@ function validateConfiguration(configuration, configurationPath) {
     }
   });
 
-  const extraProperties = Object.keys(configuration).filter(
-    (key) => key !== 'name' && key !== 'services'
-  );
+  const extraProperties = Object.keys(configuration).filter((key) => key !== 'services');
   if (extraProperties.length > 0) {
     throw new ServerlessError(
       `Unrecognized property ${extraProperties.join(', ')} in "${configurationFilename}".\n` +

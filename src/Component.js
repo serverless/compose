@@ -6,8 +6,6 @@ class Component {
   /** @type {string} */
   id;
   /** @type {string} */
-  appName;
-  /** @type {string} */
   stage;
   /** @type {Record<string, any>} */
   inputs;
@@ -27,7 +25,6 @@ class Component {
    */
   constructor(id, context, inputs) {
     this.id = id || this.constructor.name;
-    this.appName = context.appName;
     this.stage = context.stage;
     this.inputs = inputs;
     this.context = context;

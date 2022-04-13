@@ -112,7 +112,6 @@ const runComponents = async () => {
     stateRoot: path.join(process.cwd(), '.serverless'),
     verbose: options.verbose,
     stage: options.stage || 'dev',
-    appName: configuration.name,
   };
 
   context = new Context(contextConfig);

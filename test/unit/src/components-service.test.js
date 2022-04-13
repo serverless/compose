@@ -37,7 +37,6 @@ describe('test/unit/src/components-service.test.js', () => {
       root: process.cwd(),
       stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
-      appName: 'some-random-name',
       disableIO: true,
     };
     const context = new Context(contextConfig);
@@ -109,7 +108,6 @@ describe('test/unit/src/components-service.test.js', () => {
       root: process.cwd(),
       stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
-      appName: 'some-random-name',
       disableIO: true,
     };
     const context = new Context(contextConfig);
@@ -138,7 +136,6 @@ describe('test/unit/src/components-service.test.js', () => {
       root: process.cwd(),
       stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
-      appName: 'some-random-name',
       disableIO: true,
     };
     const mockedStateStorage = {
@@ -191,7 +188,6 @@ describe('test/unit/src/components-service.test.js', () => {
       root: process.cwd(),
       stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
-      appName: 'some-random-name',
       disableIO: true,
     };
     const mockedStateStorage = {
