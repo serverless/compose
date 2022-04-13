@@ -19,7 +19,6 @@
   "author": "serverless.com",
   "license": "MIT",
   "dependencies": {
-    "@aws-sdk/client-cloudformation": "^3.67.0",
     "@serverless/utils": "^6.0.3",
     "chalk": "^4.1.2",
     "child-process-ext": "^2.1.1",
