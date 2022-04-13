@@ -247,7 +247,7 @@ class ComponentsService {
 
   async deploy() {
     this.context.output.log();
-    this.context.output.log(`Deploying ${this.context.appName} to stage ${this.context.stage}`);
+    this.context.output.log(`Deploying to stage ${this.context.stage}`);
 
     // Pre-emptively add all components to the progress list
     Object.keys(this.allComponents).forEach((componentName) => {
@@ -267,7 +267,7 @@ class ComponentsService {
 
   async remove() {
     this.context.output.log();
-    this.context.output.log(`Removing stage ${this.context.stage} of ${this.context.appName}`);
+    this.context.output.log(`Removing stage ${this.context.stage}`);
 
     // Pre-emptively add all components to the progress list
     Object.keys(this.allComponents).forEach((componentName) => {
@@ -288,7 +288,7 @@ class ComponentsService {
 
   async refreshOutputs() {
     this.context.output.log();
-    this.context.output.log(`Refreshing outputs of ${this.context.appName}`);
+    this.context.output.log('Refreshing outputs');
 
     Object.keys(this.allComponents).forEach((componentName) => {
       this.context.progresses.add(componentName);

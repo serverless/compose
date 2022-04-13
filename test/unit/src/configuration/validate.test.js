@@ -14,7 +14,6 @@ describe('test/unit/src/configuration/validate.test.js', () => {
     expect(() =>
       validateConfiguration(
         {
-          name: 'my-app',
           services: [],
           provider: {},
         },
@@ -25,7 +24,6 @@ describe('test/unit/src/configuration/validate.test.js', () => {
     expect(() =>
       validateConfiguration(
         {
-          name: 'my-app',
           services: [],
           foo: '',
         },
@@ -36,7 +34,6 @@ describe('test/unit/src/configuration/validate.test.js', () => {
     expect(() =>
       validateConfiguration(
         {
-          name: 'my-app',
           services: [],
         },
         configurationPath

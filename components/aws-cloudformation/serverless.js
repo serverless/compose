@@ -34,7 +34,7 @@ class AwsCloudformation extends Component {
   constructor(id, context, inputs) {
     super(id, context, inputs);
 
-    this.stackName = `${this.appName}-${this.id}-${this.stage}`;
+    this.stackName = `${this.id}-${this.stage}`;
     this.region = this.inputs.region;
   }
 
