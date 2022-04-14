@@ -61,7 +61,7 @@ class Progresses {
       text: 'waiting',
       timer,
     };
-    this.updateSpinnerState();
+    this.updateSpinnerState(name);
   }
 
   setFooterText(text) {
@@ -80,7 +80,7 @@ class Progresses {
       text,
       startTime: Date.now(),
     };
-    this.updateSpinnerState();
+    this.updateSpinnerState(name);
   }
 
   /**
@@ -104,7 +104,7 @@ class Progresses {
   update(name, text) {
     if (!this.progresses[name]) throw Error(`No progress with name ${name}`);
     this.progresses[name].text = text;
-    this.updateSpinnerState();
+    this.updateSpinnerState(name);
   }
 
   /**
@@ -118,7 +118,7 @@ class Progresses {
       this.progresses[name].text = text;
     }
     this.progresses[name].endTime = Date.now();
-    this.updateSpinnerState();
+    this.updateSpinnerState(name);
   }
 
   /**
@@ -133,7 +133,7 @@ class Progresses {
     this.progresses[name].text = 'error';
     this.progresses[name].endTime = Date.now();
     this.progresses[name].content = errorMessage;
-    this.updateSpinnerState();
+    this.updateSpinnerState(name);
 
     if (error instanceof Error && error.stack) {
       this.output.verbose(error.stack, [name]);
@@ -148,7 +148,7 @@ class Progresses {
     this.progresses[name].status = 'skipped';
     this.progresses[name].text = 'skipped';
     this.progresses[name].endTime = Date.now();
-    this.updateSpinnerState();
+    this.updateSpinnerState(name);
   }
 
   stopAll() {
@@ -171,7 +171,17 @@ class Progresses {
     this.progresses = {};
   }
 
-  updateSpinnerState() {
+  updateSpinnerState(progressName) {
+    // Log the contents of the progress that initiated state update to verbose
+    if (this.progresses[progressName]) {
+      const progress = this.progresses[progressName];
+      let logMessage = progress.text;
+      if (progress.content) {
+        logMessage += `\n${progress.content}`;
+      }
+      this.output.verbose(logMessage, [progressName]);
+    }
+
     if (!this.output.interactiveStderr) return;
     if (this.currentInterval) {
       clearInterval(this.currentInterval);
