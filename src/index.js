@@ -116,7 +116,7 @@ const runComponents = async () => {
 
   context = new Context(contextConfig);
   await context.init();
-  await resolveConfigurationVariables(configuration, context.stage);
+  await resolveConfigurationVariables(configuration, configurationPath, context.stage);
 
   // For telemetry we want to keep the configuration that has references to components outputs unresolved
   // So we can properly count it

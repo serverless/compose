@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const traverse = require('traverse');
 const ServerlessError = require('../serverless-error');
 
@@ -7,6 +8,7 @@ const ServerlessError = require('../serverless-error');
 // TODO: After merging into Framework CLI, unify the configuration resolution handling with Framework logic
 const resolveConfigurationVariables = async (
   configuration,
+  configurationPath,
   stage,
   unrecognizedVariableSources = new Set()
 ) => {
@@ -46,15 +48,35 @@ const resolveConfigurationVariables = async (
     }
   });
   if (variableResolved) {
-    return resolveConfigurationVariables(resolvedConfiguration, stage, unrecognizedVariableSources);
+    return resolveConfigurationVariables(
+      resolvedConfiguration,
+      configurationPath,
+      stage,
+      unrecognizedVariableSources
+    );
   }
   if (unrecognizedVariableSources.size) {
-    throw new ServerlessError(
-      `Unrecognized configuration variable sources: "${Array.from(unrecognizedVariableSources).join(
-        '", "'
-      )}"`,
-      'UNRECOGNIZED_VARIABLE_SOURCES'
+    const configurationFilename = path.basename(configurationPath);
+    const frameworkOnlyVariableSources = ['params', 'cf', 's3', 'ssm', 'aws', 'file', 'opt'];
+    let errorMessage = `Unrecognized configuration variable sources: "${Array.from(
+      unrecognizedVariableSources
+    ).join('", "')}"`;
+    const usedFrameworkOnlyVariableSources = [...frameworkOnlyVariableSources].filter((source) =>
+      unrecognizedVariableSources.has(source)
     );
+    if (usedFrameworkOnlyVariableSources.length) {
+      if (usedFrameworkOnlyVariableSources.length === 1) {
+        errorMessage += `\n\nVariable source "${usedFrameworkOnlyVariableSources[0]}" is Serverless Framework-specific source that is not supported in "${configurationFilename}"`;
+      } else {
+        errorMessage += `\n\nVariable sources "${usedFrameworkOnlyVariableSources.join(
+          '", "'
+        )}" are Serverless Framework-specific sources that are not supported in "${configurationFilename}"`;
+      }
+      errorMessage +=
+        '\nYou can search and/or open feature requests here: https://github.com/serverless/compose';
+    }
+
+    throw new ServerlessError(errorMessage, 'UNRECOGNIZED_VARIABLE_SOURCES');
   }
   return resolvedConfiguration;
 };
