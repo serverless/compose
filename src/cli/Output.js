@@ -40,6 +40,13 @@ class Output {
       this.interactiveStderr = process.stderr;
       this.interactiveStdin = process.stdin;
     }
+
+    // We want to apply it only in non-test environment so we check this only if
+    // disableIO is not explicitly set to true
+    if (!isInteractiveTerminal() && disableIO === false) {
+      // We also want to enable verbose by default for non-interactive environments
+      this.verboseMode = true;
+    }
   }
 
   /**
