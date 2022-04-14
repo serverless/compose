@@ -201,8 +201,8 @@ class Progresses {
     let output = '\n';
     for (const [name, progress] of Object.entries(this.progresses)) {
       let symbol = ' ';
-      let componentColor = colors.white;
-      let statusColor = colors.white;
+      let componentColor = colors.foreground;
+      let statusColor = colors.foreground;
       if (progress.status === 'spinning') {
         symbol = frame;
       } else if (progress.status === 'success') {
