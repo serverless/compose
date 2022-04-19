@@ -193,6 +193,13 @@ class ServerlessFramework extends Component {
       args.push('--param', `${key}=${value}`);
     }
 
+    // Patch required for standalone distribution of Serverless
+    // Needed because of the behavior of `pkg` when invoking itself via subprocess
+    // https://github.com/vercel/pkg/issues/897
+    if (command === 'serverless' && process.pkg) {
+      args = [process.pkg.entrypoint, ...args];
+    }
+
     this.logVerbose(`Running "${command} ${args.join(' ')}"`);
     return new Promise((resolve, reject) => {
       const child = childProcess.spawn(command, args, {
