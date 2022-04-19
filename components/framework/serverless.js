@@ -15,13 +15,6 @@ const doesSatisfyRequiredFrameworkVersion = (version) =>
   semver.gte(version, MINIMAL_FRAMEWORK_VERSION);
 
 class ServerlessFramework extends Component {
-  constructor(id, context, inputs) {
-    // Default inputs
-    inputs.path = inputs.path ?? '.';
-
-    super(id, context, inputs);
-  }
-
   // TODO:
   // Component-specific commands
   // In the long run, they should be generated based on configured command schema

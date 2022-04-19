@@ -44,17 +44,17 @@ describe('test/unit/components/framework/index.test.js', () => {
     });
 
     const context = await getContext();
-    const component = new FrameworkComponent('some-id', context, {});
+    const component = new FrameworkComponent('some-id', context, { path: 'path' });
     component.state.detectedFrameworkVersion = '9.9.9';
     await component.deploy();
 
     expect(spawnStub).to.be.calledTwice;
     expect(spawnStub.getCall(0).args[0]).to.equal('serverless');
     expect(spawnStub.getCall(0).args[1]).to.deep.equal(['deploy', '--stage', 'dev']);
-    expect(spawnStub.getCall(0).args[2].cwd).to.equal('.');
+    expect(spawnStub.getCall(0).args[2].cwd).to.equal('path');
     expect(spawnStub.getCall(1).args[0]).to.equal('serverless');
     expect(spawnStub.getCall(1).args[1]).to.deep.equal(['info', '--verbose', '--stage', 'dev']);
-    expect(spawnStub.getCall(1).args[2].cwd).to.equal('.');
+    expect(spawnStub.getCall(1).args[2].cwd).to.equal('path');
     expect(component.state).to.deep.equal({ detectedFrameworkVersion: '9.9.9' });
     expect(component.outputs).to.deep.equal({ Key: 'Output' });
   });
@@ -79,14 +79,14 @@ describe('test/unit/components/framework/index.test.js', () => {
     });
 
     const context = await getContext();
-    const component = new FrameworkComponent('some-id', context, {});
+    const component = new FrameworkComponent('some-id', context, { path: 'path' });
     component.state.detectedFrameworkVersion = '9.9.9';
     await component.refreshOutputs();
 
     expect(spawnStub).to.be.calledOnce;
     expect(spawnStub.getCall(0).args[0]).to.equal('serverless');
     expect(spawnStub.getCall(0).args[1]).to.deep.equal(['info', '--verbose', '--stage', 'dev']);
-    expect(spawnStub.getCall(0).args[2].cwd).to.equal('.');
+    expect(spawnStub.getCall(0).args[2].cwd).to.equal('path');
     expect(component.state).to.deep.equal({ detectedFrameworkVersion: '9.9.9' });
     expect(component.outputs).to.deep.equal({ Key: 'Output' });
   });
@@ -112,14 +112,14 @@ describe('test/unit/components/framework/index.test.js', () => {
     });
 
     const context = await getContext();
-    const component = new FrameworkComponent('some-id', context, {});
+    const component = new FrameworkComponent('some-id', context, { path: 'path' });
     component.state.detectedFrameworkVersion = '9.9.9';
     await component.refreshOutputs();
 
     expect(spawnStub).to.be.calledOnce;
     expect(spawnStub.getCall(0).args[0]).to.equal('serverless');
     expect(spawnStub.getCall(0).args[1]).to.deep.equal(['info', '--verbose', '--stage', 'dev']);
-    expect(spawnStub.getCall(0).args[2].cwd).to.equal('.');
+    expect(spawnStub.getCall(0).args[2].cwd).to.equal('path');
     expect(component.state).to.deep.equal({ detectedFrameworkVersion: '9.9.9' });
     expect(component.outputs).to.deep.equal({ Key: 'Output' });
   });
@@ -139,7 +139,7 @@ describe('test/unit/components/framework/index.test.js', () => {
     });
 
     const context = await getContext();
-    const component = new FrameworkComponent('some-id', context, {});
+    const component = new FrameworkComponent('some-id', context, { path: 'path' });
     component.state = {
       key: 'val',
       detectedFrameworkVersion: '9.9.9',
@@ -153,7 +153,7 @@ describe('test/unit/components/framework/index.test.js', () => {
     expect(spawnStub).to.be.calledOnce;
     expect(spawnStub.getCall(0).args[0]).to.equal('serverless');
     expect(spawnStub.getCall(0).args[1]).to.deep.equal(['remove', '--stage', 'dev']);
-    expect(spawnStub.getCall(0).args[2].cwd).to.equal('.');
+    expect(spawnStub.getCall(0).args[2].cwd).to.equal('path');
     expect(component.state).to.deep.equal({});
     expect(component.outputs).to.deep.equal({});
   });
