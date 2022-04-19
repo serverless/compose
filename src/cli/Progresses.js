@@ -246,7 +246,7 @@ class Progresses {
     }
 
     if (this.footerText) {
-      output += `\n${this.footerText.trim()}\n`;
+      output += `\n${this.footerText.trim()}`;
     }
 
     output = this.wrapMultilineText(output);
