@@ -8,8 +8,8 @@ function validateConfiguration(configuration, configurationPath) {
   const configurationFilename = path.basename(configurationPath);
   if (typeof configuration !== 'object') {
     throw new ServerlessError(
-      `Resolved "${configurationFilename}" does not contain valid Serverless Compose configuration.\n` +
-        'Read about Serverless Compose in the documentation: https://slss.io/docs-compose',
+      `Resolved "${configurationFilename}" does not contain valid Compose configuration.\n` +
+        'Read about Serverless Framework Compose in the documentation: https://slss.io/docs-compose',
       'INVALID_NON_OBJECT_CONFIGURATION'
     );
   }
@@ -17,7 +17,7 @@ function validateConfiguration(configuration, configurationPath) {
   if (!isObject(configuration.services)) {
     throw new ServerlessError(
       `Invalid configuration: "${configurationFilename}" must contain "services" property.\n` +
-        'Read about Serverless Compose configuration in the documentation: https://slss.io/docs-compose',
+        'Read about Serverless Framework Compose configuration in the documentation: https://slss.io/docs-compose',
       'INVALID_NON_OBJECT_SERVICES_CONFIGURATION'
     );
   }
@@ -25,23 +25,23 @@ function validateConfiguration(configuration, configurationPath) {
   Object.entries(configuration.services).forEach(([key, value]) => {
     if (!isObject(value)) {
       throw new ServerlessError(
-        `Invalid configuration: Definition of "${key}" service must be an object.\n` +
-          'Read about Serverless Compose configuration in the documentation: https://slss.io/docs-compose',
+        `Invalid configuration: definition of "${key}" service must be an object.\n` +
+          'Read about Serverless Framework Compose configuration in the documentation: https://slss.io/docs-compose',
         'INVALID_NON_OBJECT_SERVICE_CONFIGURATION'
       );
     }
 
     if (!value.path) {
       throw new ServerlessError(
-        `Invalid configuration: Definition of "${key}" service must contain a "path" property.\n` +
-          'Read about Serverless Compose configuration in the documentation: https://slss.io/docs-compose',
+        `Invalid configuration: definition of "${key}" service must contain a "path" property.\n` +
+          'Read about Serverless Framework Compose configuration in the documentation: https://slss.io/docs-compose',
         'MISSING_PATH_IN_SERVICE_CONFIGURATION'
       );
     }
 
     if (path.relative(process.cwd(), value.path) === '') {
       throw new ServerlessError(
-        `Definition of "${key}" service must contain a "path" property that does not point to the root directory of Serverless Compose project`,
+        `Definition of "${key}" service must contain a "path" property that does not point to the root directory of Serverless Framework Compose project`,
         'INVALID_PATH_IN_SERVICE_CONFIGURATION'
       );
     }
@@ -75,7 +75,7 @@ function validateConfiguration(configuration, configurationPath) {
   if (extraProperties.length > 0) {
     throw new ServerlessError(
       `Unrecognized property ${extraProperties.join(', ')} in "${configurationFilename}".\n` +
-        'Read about Serverless Compose configuration in the documentation: https://slss.io/docs-compose',
+        'Read about Serverless Framework Compose configuration in the documentation: https://slss.io/docs-compose',
       'INVALID_CONFIGURATION'
     );
   }

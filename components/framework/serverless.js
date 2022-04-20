@@ -159,12 +159,12 @@ class ServerlessFramework extends Component {
           this.save();
         } else {
           throw new Error(
-            `The installed version of Serverless Framework (${version}) is not supported by Serverless Compose. Please upgrade Serverless Framework to a version greater or equal to "${MINIMAL_FRAMEWORK_VERSION}"`
+            `The installed version of Serverless Framework (${version}) is not supported by Compose. Please upgrade Serverless Framework to a version greater or equal to "${MINIMAL_FRAMEWORK_VERSION}"`
           );
         }
       } else {
         throw new Error(
-          'Could not verify Serverless Framework CLI installation. Ensure Serverless Framework is installed before continuing.\nhttps://serverless.com/framework/docs/getting-started'
+          'Could not verify the Serverless Framework CLI installation. Ensure Serverless Framework is installed before continuing.\nhttps://serverless.com/framework/docs/getting-started'
         );
       }
     }

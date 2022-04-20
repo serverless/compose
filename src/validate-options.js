@@ -10,7 +10,7 @@ function validateCliOptions(options, method) {
   unsupportedGlobalCliOptions.forEach((option) => {
     if (options[option]) {
       throw new ServerlessError(
-        `The "--${option}" option is not supported (yet) in Serverless Compose\nYou can search and/or open feature requests here: https://github.com/serverless/compose'`,
+        `The "--${option}" option is not supported (yet) in Serverless Framework Compose\nYou can search and/or open feature requests here: https://github.com/serverless/compose'`,
         'INVALID_GLOBAL_CLI_OPTION'
       );
     }
@@ -57,11 +57,11 @@ function validateCliOptions(options, method) {
 
   if (usedFrameworkSpecificCliOptions.length) {
     if (usedFrameworkSpecificCliOptions.length === 1) {
-      errorMessage += `\n\nCLI option "--${usedFrameworkSpecificCliOptions[0]}" is Serverless Framework-specific option that is not supported in Serverless Compose`;
+      errorMessage += `\n\nCLI option "--${usedFrameworkSpecificCliOptions[0]}" is Serverless Framework-specific option that is not supported in Compose`;
     } else {
       errorMessage += `\n\nCLI options "--${usedFrameworkSpecificCliOptions.join(
         '", "--'
-      )}" are Serverless Framework-specific options that are not supported in Serverless Compose`;
+      )}" are Serverless Framework-specific options that are not supported in Compose`;
     }
     errorMessage +=
       '\nYou can search and/or open feature requests here: https://github.com/serverless/compose';
