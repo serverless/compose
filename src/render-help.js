@@ -42,7 +42,7 @@ function formatLine(commandOrOption, description) {
 
 module.exports = async () => {
   const output = new Output(false);
-  output.writeText(`Serverless Compose v${version}`);
+  output.writeText(`Serverless Framework Compose v${version}`);
   output.writeText();
   output.writeText(colors.gray('Usage'));
   output.writeText('serverless-compose <command> <options>');

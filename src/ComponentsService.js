@@ -337,7 +337,7 @@ class ComponentsService {
     // Specific error messages for popular Framework commands
     if (command === 'package') {
       throw new ServerlessError(
-        `"package" is not a global command in Serverless Compose.\nAvailable global commands: ${globalCommands.join(
+        `"package" is not a global command in Serverless Framework Compose.\nAvailable global commands: ${globalCommands.join(
           ', '
         )}.\nYou can package each Serverless Framework service by running "serverless-compose <service-name>:${command}".`,
         'COMMAND_NOT_FOUND'
@@ -345,7 +345,7 @@ class ComponentsService {
     }
     if (command === 'invoke') {
       throw new ServerlessError(
-        `"invoke" is not a global command in Serverless Compose.\nAvailable global commands: ${globalCommands.join(
+        `"invoke" is not a global command in Serverless Framework Compose.\nAvailable global commands: ${globalCommands.join(
           ', '
         )}.\nYou can invoke functions by running "serverless-compose <service-name>:invoke --function <function>".`,
         'COMMAND_NOT_FOUND'
@@ -353,7 +353,7 @@ class ComponentsService {
     }
     if (command === 'offline') {
       throw new ServerlessError(
-        `"offline" is not a global command in Serverless Compose.\nAvailable global commands: ${globalCommands.join(
+        `"offline" is not a global command in Serverless Framework Compose.\nAvailable global commands: ${globalCommands.join(
           ', '
         )}.\nYou can run serverless-offline in each Serverless Framework service by running "serverless-compose <service-name>:${command}".`,
         'COMMAND_NOT_FOUND'

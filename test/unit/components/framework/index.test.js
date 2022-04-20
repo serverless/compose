@@ -202,7 +202,7 @@ describe('test/unit/components/framework/index.test.js', () => {
     const context = await getContext();
     const component = new FrameworkComponent('some-id', context, {});
     await expect(component.deploy()).to.eventually.be.rejectedWith(
-      'The installed version of Serverless Framework (2.1.0) is not supported by Serverless Compose. Please upgrade Serverless Framework to a version greater or equal to "3.7.7"'
+      'The installed version of Serverless Framework (2.1.0) is not supported by Compose. Please upgrade Serverless Framework to a version greater or equal to "3.7.7"'
     );
   });
 });
