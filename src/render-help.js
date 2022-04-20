@@ -45,13 +45,12 @@ module.exports = async () => {
   output.writeText(`Serverless Framework Compose v${version}`);
   output.writeText();
   output.writeText(colors.gray('Usage'));
-  output.writeText('serverless-compose <command> <options>');
-  output.writeText('slsc <command> <options>');
+  output.writeText('serverless <command> <options>');
   output.writeText();
   output.writeText(colors.gray('Service-specific commands'));
-  output.writeText('serverless-compose <command> <options> --service=<service-name>');
+  output.writeText('serverless <command> <options> --service=<service-name>');
   output.writeText(colors.gray('or the shortcut:'));
-  output.writeText('serverless-compose <service-name>:<command> <options>');
+  output.writeText('serverless <service-name>:<command> <options>');
   output.writeText();
   output.writeText(colors.gray('Global options'));
   output.writeText(formatLine('--verbose', 'Enable verbose logs'));

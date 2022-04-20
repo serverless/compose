@@ -40,7 +40,7 @@ const resolveObject = (object, context, method) => {
         let errMsg = `The variable "${match}" cannot be resolved: the referenced output does not exist.`;
         if (method && !['refreshOutputs', 'deploy'].includes(method)) {
           errMsg +=
-            '\n\nIf your project is not deployed, you can deploy it via "serverless-compose deploy". If the project is already deployed, you can synchronize your local state via "serverless-compose refresh-outputs".';
+            '\n\nIf your project is not deployed, you can deploy it via "serverless deploy". If the project is already deployed, you can synchronize your local state via "serverless refresh-outputs".';
         }
         throw new ServerlessError(errMsg, 'REFERENCED_OUTPUT_DOES_NOT_EXIST');
       }
@@ -323,7 +323,7 @@ class ComponentsService {
       outputs = await this.context.stateStorage.readComponentsOutputs();
       if (isEmpty(outputs)) {
         throw new ServerlessError(
-          'Could not find any deployed service.\nYou can deploy the project via "serverless-compose deploy".\nIf the project is already deployed, you can synchronize your local state via "serverless-compose refresh-outputs".',
+          'Could not find any deployed service.\nYou can deploy the project via "serverless deploy".\nIf the project is already deployed, you can synchronize your local state via "serverless refresh-outputs".',
           'NO_DEPLOYED_SERVICES_FOUND'
         );
       }
@@ -339,7 +339,7 @@ class ComponentsService {
       throw new ServerlessError(
         `"package" is not a global command in Serverless Framework Compose.\nAvailable global commands: ${globalCommands.join(
           ', '
-        )}.\nYou can package each Serverless Framework service by running "serverless-compose <service-name>:${command}".`,
+        )}.\nYou can package each Serverless Framework service by running "serverless <service-name>:${command}".`,
         'COMMAND_NOT_FOUND'
       );
     }
@@ -347,7 +347,7 @@ class ComponentsService {
       throw new ServerlessError(
         `"invoke" is not a global command in Serverless Framework Compose.\nAvailable global commands: ${globalCommands.join(
           ', '
-        )}.\nYou can invoke functions by running "serverless-compose <service-name>:invoke --function <function>".`,
+        )}.\nYou can invoke functions by running "serverless <service-name>:invoke --function <function>".`,
         'COMMAND_NOT_FOUND'
       );
     }
@@ -355,7 +355,7 @@ class ComponentsService {
       throw new ServerlessError(
         `"offline" is not a global command in Serverless Framework Compose.\nAvailable global commands: ${globalCommands.join(
           ', '
-        )}.\nYou can run serverless-offline in each Serverless Framework service by running "serverless-compose <service-name>:${command}".`,
+        )}.\nYou can run serverless-offline in each Serverless Framework service by running "serverless <service-name>:${command}".`,
         'COMMAND_NOT_FOUND'
       );
     }
@@ -363,7 +363,7 @@ class ComponentsService {
       const extraText = colors.gray(
         `Available commands: ${globalCommands.join(
           ', '
-        )}.\nIf this is a service-specific command, run it using the component name: "serverless-compose <service-name>:${command}"`
+        )}.\nIf this is a service-specific command, run it using the component name: "serverless <service-name>:${command}"`
       );
       throw new ServerlessError(
         `Command "${command}" doesn't exist.\n${extraText}`,
