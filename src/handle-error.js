@@ -19,7 +19,7 @@ module.exports = (exception, output) => {
   ];
 
   detailsTextTokens.push(
-    'Docs:        github.com/serverless/compose',
+    'Docs:        slss.io/docs-compose',
     'Bugs:        github.com/serverless/compose/issues'
   );
 
