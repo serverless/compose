@@ -1,6 +1,6 @@
 {
   "name": "@serverless/compose",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Deploy and orchestrate multiple Serverless Framework services in monorepositories.",
   "main": "src/index.js",
   "repository": "serverless/compose",
