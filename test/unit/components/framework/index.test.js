@@ -190,6 +190,36 @@ describe('test/unit/components/framework/index.test.js', () => {
     expect(spawnStub.getCall(0).args[2].cwd).to.equal('custom-path');
   });
 
+  it('correctly ignores `stage` from options to not duplicate it when executing command', async () => {
+    const spawnStub = sinon.stub().returns({
+      on: (arg, cb) => {
+        if (arg === 'close') cb(0);
+      },
+      kill: () => {},
+    });
+
+    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+      child_process: {
+        spawn: spawnStub,
+      },
+    });
+
+    const context = await getContext();
+    const component = new FrameworkComponent('some-id', context, { path: 'custom-path' });
+    component.state.detectedFrameworkVersion = '9.9.9';
+
+    await component.command('print', { key: 'val', flag: true, stage: 'dev' });
+
+    expect(spawnStub).to.be.calledOnce;
+    expect(spawnStub.getCall(0).args[1]).to.deep.equal([
+      'print',
+      '--key=val',
+      '--flag',
+      '--stage',
+      'dev',
+    ]);
+  });
+
   it('reports detected unsupported framework version', async () => {
     const spawnExtStub = sinon.stub().resolves({
       stdoutBuffer: Buffer.from('Framework Core: 2.1.0'),
