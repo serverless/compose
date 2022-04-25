@@ -89,6 +89,7 @@ class ServerlessFramework extends Component {
     this.state = {};
     await this.save();
     await this.updateOutputs({});
+    this.successProgress('removed');
   }
 
   async info() {
