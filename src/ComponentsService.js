@@ -221,8 +221,6 @@ const createGraph = (allComponents) => {
 };
 
 class ComponentsService {
-  /** @type {import('./Context')} */
-  context;
   /**
    * @param {import('./Context')} context
    * @param configuration
@@ -385,7 +383,10 @@ class ComponentsService {
     } else {
       await this.instantiateComponents();
 
-      const component = this.allComponents?.[componentName]?.instance;
+      const component =
+        this.allComponents &&
+        this.allComponents[componentName] &&
+        this.allComponents[componentName].instance;
       if (component === undefined) {
         throw new ServerlessError(`Unknown service "${componentName}"`, 'COMPONENT_NOT_FOUND');
       }
@@ -395,7 +396,7 @@ class ComponentsService {
 
       if (isDefaultCommand) {
         // Default command defined for all components (deploy, logs, dev, etc.)
-        if (!component?.[command]) {
+        if (!component || !component[command]) {
           throw new ServerlessError(
             `No method "${command}" on service "${componentName}"`,
             'COMPONENT_COMMAND_NOT_FOUND'
@@ -403,7 +404,7 @@ class ComponentsService {
         }
         handler = (opts) => component[command](opts);
       } else if (
-        !component.commands?.[command] &&
+        (!component || !component.commands || !component.commands[command]) &&
         component.inputs.component === 'serverless-framework'
       ) {
         // Workaround to invoke all custom Framework commands
@@ -411,7 +412,7 @@ class ComponentsService {
         handler = (opts) => component.command(command, opts);
       } else {
         // Custom command: the handler is defined in the component's `commands` property
-        if (!component.commands?.[command]) {
+        if (!component || !component.commands || !component.commands[command]) {
           throw new ServerlessError(
             `No command "${command}" on service ${componentName}`,
             'COMPONENT_COMMAND_NOT_FOUND'

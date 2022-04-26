@@ -60,7 +60,7 @@ module.exports = async () => {
 
   for (const command of commands) {
     output.writeText(formatLine(command.command, command.description));
-    Object.entries(command.options ?? {}).forEach(([key, desc]) => {
+    Object.entries(command.options || {}).forEach(([key, desc]) => {
       output.writeText(formatLine(`  --${key}`, desc));
     });
   }

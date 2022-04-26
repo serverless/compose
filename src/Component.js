@@ -3,21 +3,6 @@
 const ServerlessError = require('./serverless-error');
 
 class Component {
-  /** @type {string} */
-  id;
-  /** @type {string} */
-  stage;
-  /** @type {Record<string, any>} */
-  inputs;
-  /** @type {Record<string, any>} */
-  state = {};
-
-  /**
-   * @type {import('./Context')}
-   * @private Let's try to keep the context private so that we limit the API surface for components
-   */
-  context;
-
   /**
    * @param {string} id
    * @param {import('./Context')} context
@@ -28,6 +13,7 @@ class Component {
     this.stage = context.stage;
     this.inputs = inputs;
     this.context = context;
+    this.state = {};
 
     if (typeof this.outputs === 'function') {
       throw new ServerlessError(

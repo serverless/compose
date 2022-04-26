@@ -24,14 +24,19 @@ class StateStorage {
   async readComponentState(componentId) {
     await this.readState();
 
-    return this.state.components?.[componentId]?.state ?? {};
+    return (
+      (this.state.components &&
+        this.state.components[componentId] &&
+        this.state.components[componentId].state) ||
+      {}
+    );
   }
 
   async writeComponentState(componentId, componentState) {
     await this.readState();
 
-    this.state.components = this.state.components ?? {};
-    this.state.components[componentId] = this.state.components[componentId] ?? {};
+    this.state.components = this.state.components || {};
+    this.state.components[componentId] = this.state.components[componentId] || {};
     this.state.components[componentId].state = componentState;
 
     await this.writeState();
@@ -40,13 +45,13 @@ class StateStorage {
   async readComponentsOutputs() {
     await this.readState();
 
-    if (!this.state?.components) {
+    if (!this.state || !this.state.components) {
       return {};
     }
 
     const outputs = {};
     for (const [id, data] of Object.entries(this.state.components)) {
-      outputs[id] = data.outputs ?? {};
+      outputs[id] = data.outputs || {};
     }
     return outputs;
   }
@@ -54,13 +59,18 @@ class StateStorage {
   async readComponentOutputs(componentId) {
     await this.readState();
 
-    return this.state?.components?.[componentId]?.outputs ?? {};
+    return (
+      (this.state.components &&
+        this.state.components[componentId] &&
+        this.state.components[componentId].outputs) ||
+      {}
+    );
   }
 
   async writeComponentOutputs(componentId, componentOutputs) {
     await this.readState();
-    this.state.components = this.state.components ?? {};
-    this.state.components[componentId] = this.state.components[componentId] ?? {};
+    this.state.components = this.state.components || {};
+    this.state.components[componentId] = this.state.components[componentId] || {};
     this.state.components[componentId].outputs = componentOutputs;
 
     await this.writeState();
