@@ -120,3 +120,35 @@ jobs:
           npm update --save-dev --no-save
       - name: Unit tests
         run: npm test
+
+  linuxNode12:
+    name: '[Linux] Node.js 12: Unit tests'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Retrieve dependencies from cache
+        id: cacheNpm
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: npm-v12-${{ runner.os }}-${{ github.ref }}-${{ hashFiles('package.json') }}
+          restore-keys: |
+            npm-v12-${{ runner.os }}-${{ github.ref }}-
+            npm-v12-${{ runner.os }}-refs/heads/main-
+
+      - name: Install Node.js and npm
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+
+      - name: Install dependencies
+        if: steps.cacheNpm.outputs.cache-hit != 'true'
+        run: |
+          npm update --no-save
+          npm update --save-dev --no-save
+      - name: Unit tests
+        run: npm test
