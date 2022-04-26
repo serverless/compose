@@ -8,12 +8,21 @@ const path = require('path');
 const isInteractiveTerminal = require('is-interactive');
 const { PassThrough } = require('stream');
 
+/**
+ * @property {NodeJS.WritableStream} stdout
+ * @property {undefined | NodeJS.WriteStream} interactiveStdout Undefined if not interactive
+ * @property {NodeJS.WritableStream} stderr
+ * @property {undefined | NodeJS.WriteStream} interactiveStderr Undefined if not interactive
+ * @property {undefined | NodeJS.ReadStream} interactiveStdin Undefined if not interactive
+ * @property {NodeJS.WritableStream} logsFileStream
+ */
 class Output {
   /**
    * @param {boolean} verboseMode
    * @param {boolean} [disableIO] To allow mocking in tests
    */
   constructor(verboseMode, disableIO = false) {
+    /** @type {Array<{ namespace?: string[], message: string }>} */
     this.verboseLogs = [];
     this.logsFilePath = '.serverless/compose.log';
     this.verboseMode = verboseMode;

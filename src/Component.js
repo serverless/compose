@@ -6,13 +6,15 @@ class Component {
   /**
    * @param {string} id
    * @param {import('./Context')} context
-   * @param inputs
+   * @param {Record<string, any>} inputs
    */
   constructor(id, context, inputs) {
     this.id = id || this.constructor.name;
     this.stage = context.stage;
     this.inputs = inputs;
+    /** @private Let's try to keep the context private so that we limit the API surface for components */
     this.context = context;
+    /** @type {Record<string, any>} */
     this.state = {};
 
     if (typeof this.outputs === 'function') {
