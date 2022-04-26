@@ -16,6 +16,7 @@ class Context {
     this.root = path.resolve(config.root) || process.cwd();
     this.output = new Output(config.verbose || false, config.disableIO);
     this.stateStorage = new StateStorage(config.stage);
+    /** @type {string} */
     this.stage = config.stage;
     this.id = undefined;
     this.componentCommandsOutcomes = {};

@@ -39,6 +39,7 @@ class Progresses {
     this.options = {
       spinner: isUnicodeSupported() ? dots : dashes,
     };
+    /** @type {Record<string, Progress>} */
     this.progresses = {};
     this.isCursorHidden = false;
     this.currentInterval = null;
