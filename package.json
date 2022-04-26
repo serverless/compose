@@ -64,10 +64,7 @@
     "root": true,
     "ignorePatterns": [
       "demo/*"
-    ],
-    "parserOptions": {
-      "ecmaVersion": 2022
-    }
+    ]
   },
   "mocha": {
     "require": [
@@ -80,6 +77,6 @@
     "timeout": 10000
   },
   "engines": {
-    "node": ">=14.15"
+    "node": ">=12.12"
   }
 }

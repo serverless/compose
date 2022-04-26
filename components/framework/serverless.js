@@ -98,7 +98,7 @@ class ServerlessFramework extends Component {
   }
 
   async logs(options) {
-    const functions = this.outputs.functions ?? {};
+    const functions = this.outputs.functions || {};
     // Some services do not have functions, let's not start a progress when tailing
     if (Object.keys(functions).length === 0) return;
 
@@ -181,11 +181,11 @@ class ServerlessFramework extends Component {
     // Add stage
     args.push('--stage', this.stage);
     // Add config file name if necessary
-    if (this.inputs?.config) {
+    if (this.inputs && this.inputs.config) {
       args.push('--config', this.inputs.config);
     }
     // Add inputs
-    for (const [key, value] of Object.entries(this.inputs?.params ?? {})) {
+    for (const [key, value] of Object.entries((this.inputs && this.inputs.params) || {})) {
       args.push('--param', `${key}=${value}`);
     }
 

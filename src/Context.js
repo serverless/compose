@@ -11,15 +11,6 @@ const Progresses = require('./cli/Progresses');
 const colors = require('./cli/colors');
 
 class Context {
-  /** @type {StateStorage} */
-  stateStorage;
-  /** @type {Progresses} */
-  progresses;
-  /** @type {Output} */
-  output;
-  /** @type {Record<string, 'success'|'failure'|'skip'>} */
-  componentCommandsOutcomes = {};
-
   constructor(config) {
     this.version = packageJson.version;
     this.root = path.resolve(config.root) || process.cwd();
@@ -27,6 +18,7 @@ class Context {
     this.stateStorage = new StateStorage(config.stage);
     this.stage = config.stage;
     this.id = undefined;
+    this.componentCommandsOutcomes = {};
 
     this.progresses = new Progresses(this.output);
     if (!config.verbose) {

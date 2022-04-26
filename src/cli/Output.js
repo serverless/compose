@@ -9,28 +9,13 @@ const isInteractiveTerminal = require('is-interactive');
 const { PassThrough } = require('stream');
 
 class Output {
-  /** @type {NodeJS.WritableStream} */
-  stdout;
-  /** @type {undefined | NodeJS.WriteStream} Undefined if not interactive */
-  interactiveStdout;
-  /** @type {NodeJS.WritableStream} */
-  stderr;
-  /** @type {undefined | NodeJS.WriteStream} Undefined if not interactive */
-  interactiveStderr;
-  /** @type {undefined | NodeJS.ReadStream} Undefined if not interactive */
-  interactiveStdin;
-  /** @type {NodeJS.WritableStream} */
-  logsFileStream;
-
-  /** @type {Array<{ namespace?: string[], message: string }>} */
-  verboseLogs = [];
-  logsFilePath = '.serverless/compose.log';
-
   /**
    * @param {boolean} verboseMode
    * @param {boolean} [disableIO] To allow mocking in tests
    */
   constructor(verboseMode, disableIO = false) {
+    this.verboseLogs = [];
+    this.logsFilePath = '.serverless/compose.log';
     this.verboseMode = verboseMode;
     this.stdout = disableIO ? new PassThrough() : process.stdout;
     this.stderr = disableIO ? new PassThrough() : process.stderr;
@@ -140,7 +125,7 @@ class Output {
    * @return {string}
    */
   namespaceLogMessage(text, namespace) {
-    text = text ?? '';
+    text = text || '';
     const prefix = this.generatePrefix(namespace);
     return text
       .split('\n')
@@ -183,7 +168,7 @@ class Output {
     const stream = stdout ? this.stdout : this.stderr;
     const interactiveStream = stdout ? this.interactiveStdout : this.interactiveStderr;
 
-    text = text ?? '';
+    text = text || '';
     for (const line of text.split('\n')) {
       // This writes from the cursor
       stream.write(line);

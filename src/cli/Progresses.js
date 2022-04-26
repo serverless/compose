@@ -32,9 +32,6 @@ const dashes = {
  */
 
 class Progresses {
-  /** @type {Record<string, Progress>} */
-  progresses = {};
-
   /**
    * @param {import('./Output')} output
    */
@@ -42,6 +39,7 @@ class Progresses {
     this.options = {
       spinner: isUnicodeSupported() ? dots : dashes,
     };
+    this.progresses = {};
     this.isCursorHidden = false;
     this.currentInterval = null;
     this.output = output;
@@ -94,7 +92,7 @@ class Progresses {
    * @param {string} name
    */
   isWaiting(name) {
-    return this.progresses[name]?.status === 'waiting';
+    return this.progresses[name] && this.progresses[name].status === 'waiting';
   }
 
   /**
@@ -228,7 +226,7 @@ class Progresses {
         progress.text
       )}`;
       if (progress.timer && progress.startTime) {
-        const end = progress.endTime ?? Date.now();
+        const end = progress.endTime || Date.now();
         const elapsed = Math.round((end - progress.startTime) / 1000);
         line = `${line} ${separator} ${colors.gray(`${elapsed}s`)}`;
       }
@@ -264,13 +262,15 @@ class Progresses {
   bindSigint() {
     process.on('SIGINT', () => {
       cliCursor.show();
-      this.output.interactiveStderr?.moveCursor(0, this.lineCount);
+      if (this.output.interactiveStderr) {
+        this.output.interactiveStderr.moveCursor(0, this.lineCount);
+      }
       process.exit(0);
     });
   }
 
   ellipsis(text) {
-    const columns = this.output.interactiveStderr?.columns || 95;
+    const columns = (this.output.interactiveStderr && this.output.interactiveStderr.columns) || 95;
     const extraCharacters = stripAnsi(text).length - columns;
     // If we go beyond the terminal width, we strip colors (because preserving ANSI while trimming is HARD)
     return extraCharacters > 0
@@ -286,7 +286,7 @@ class Progresses {
   }
 
   wrapLine(line) {
-    const columns = this.output.interactiveStderr?.columns || 95;
+    const columns = (this.output.interactiveStderr && this.output.interactiveStderr.columns) || 95;
     const strippedLine = stripAnsi(line);
     const lineLength = strippedLine.length;
     // If the line doesn't wrap, we don't touch it
@@ -300,7 +300,7 @@ class Progresses {
   }
 
   limitOutputToTerminalHeight(output) {
-    if (!this.output.interactiveStderr?.rows) {
+    if (!this.output.interactiveStderr || !this.output.interactiveStderr.rows) {
       return '';
     }
     const lines = output.split('\n');
