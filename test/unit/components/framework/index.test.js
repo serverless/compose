@@ -38,9 +38,7 @@ describe('test/unit/components/framework/index.test.js', () => {
       kill: () => {},
     });
     const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
-      child_process: {
-        spawn: spawnStub,
-      },
+      'cross-spawn': spawnStub,
     });
 
     const context = await getContext();
@@ -73,9 +71,7 @@ describe('test/unit/components/framework/index.test.js', () => {
       kill: () => {},
     });
     const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
-      child_process: {
-        spawn: spawnStub,
-      },
+      'cross-spawn': spawnStub,
     });
 
     const context = await getContext();
@@ -106,9 +102,7 @@ describe('test/unit/components/framework/index.test.js', () => {
       kill: () => {},
     });
     const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
-      child_process: {
-        spawn: spawnStub,
-      },
+      'cross-spawn': spawnStub,
     });
 
     const context = await getContext();
@@ -133,9 +127,7 @@ describe('test/unit/components/framework/index.test.js', () => {
     });
 
     const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
-      child_process: {
-        spawn: spawnStub,
-      },
+      'cross-spawn': spawnStub,
     });
 
     const context = await getContext();
@@ -167,9 +159,7 @@ describe('test/unit/components/framework/index.test.js', () => {
     });
 
     const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
-      child_process: {
-        spawn: spawnStub,
-      },
+      'cross-spawn': spawnStub,
     });
 
     const context = await getContext();
@@ -199,9 +189,7 @@ describe('test/unit/components/framework/index.test.js', () => {
     });
 
     const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
-      child_process: {
-        spawn: spawnStub,
-      },
+      'cross-spawn': spawnStub,
     });
 
     const context = await getContext();

@@ -1,7 +1,7 @@
 'use strict';
 
 const Component = require('../../src/Component');
-const childProcess = require('child_process');
+const spawn = require('cross-spawn');
 const YAML = require('js-yaml');
 const hasha = require('hasha');
 const globby = require('globby');
@@ -198,7 +198,7 @@ class ServerlessFramework extends Component {
 
     this.logVerbose(`Running "${command} ${args.join(' ')}"`);
     return new Promise((resolve, reject) => {
-      const child = childProcess.spawn(command, args, {
+      const child = spawn(command, args, {
         cwd: this.inputs.path,
         stdio: streamStdout ? 'inherit' : undefined,
         env: { ...process.env, SLS_DISABLE_AUTO_UPDATE: '1' },
