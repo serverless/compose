@@ -20,6 +20,7 @@ class Context {
     this.stage = config.stage;
     this.id = undefined;
     this.componentCommandsOutcomes = {};
+    this.hasEnabledVerboseInteractively = false;
 
     this.progresses = new Progresses(this.output);
     if (!config.verbose) {
@@ -65,6 +66,7 @@ class Context {
     this.output.interactiveStdin.on('keypress', (character, key) => {
       if (character === '?') {
         this.output.enableVerbose();
+        this.hasEnabledVerboseInteractively = true;
         this.progresses.setFooterText();
       }
       if (key && key.ctrl && key.name === 'c') {

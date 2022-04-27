@@ -71,6 +71,7 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
         ],
         componentsOutputsVariablesCount: 1,
       },
+      hasEnabledVerboseInteractively: false,
       interruptSignal: undefined,
       singleCommandType: 'withSemicolon',
       outcome: 'unrecognized',
@@ -164,6 +165,7 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
       commandOptionNames: [],
       commandType: 'global',
       componentsOutcomes: [],
+      hasEnabledVerboseInteractively: false,
       interruptSignal: undefined,
       outcome: 'failure',
       versions,
@@ -172,6 +174,21 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
         kind: 'user',
       },
     });
+  });
+
+  it('recognizes hasEnabledVerboseInteractively', () => {
+    const contextConfig = {
+      root: process.cwd(),
+      disableIO: true,
+    };
+    const context = new Context(contextConfig);
+    context.hasEnabledVerboseInteractively = true;
+    const payload = generatePayload({
+      command: 'deploy',
+      context,
+    });
+
+    expect(payload.hasEnabledVerboseInteractively).to.be.true;
   });
 
   it('recognizes interrupt', () => {
@@ -202,6 +219,7 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
       commandOptionNames: [],
       commandType: 'global',
       componentsOutcomes: [],
+      hasEnabledVerboseInteractively: false,
       outcome: 'interrupt',
       interruptSignal,
       versions,
