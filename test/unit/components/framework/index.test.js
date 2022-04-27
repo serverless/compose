@@ -230,4 +230,111 @@ describe('test/unit/components/framework/index.test.js', () => {
       'The installed version of Serverless Framework (2.1.0) is not supported by Compose. Please upgrade Serverless Framework to a version greater or equal to "3.7.7"'
     );
   });
+
+  it('correctly handles logs for component with functions', async () => {
+    const spawnStub = sinon.stub().returns({
+      on: (arg, cb) => {
+        if (arg === 'close') cb(0);
+      },
+      stdout: {
+        on: (arg, cb) => {
+          const data =
+            'functions:\n  hello:\n    handler: handler.hello\n  other:\n    handler: handler.other';
+          if (arg === 'data') cb(data);
+        },
+      },
+      kill: () => {},
+    });
+    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+      'cross-spawn': spawnStub,
+    });
+
+    const context = await getContext();
+    const component = new FrameworkComponent('some-id', context, { path: 'path' });
+    component.state.detectedFrameworkVersion = '9.9.9';
+    await component.logs({});
+
+    expect(spawnStub).to.be.calledThrice;
+    expect(spawnStub.getCall(0).args[0]).to.equal('serverless');
+    expect(spawnStub.getCall(0).args[1]).to.deep.equal(['print', '--stage', 'dev']);
+    expect(spawnStub.getCall(1).args[0]).to.equal('serverless');
+    expect(spawnStub.getCall(1).args[1]).to.deep.equal([
+      'logs',
+      '--function',
+      'hello',
+      '--stage',
+      'dev',
+    ]);
+    expect(spawnStub.getCall(2).args[0]).to.equal('serverless');
+    expect(spawnStub.getCall(2).args[1]).to.deep.equal([
+      'logs',
+      '--function',
+      'other',
+      '--stage',
+      'dev',
+    ]);
+  });
+
+  it('correctly handles logs for component without functions', async () => {
+    const spawnStub = sinon.stub().returns({
+      on: (arg, cb) => {
+        if (arg === 'close') cb(0);
+      },
+      stdout: {
+        on: (arg, cb) => {
+          const data = 'provider:\n  name: aws';
+          if (arg === 'data') cb(data);
+        },
+      },
+      kill: () => {},
+    });
+    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+      'cross-spawn': spawnStub,
+    });
+
+    const context = await getContext();
+    const component = new FrameworkComponent('some-id', context, { path: 'path' });
+    component.state.detectedFrameworkVersion = '9.9.9';
+    await component.logs({});
+
+    expect(spawnStub).to.be.calledOnce;
+    expect(spawnStub.getCall(0).args[0]).to.equal('serverless');
+    expect(spawnStub.getCall(0).args[1]).to.deep.equal(['print', '--stage', 'dev']);
+  });
+
+  it('correctly handles tail option for logs', async () => {
+    const spawnStub = sinon.stub().returns({
+      on: (arg, cb) => {
+        if (arg === 'close') cb(0);
+      },
+      stdout: {
+        on: (arg, cb) => {
+          const data = 'functions:\n  hello:\n    handler: handler.hello';
+          if (arg === 'data') cb(data);
+        },
+      },
+      kill: () => {},
+    });
+    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+      'cross-spawn': spawnStub,
+    });
+
+    const context = await getContext();
+    const component = new FrameworkComponent('some-id', context, { path: 'path' });
+    component.state.detectedFrameworkVersion = '9.9.9';
+    await component.logs({ tail: true });
+
+    expect(spawnStub).to.be.calledTwice;
+    expect(spawnStub.getCall(0).args[0]).to.equal('serverless');
+    expect(spawnStub.getCall(0).args[1]).to.deep.equal(['print', '--stage', 'dev']);
+    expect(spawnStub.getCall(1).args[0]).to.equal('serverless');
+    expect(spawnStub.getCall(1).args[1]).to.deep.equal([
+      'logs',
+      '--function',
+      'hello',
+      '--tail',
+      '--stage',
+      'dev',
+    ]);
+  });
 });

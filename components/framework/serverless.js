@@ -97,8 +97,17 @@ class ServerlessFramework extends Component {
     this.writeText(infoOutput);
   }
 
+  async retrieveFunctions() {
+    const { stdout: printOutput } = await this.exec('serverless', ['print']);
+    try {
+      return YAML.load(printOutput.toString()).functions || {};
+    } catch {
+      throw new Error(`Could not retrieve functions from configuration:\n${printOutput}`);
+    }
+  }
+
   async logs(options) {
-    const functions = this.outputs.functions || {};
+    const functions = await this.retrieveFunctions();
     // Some services do not have functions, let's not start a progress when tailing
     if (Object.keys(functions).length === 0) return;
 
