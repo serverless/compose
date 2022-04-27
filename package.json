@@ -24,6 +24,7 @@
     "child-process-ext": "^2.1.1",
     "ci-info": "^3.3.0",
     "cli-cursor": "^3",
+    "cross-spawn": "^7.0.3",
     "fs-extra": "^10.1.0",
     "globby": "^11.1.0",
     "graphlib": "^2.1.8",
