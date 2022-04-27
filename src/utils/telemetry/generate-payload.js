@@ -86,6 +86,10 @@ module.exports = ({
     versions: usedVersions,
   };
 
+  if (context) {
+    payload.hasEnabledVerboseInteractively = context.hasEnabledVerboseInteractively;
+  }
+
   if (commandDurationMs != null) {
     payload.commandDurationMs = commandDurationMs;
   }
