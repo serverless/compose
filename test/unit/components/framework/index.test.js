@@ -98,8 +98,15 @@ describe('test/unit/components/framework/index.test.js', () => {
       },
       stdout: {
         on: (arg, cb) => {
+          // Simulate the output we get with Serverless Domain Manager
+          // https://github.com/serverless/compose/issues/105
           const data =
-            'region: us-east-1\n\nStack Outputs:\n  Key: Output\n\n SOME ADDITONAL NON-YAML TEXT';
+            'region: us-east-1\n\n' +
+            'Stack Outputs:\n' +
+            '  Key: Output\n' +
+            'Serverless Domain Manager:\n' +
+            '  Domain Name: example.com\n' +
+            '  ------------------------';
           if (arg === 'data') cb(data);
         },
       },

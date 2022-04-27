@@ -240,27 +240,24 @@ class ServerlessFramework extends Component {
 
   async retrieveOutputs() {
     const { stdout: infoOutput } = await this.exec('serverless', ['info', '--verbose']);
-    let outputs;
     try {
-      outputs = YAML.load(infoOutput.toString())['Stack Outputs'];
+      return YAML.load(infoOutput.toString())['Stack Outputs'];
     } catch (e) {
       if (infoOutput.toString()) {
         // Try to extract the section with `Stack Outputs` and parse it
-        const res = infoOutput.toString().match(/Stack Outputs:[\s\S]+\n\n/);
+        // The regex below matches everything indented with 2 spaces below "Stack Outputs:"
+        // If plugins add extra output afterwards, it should be ignored.
+        const res = infoOutput.toString().match(/Stack Outputs:\n(( {2}[ \S]+\n)+)/);
         if (res) {
           try {
-            outputs = YAML.load(res[0])['Stack Outputs'];
+            return YAML.load(res[1]);
           } catch {
             // Pass to generic error
           }
         }
       }
-      if (!outputs) {
-        throw new Error(`Impossible to parse the output of "serverless info":\n${infoOutput}`);
-      }
     }
-
-    return outputs;
+    throw new Error(`Impossible to parse the output of "serverless info":\n${infoOutput}`);
   }
 
   /**
