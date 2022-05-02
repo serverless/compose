@@ -8,7 +8,6 @@ const args = require('minimist')(process.argv.slice(2));
 const { clone } = require('ramda');
 const renderHelp = require('./render-help');
 const Context = require('./Context');
-const Component = require('./Component');
 const ComponentsService = require('./ComponentsService');
 const generateTelemetryPayload = require('./utils/telemetry/generate-payload');
 const storeTelemetryLocally = require('./utils/telemetry/store-locally');
@@ -184,6 +183,4 @@ const runComponents = async () => {
 
 module.exports = {
   runComponents,
-  Component,
-  Context,
 };

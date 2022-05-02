@@ -1,6 +1,7 @@
 {
   "workspaces": [
-    "cli"
+    "cli",
+    "components"
   ],
   "scripts": {
     "lint": "eslint .",

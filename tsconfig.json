@@ -4,6 +4,7 @@
     "target": "es5",
     "sourceMap": true,
     "allowJs": true,
+    // Type checking for JS files too
     "checkJs": true,
     "resolveJsonModule": true,
     "strictNullChecks": true

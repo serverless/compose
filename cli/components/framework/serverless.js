@@ -1,6 +1,5 @@
 'use strict';
 
-const Component = require('../../src/Component');
 const spawn = require('cross-spawn');
 const YAML = require('js-yaml');
 const hasha = require('hasha');
@@ -8,12 +7,16 @@ const globby = require('globby');
 const path = require('path');
 const spawnExt = require('child-process-ext/spawn');
 const semver = require('semver');
+const { Component } = require('@serverless/components');
 
 const MINIMAL_FRAMEWORK_VERSION = '3.7.7';
 
 const doesSatisfyRequiredFrameworkVersion = (version) =>
   semver.gte(version, MINIMAL_FRAMEWORK_VERSION);
 
+/**
+ * @extends {Component}
+ */
 class ServerlessFramework extends Component {
   // TODO:
   // Component-specific commands
@@ -43,58 +46,58 @@ class ServerlessFramework extends Component {
   }
 
   async deploy() {
-    this.startProgress('deploying');
+    this.context.startProgress('deploying');
 
     let cacheHash;
     if (this.inputs.cachePatterns) {
-      this.updateProgress('calculating changes');
+      this.context.updateProgress('calculating changes');
       cacheHash = await this.calculateCacheHash();
       const hasNoChanges =
-        JSON.stringify(this.inputs) === JSON.stringify(this.state.inputs) &&
-        cacheHash === this.state.cacheHash;
+        JSON.stringify(this.inputs) === JSON.stringify(this.context.state.inputs) &&
+        cacheHash === this.context.state.cacheHash;
       if (hasNoChanges) {
-        this.successProgress('no changes');
+        this.context.successProgress('no changes');
         return;
       }
-      this.updateProgress('deploying');
+      this.context.updateProgress('deploying');
     }
 
     const { stderr: deployOutput } = await this.exec('serverless', ['deploy']);
 
-    const hasOutputs = this.outputs && Object.keys(this.outputs).length > 0;
+    const hasOutputs = this.context.outputs && Object.keys(this.context.outputs).length > 0;
     const hasChanges = !deployOutput.includes('No changes to deploy. Deployment skipped.');
     // Skip retrieving outputs via `sls info` if we already have outputs (faster)
     if (hasChanges || !hasOutputs) {
-      await this.updateOutputs(await this.retrieveOutputs());
+      await this.context.updateOutputs(await this.retrieveOutputs());
     }
 
     // Save state
     if (this.inputs.cachePatterns) {
-      this.state.inputs = this.inputs;
-      this.state.cacheHash = cacheHash;
-      await this.save();
+      this.context.state.inputs = this.inputs;
+      this.context.state.cacheHash = cacheHash;
+      await this.context.save();
     }
 
     if (hasChanges) {
-      this.successProgress('deployed');
+      this.context.successProgress('deployed');
     } else {
-      this.successProgress('no changes');
+      this.context.successProgress('no changes');
     }
   }
 
   async remove() {
-    this.startProgress('removing');
+    this.context.startProgress('removing');
 
     await this.exec('serverless', ['remove']);
     this.state = {};
-    await this.save();
-    await this.updateOutputs({});
-    this.successProgress('removed');
+    await this.context.save();
+    await this.context.updateOutputs({});
+    this.context.successProgress('removed');
   }
 
   async info() {
     const { stdout: infoOutput } = await this.exec('serverless', ['info']);
-    this.writeText(infoOutput);
+    this.context.writeText(infoOutput);
   }
 
   async retrieveFunctions() {
@@ -112,7 +115,7 @@ class ServerlessFramework extends Component {
     if (Object.keys(functions).length === 0) return;
 
     if (options.tail) {
-      this.startProgress('logs');
+      this.context.startProgress('logs');
     }
 
     const promises = Object.keys(functions).map(async (functionName) => {
@@ -125,32 +128,32 @@ class ServerlessFramework extends Component {
           if (output.length > 0) {
             // Silence this error because it's not really an error: there are simply no logs
             if (output.includes('No existing streams for the function')) return;
-            this.writeText(output.trim(), [functionName]);
+            this.context.writeText(output.trim(), [functionName]);
           }
         });
       } catch (e) {
         // Silence this error because it's not really an error: there are simply no logs
         if (typeof e === 'string' && e.includes('No existing streams for the function')) return;
-        this.logError(e, [functionName]);
+        this.context.logError(e, [functionName]);
       }
     });
     await Promise.all(promises);
 
     if (options.tail) {
-      this.successProgress('no log streams to tail');
+      this.context.successProgress('no log streams to tail');
     }
   }
 
   async refreshOutputs() {
-    this.startProgress('refreshing outputs');
-    await this.updateOutputs(await this.retrieveOutputs());
-    this.successProgress('outputs refreshed');
+    this.context.startProgress('refreshing outputs');
+    await this.context.updateOutputs(await this.retrieveOutputs());
+    this.context.successProgress('outputs refreshed');
   }
 
   async ensureFrameworkVersion() {
     if (
-      !this.state.detectedFrameworkVersion ||
-      !doesSatisfyRequiredFrameworkVersion(this.state.detectedFrameworkVersion)
+      !this.context.state.detectedFrameworkVersion ||
+      !doesSatisfyRequiredFrameworkVersion(this.context.state.detectedFrameworkVersion)
     ) {
       let stdoutResult;
       try {
@@ -167,8 +170,8 @@ class ServerlessFramework extends Component {
         if (doesSatisfyRequiredFrameworkVersion(version)) {
           // Stored to avoid checking it on each invocation
           // We ignore edge case when someone downgrades or uninstalls serverless afterwards
-          this.state.detectedFrameworkVersion = version;
-          this.save();
+          this.context.state.detectedFrameworkVersion = version;
+          this.context.save();
         } else {
           throw new Error(
             `The installed version of Serverless Framework (${version}) is not supported by Compose. Please upgrade Serverless Framework to a version greater or equal to "${MINIMAL_FRAMEWORK_VERSION}"`
@@ -188,7 +191,7 @@ class ServerlessFramework extends Component {
   async exec(command, args, streamStdout = false, stdoutCallback = undefined) {
     await this.ensureFrameworkVersion();
     // Add stage
-    args.push('--stage', this.stage);
+    args.push('--stage', this.context.stage);
     // Add config file name if necessary
     if (this.inputs && this.inputs.config) {
       args.push('--config', this.inputs.config);
@@ -205,7 +208,7 @@ class ServerlessFramework extends Component {
       args = [process.pkg.entrypoint, ...args];
     }
 
-    this.logVerbose(`Running "${command} ${args.join(' ')}"`);
+    this.context.logVerbose(`Running "${command} ${args.join(' ')}"`);
     return new Promise((resolve, reject) => {
       const child = spawn(command, args, {
         cwd: this.inputs.path,
@@ -217,7 +220,7 @@ class ServerlessFramework extends Component {
       let allOutput = '';
       if (child.stdout) {
         child.stdout.on('data', (data) => {
-          this.logVerbose(data.toString().trim());
+          this.context.logVerbose(data.toString().trim());
           stdout += data;
           allOutput += data;
           if (stdoutCallback) {
@@ -227,7 +230,7 @@ class ServerlessFramework extends Component {
       }
       if (child.stderr) {
         child.stderr.on('data', (data) => {
-          this.logVerbose(data.toString().trim());
+          this.context.logVerbose(data.toString().trim());
           stderr += data;
           allOutput += data;
         });
