@@ -55,7 +55,7 @@ jobs:
       - name: Validate lint rules
         run: npm run lint:updated
       - name: Unit tests
-        run: npm test
+        run: npm run test --workspaces
 
   windowsNode14:
     name: '[Windows] Node.js v14: Unit tests'
@@ -87,7 +87,7 @@ jobs:
           npm update --no-save
           npm update --save-dev --no-save
       - name: Unit tests
-        run: npm test
+        run: npm run test --workspaces
 
   linuxNode16:
     name: '[Linux] Node.js 16: Unit tests'
@@ -119,7 +119,7 @@ jobs:
           npm update --no-save
           npm update --save-dev --no-save
       - name: Unit tests
-        run: npm test
+        run: npm run test --workspaces
 
   linuxNode12:
     name: '[Linux] Node.js 12: Unit tests'
@@ -151,4 +151,4 @@ jobs:
           npm update --no-save
           npm update --save-dev --no-save
       - name: Unit tests
-        run: npm test
+        run: npm run test --workspaces
