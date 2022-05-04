@@ -1,7 +1,10 @@
 {
   "workspaces": [
     "cli",
-    "components"
+    "components",
+    "components-aws",
+    "website",
+    "demo/*"
   ],
   "scripts": {
     "lint": "eslint .",

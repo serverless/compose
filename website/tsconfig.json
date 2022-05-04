@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2019",
+    "outDir": "dist",
+    "strictNullChecks": true,
+    // This is needed to that TS works with NPM workspaces
+    "moduleResolution": "node"
+  },
+  "include": ["src"]
+}
