@@ -4,7 +4,6 @@ import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts';
 import * as childProcess from 'child_process';
 import { App } from 'aws-cdk-lib';
 import { ComponentContext } from '@serverless/components';
-import sdkConfig from './sdk-config';
 
 export default class Cdk {
   private readonly toolkitStackName = 'serverless-cdk-toolkit';
@@ -13,7 +12,8 @@ export default class Cdk {
   constructor(
     private readonly context: ComponentContext,
     private readonly stackName: string,
-    private readonly region: string
+    private readonly region: string,
+    private readonly sdkConfig: { region: string }
   ) {
     this.artifactDirectory = `.serverless/${this.stackName}`;
   }
@@ -55,10 +55,6 @@ export default class Cdk {
     this.context.state.cloudFormationTemplateHash = cloudFormationTemplateHash;
     await this.context.save();
 
-    // if (deployResult.noOp) {
-    //   this.logVerbose('Nothing to deploy, the stack is up to date');
-    //   return false;
-    // }
     this.context.logVerbose('Deployment success');
     return true;
   }
@@ -81,7 +77,7 @@ export default class Cdk {
   async getStackOutputs(): Promise<Record<string, string>> {
     this.context.logVerbose(`Fetching outputs of stack "${this.stackName}"`);
 
-    const cloudFormation = new CloudFormationClient(await sdkConfig(this.region));
+    const cloudFormation = new CloudFormationClient(this.sdkConfig);
     let data;
     try {
       data = await cloudFormation.send(
@@ -154,10 +150,7 @@ export default class Cdk {
   private async execCdk(args: string[]): Promise<{ stdout: string; stderr: string }> {
     this.context.logVerbose(`Running "cdk ${args.join(' ')}"`);
     return new Promise((resolve, reject) => {
-      const child = childProcess.spawn('cdk', args, {
-        // cwd: this.inputs.path,
-        // env: { ...process.env, SLS_DISABLE_AUTO_UPDATE: '1' },
-      });
+      const child = childProcess.spawn('cdk', args);
       let stdout = '';
       let stderr = '';
       let allOutput = '';

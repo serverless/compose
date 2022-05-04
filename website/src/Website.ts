@@ -21,7 +21,7 @@ export default class Website extends AwsComponent {
   async deploy() {
     this.context.startProgress('deploying');
 
-    const cdk = this.getCdk();
+    const cdk = await this.getCdk();
 
     const app = new App({
       outdir: cdk.artifactDirectory,
@@ -51,7 +51,7 @@ export default class Website extends AwsComponent {
 
     // TODO empty bucket
 
-    const cdk = this.getCdk();
+    const cdk = await this.getCdk();
     await cdk.remove(app);
 
     this.context.state = {};

@@ -1,6 +1,5 @@
 import { Component, ComponentContext } from '@serverless/components';
 import Cdk from './Cdk';
-import sdkConfig from './sdk-config';
 
 export default abstract class AwsComponent extends Component {
   readonly stackName: string;
@@ -15,11 +14,18 @@ export default abstract class AwsComponent extends Component {
     this.region = this.inputs.region ?? 'us-east-1';
   }
 
-  getCdk(): Cdk {
-    return new Cdk(this.context, this.stackName, this.region);
+  async getCdk(): Promise<Cdk> {
+    return new Cdk(this.context, this.stackName, this.region, await this.getSdkConfig());
   }
 
   async getSdkConfig() {
-    return await sdkConfig(this.region);
+    // TODO We should probably look at how AWS CDK resolves credentials.
+    // The CDK has a tool that creates a preconfigured SDK (SdkProvider)
+    // using credentials resolution compatible with the AWS CLI, and that
+    // supports the AssumeRole of the ToolkitStack.
+    // @see https://github.com/aws/aws-cdk/blob/fa16f7a9c11981da75e44ffc83adcdc6edad94fc/packages/aws-cdk/lib/cli.ts#L257-L264
+    return {
+      region: this.region,
+    };
   }
 }
