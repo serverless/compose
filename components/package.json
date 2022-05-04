@@ -6,7 +6,6 @@
   "license": "MIT",
   "scripts": {
     "build": "",
-    "watch": "",
     "test": ""
   }
 }
