@@ -31,7 +31,8 @@ export default class Website extends AwsComponent {
     const hasInfrastructureChanges = await cdk.deploy(app);
 
     if (hasInfrastructureChanges) {
-      await this.context.updateOutputs(await cdk.getStackOutputs());
+      this.context.outputs = await cdk.getStackOutputs();
+      await this.context.save();
     }
 
     const filesChanged = await this.uploadWebsite();
@@ -55,8 +56,8 @@ export default class Website extends AwsComponent {
     await cdk.remove(app);
 
     this.context.state = {};
+    this.context.outputs = {};
     await this.context.save();
-    await this.context.updateOutputs({});
 
     this.context.successProgress('removed');
   }

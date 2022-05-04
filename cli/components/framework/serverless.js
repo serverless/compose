@@ -68,7 +68,8 @@ class ServerlessFramework extends Component {
     const hasChanges = !deployOutput.includes('No changes to deploy. Deployment skipped.');
     // Skip retrieving outputs via `sls info` if we already have outputs (faster)
     if (hasChanges || !hasOutputs) {
-      await this.context.updateOutputs(await this.retrieveOutputs());
+      this.context.outputs = await this.retrieveOutputs();
+      await this.context.save();
     }
 
     // Save state
@@ -89,9 +90,9 @@ class ServerlessFramework extends Component {
     this.context.startProgress('removing');
 
     await this.exec('serverless', ['remove']);
-    this.state = {};
+    this.context.state = {};
+    this.context.outputs = {};
     await this.context.save();
-    await this.context.updateOutputs({});
     this.context.successProgress('removed');
   }
 
@@ -146,7 +147,8 @@ class ServerlessFramework extends Component {
 
   async refreshOutputs() {
     this.context.startProgress('refreshing outputs');
-    await this.context.updateOutputs(await this.retrieveOutputs());
+    this.context.outputs = await this.retrieveOutputs();
+    await this.context.save();
     this.context.successProgress('outputs refreshed');
   }
 
