@@ -20,7 +20,7 @@ class ComponentContext {
     /** @type {Record<string, any>} */
     this.outputs = {};
 
-    /** @private Let's try to keep the context private so that we limit the API surface for components */
+    /** @private Let's keep the context private so that we limit the API surface for components */
     this.context = context;
   }
 

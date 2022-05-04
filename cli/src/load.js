@@ -1,25 +1,24 @@
 'use strict';
 
-const { resolve } = require('path');
 const ComponentContext = require('./ComponentContext');
 
 /**
+ * @param {{
+ *     context: import('./Context'),
+ *     path: string,
+ *     alias: string,
+ *     inputs: Record<string, any>,
+ * }} param
  * @return {Promise<import('@serverless/components').Component>}
  */
 async function loadComponent({ context, path, alias, inputs }) {
-  const externalComponentPath = resolve(context.root, path, 'serverless.js');
-
-  const ComponentClass = require(externalComponentPath);
+  const ComponentClass = require(path);
 
   const componentId = alias || ComponentClass.name;
   const componentContext = new ComponentContext(componentId, context);
+  await componentContext.init();
 
-  const component = new ComponentClass(componentId, componentContext, inputs);
-
-  // populate state based on the component id
-  await component.init();
-
-  return component;
+  return new ComponentClass(componentId, componentContext, inputs);
 }
 
 module.exports = { loadComponent };

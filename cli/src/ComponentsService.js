@@ -11,8 +11,8 @@ const { loadComponent } = require('./load');
 const colors = require('./cli/colors');
 
 const INTERNAL_COMPONENTS = {
-  'serverless-framework': resolve(__dirname, '../components/framework'),
-  'aws-cloudformation': resolve(__dirname, '../components/aws-cloudformation'),
+  'serverless-framework': resolve(__dirname, '../components/framework/serverless.js'),
+  'aws-cloudformation': resolve(__dirname, '../components/aws-cloudformation/serverless.js'),
 };
 
 const formatError = (e) => {
@@ -85,13 +85,18 @@ const getAllComponents = async (obj = {}) => {
   for (const [key, val] of Object.entries(obj.services)) {
     if (val.component) {
       if (val.component[0] === '.') {
-        const localComponentPath = resolve(process.cwd(), val.component, 'serverless.js');
+        const localComponentPath = resolve(process.cwd(), val.component);
         if (!(await utils.fileExists(localComponentPath))) {
           throw new ServerlessError(
-            `The component "${val.component}" (used by service "${key}") is invalid: no serverless.js file found`,
-            'MISSING_SERVERLESS_FILE_IN_COMPONENT_PATH'
+            `The component "${val.component}" (used by service "${key}") is invalid: file not found`,
+            'INVALID_COMPONENT_PATH'
           );
         }
+        allComponents[key] = {
+          path: localComponentPath,
+          inputs: val,
+        };
+      } else if (val.component[0] === '@') {
         allComponents[key] = {
           path: val.component,
           inputs: val,
