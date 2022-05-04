@@ -32,3 +32,7 @@ export interface ComponentContext {
   updateProgress(text: string): void;
   successProgress(text: string): void;
 }
+
+export declare class ServerlessError extends Error {
+  constructor(message: string, code: string);
+}
