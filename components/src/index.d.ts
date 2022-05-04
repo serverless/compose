@@ -12,11 +12,11 @@ export declare abstract class Component {
 
   protected constructor(id: string, context: ComponentContext, inputs: Record<string, any>);
 
-  abstract deploy(): Promise<void>;
-  abstract remove(): Promise<void>;
-  abstract info(): Promise<void>;
-  abstract refreshOutputs(): Promise<void>;
-  logs?(): Promise<void>;
+  abstract deploy(): Promise<void> | void;
+  abstract remove(): Promise<void> | void;
+  abstract info(): Promise<void> | void;
+  abstract refreshOutputs(): Promise<void> | void;
+  logs?(): Promise<void> | void;
 }
 
 export interface ComponentContext {
