@@ -53,7 +53,7 @@ export default class Cdk {
     ]);
 
     this.context.state.cloudFormationTemplateHash = cloudFormationTemplateHash;
-    this.context.save();
+    await this.context.save();
 
     // if (deployResult.noOp) {
     //   this.logVerbose('Nothing to deploy, the stack is up to date');
@@ -140,7 +140,7 @@ export default class Cdk {
       'serverless',
     ]);
     this.context.state.cdkBootstrapped = true;
-    this.context.save();
+    await this.context.save();
   }
 
   private computeStackTemplateHash(stackTemplate: string): string {
