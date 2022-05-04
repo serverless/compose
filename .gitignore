@@ -1,7 +1,7 @@
 /.eslintcache
 /.nyc_output
 /coverage
-/dist
+dist
 npm-debug.log
 package-lock.json
 yarn.lock
