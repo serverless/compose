@@ -18,8 +18,10 @@
   },
   "author": "serverless.com",
   "license": "MIT",
+  "peerDependencies": {
+    "@serverless/components": "^0.0.1"
+  },
   "dependencies": {
-    "@serverless/components": "file:./components",
     "@serverless/utils": "^6.0.3",
     "chalk": "^4.1.2",
     "child-process-ext": "^2.1.1",

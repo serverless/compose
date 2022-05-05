@@ -8,9 +8,11 @@
     "build": "tsc",
     "build-fast": "esbuild-node-tsc"
   },
+  "peerDependencies": {
+    "@serverless/components": "^0.0.1"
+  },
   "dependencies": {
-    "@serverless/components": "file:./components",
-    "@serverless/components-aws": "file:./components-aws",
+    "@serverless/components-aws": "^0.0.1",
     "@aws-sdk/client-cloudfront": "^3.81.0",
     "@aws-sdk/client-s3": "^3.81.0",
     "aws-cdk-lib": "^2.22.0",
