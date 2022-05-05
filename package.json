@@ -7,7 +7,9 @@
     "demo/*"
   ],
   "scripts": {
-    "watch": "nodemon --watch '**/src/**' --ext ts --exec 'npm run build --workspaces'",
+    "build": "npm run build --workspaces --if-present",
+    "watch": "nodemon --watch '**/src/**' --ext ts --exec 'npm run build-fast --workspaces --if-present'",
+    "test": "npm run test --workspaces --if-present",
     "lint": "eslint .",
     "prettify": "prettier --write --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml}\"",
     "prettier-check:updated": "pipe-git-updated --ext=css --ext=html --ext=js --ext=json --ext=md --ext=yaml --ext=yml --base=main -- prettier -c",
@@ -19,6 +21,7 @@
     "@serverless/eslint-config": "^4.0.0",
     "@typescript-eslint/eslint-plugin": "^5.21.0",
     "@typescript-eslint/parser": "^5.21.0",
+    "esbuild-node-tsc": "^1.8.5",
     "eslint": "^8.14.0",
     "eslint-plugin-import": "^2.26.0",
     "git-list-updated": "^1.2.1",

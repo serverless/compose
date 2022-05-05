@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "test": ""
+    "build-fast": "esbuild-node-tsc"
   },
   "dependencies": {
     "@aws-sdk/client-cloudformation": "^3.81.0",

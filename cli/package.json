@@ -9,7 +9,6 @@
     "slsc": "./bin/serverless-compose"
   },
   "scripts": {
-    "build": "",
     "lint": "eslint .",
     "prettify": "prettier --write --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml}\"",
     "prettier-check:updated": "pipe-git-updated --ext=css --ext=html --ext=js --ext=json --ext=md --ext=yaml --ext=yml --base=main -- prettier -c",
