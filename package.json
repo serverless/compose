@@ -3,7 +3,7 @@
     "cli",
     "components",
     "components-aws",
-    "website",
+    "components-all/*",
     "demo/*"
   ],
   "scripts": {
