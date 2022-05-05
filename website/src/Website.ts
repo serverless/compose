@@ -50,7 +50,10 @@ export default class Website extends AwsComponent {
     const app = new App();
     new WebsiteConstruct(app, this.stackName, this.inputs as WebsiteInput);
 
-    // TODO empty bucket
+    if (this.context.outputs.bucketName) {
+      const s3Sync = new S3Sync(await this.getSdkConfig(), this.context);
+      await s3Sync.emptyBucket(this.context.outputs.bucketName);
+    }
 
     const cdk = await this.getCdk();
     await cdk.remove(app);

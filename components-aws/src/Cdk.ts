@@ -28,7 +28,7 @@ export default class Cdk {
     const stackArtifact = app.synth().getStackByName(this.stackName);
 
     const cloudFormationTemplateHash = this.computeStackTemplateHash(stackArtifact.template);
-    if (this.context.state.cloudFormationTemplateHash === cloudFormationTemplateHash) {
+    if (this.context.state.cdk?.cloudFormationTemplateHash === cloudFormationTemplateHash) {
       this.context.logVerbose('Nothing to deploy, the stack is up to date');
       return false;
     }
@@ -52,15 +52,49 @@ export default class Cdk {
       'never',
     ]);
 
-    this.context.state.cloudFormationTemplateHash = cloudFormationTemplateHash;
+    if (this.context.state.cdk === undefined) {
+      this.context.state.cdk = {};
+    }
+    this.context.state.cdk.cloudFormationTemplateHash = cloudFormationTemplateHash;
     await this.context.save();
 
     this.context.logVerbose('Deployment success');
     return true;
   }
 
-  async remove(app: App) {
-    throw new Error('TODO');
+  async remove(app: App): Promise<void> {
+    if (!this.context.state.cdk?.cloudFormationTemplateHash) {
+      this.context.logVerbose(`${this.stackName} was not deployed, nothing to remove`);
+      return;
+    }
+
+    await this.bootstrapCdk();
+
+    this.context.logVerbose(`Preparing ${this.stackName}`);
+    app.synth().getStackByName(this.stackName);
+
+    this.context.logVerbose(`Removing ${this.stackName}`);
+    await this.execCdk([
+      'destroy',
+      '--force',
+      /**
+       * The `:` is a shell "no-op" command. The `--app` arg tells CDK which command to run
+       * to package the application. Since we package the app ourselves above (via `synth()`),
+       * the artifacts exist already. The CDK can directly take these artifacts and deploy.
+       */
+      '--app',
+      ':',
+      '--toolkit-stack-name',
+      this.toolkitStackName,
+      '--output',
+      this.artifactDirectory,
+      // We don't want the CDK to interactively ask for approval for sensitive changes.
+      '--require-approval',
+      'never',
+    ]);
+    delete this.context.state.cdk.cloudFormationTemplateHash;
+    await this.context.save();
+    this.context.logVerbose('Stack removed with success');
   }
 
   async getAccountId(): Promise<string> {
@@ -107,7 +141,7 @@ export default class Cdk {
    * @private
    */
   async bootstrapCdk() {
-    if (this.context.state.cdkBootstrapped) {
+    if (this.context.state.cdk?.cdkBootstrapped) {
       this.context.logVerbose('The AWS CDK is already set up, moving on');
       return;
     }
@@ -135,7 +169,11 @@ export default class Cdk {
       '--qualifier',
       'serverless',
     ]);
-    this.context.state.cdkBootstrapped = true;
+
+    if (this.context.state.cdk === undefined) {
+      this.context.state.cdk = {};
+    }
+    this.context.state.cdk.cdkBootstrapped = true;
     await this.context.save();
   }
 

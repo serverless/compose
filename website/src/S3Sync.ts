@@ -84,6 +84,11 @@ export default class S3Sync {
     return fileChangeCount;
   }
 
+  async emptyBucket(bucketName: string) {
+    const existingObjects = await this.s3ListAll(bucketName);
+    await this.s3Delete(bucketName, Object.keys(existingObjects));
+  }
+
   private async listFilesRecursively(directory: string): Promise<string[]> {
     const items = await fs.readdir(directory);
 
