@@ -1,13 +1,13 @@
 import { App } from 'aws-cdk-lib';
 import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
-import { ServerlessError } from '@serverless/components';
+import { ComponentContext, ServerlessError } from '@serverless/components';
 import { AwsComponent } from '@serverless/components-aws';
 import WebsiteConstruct from './WebsiteConstruct';
 import { WebsiteInput } from './Input';
 import S3Sync from './S3Sync';
 
 export default class Website extends AwsComponent {
-  constructor(id: string, context: never, inputs: WebsiteInput) {
+  constructor(id: string, context: ComponentContext, inputs: WebsiteInput) {
     super(id, context, inputs);
 
     if (inputs.domain !== undefined && inputs.certificate === undefined) {
