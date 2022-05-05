@@ -2,7 +2,7 @@
 
 module.exports = {
   root: true,
-  ignorePatterns: ['demo/*'],
+  ignorePatterns: ['demo/*', '**/dist/*'],
   plugins: ['import', '@typescript-eslint'],
   extends: ['@serverless/eslint-config/node'],
   overrides: [
@@ -24,6 +24,6 @@ module.exports = {
   ],
   rules: {
     // This pattern is used by the CDK
-    'no-new': ['off']
+    'no-new': ['off'],
   },
 };
