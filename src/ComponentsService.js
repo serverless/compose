@@ -12,7 +12,6 @@ const colors = require('./cli/colors');
 
 const INTERNAL_COMPONENTS = {
   'serverless-framework': resolve(__dirname, '../components/framework'),
-  'aws-cloudformation': resolve(__dirname, '../components/aws-cloudformation'),
 };
 
 const formatError = (e) => {
