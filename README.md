@@ -7,6 +7,5 @@ Check out the [Serverless Framework Compose documentation](https://www.serverles
 -------
 
 <br>
-
-| <br>**[Try Serverless Console](https://bit.ly/3kL8ACL)**<br><br>Monitor, observe, and trace your serverless architectures.<br>Real-time dev mode provides streaming logs from your AWS Lambda Functions.<br><br>![1800x1-ffffff7f](https://user-images.githubusercontent.com/3837103/167449348-bf254fca-9aec-4367-b166-aaa69178f98c.png) |
-| :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| <br>**[Try Serverless Console](https://bit.ly/3kL8ACL)**<br>Monitor, observe, and trace your serverless architectures. Real-time dev mode provides streaming logs from your AWS Lambda Functions.<br><br> |
+|---|
