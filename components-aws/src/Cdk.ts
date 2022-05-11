@@ -209,10 +209,16 @@ export default class Cdk {
       child.on('error', (err) => reject(err));
       child.on('close', (code) => {
         if (code !== 0) {
-          // Try to extract the error message (temporary solution)
-          const errorMessagePosition = stdout.indexOf('Error:');
-          const error = errorMessagePosition >= 0 ? stdout.slice(errorMessagePosition) : allOutput;
-          reject(error);
+          if (
+            allOutput.includes(
+              'This CDK CLI is not compatible with the CDK library used by your application'
+            )
+          ) {
+            reject(
+              'This component uses a version of "aws-cdk-lib" that is more recent than the version of "aws-cdk" used by the "@serverless/components-aws" package'
+            );
+          }
+          reject(allOutput);
         }
         resolve({ stdout, stderr });
       });
