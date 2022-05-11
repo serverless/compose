@@ -188,7 +188,12 @@ export default class Cdk {
   private async execCdk(args: string[]): Promise<{ stdout: string; stderr: string }> {
     this.context.logVerbose(`Running "cdk ${args.join(' ')}"`);
     return new Promise((resolve, reject) => {
-      const child = childProcess.spawn('cdk', args);
+      const child = childProcess.spawn('cdk', args, {
+        env: {
+          ...process.env,
+          CDK_DISABLE_VERSION_CHECK: '1',
+        },
+      });
       let stdout = '';
       let stderr = '';
       let allOutput = '';
