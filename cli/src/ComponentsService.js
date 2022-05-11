@@ -388,6 +388,7 @@ class ComponentsService {
     } else {
       await this.instantiateComponents();
 
+      /** @type {import('@serverless/components').Component} */
       const component =
         this.allComponents &&
         this.allComponents[componentName] &&
@@ -395,7 +396,7 @@ class ComponentsService {
       if (component === undefined) {
         throw new ServerlessError(`Unknown service "${componentName}"`, 'COMPONENT_NOT_FOUND');
       }
-      component.logVerbose(`Invoking "${command}" on service "${componentName}"`);
+      component.context.logVerbose(`Invoking "${command}" on service "${componentName}"`);
 
       const isDefaultCommand = ['deploy', 'remove', 'logs', 'info'].includes(command);
 
