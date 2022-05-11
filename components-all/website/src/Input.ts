@@ -1,10 +1,15 @@
 export type WebsiteInput = {
   path: string;
-  region: string | undefined;
-  domain: string | string[] | undefined;
-  certificate: string | undefined;
-  security: {
-    allowIframe: boolean | undefined;
+  build?: {
+    run: string;
+    cwd?: string;
+    environment?: Record<string, string>;
   };
-  redirectToMainDomain: boolean | undefined;
+  region?: string;
+  domain?: string | string[];
+  certificate?: string;
+  security?: {
+    allowIframe: boolean;
+  };
+  redirectToMainDomain?: boolean;
 };

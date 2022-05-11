@@ -2,6 +2,7 @@ import { App } from 'aws-cdk-lib';
 import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
 import { ComponentContext, ServerlessError } from '@serverless/components';
 import { AwsComponent } from '@serverless/components-aws';
+import { exec } from 'child_process';
 import WebsiteConstruct from './WebsiteConstruct';
 import { WebsiteInput } from './Input';
 import S3Sync from './S3Sync';
@@ -19,7 +20,11 @@ export default class Website extends AwsComponent {
   }
 
   async deploy() {
-    this.context.startProgress('deploying');
+    this.context.startProgress('building');
+
+    await this.build();
+
+    this.context.updateProgress('deploying');
 
     const cdk = await this.getCdk();
 
@@ -86,6 +91,43 @@ export default class Website extends AwsComponent {
     }
 
     return fileChangeCount;
+  }
+
+  private async build() {
+    const buildCommand = this.inputs.build?.run;
+    if (!buildCommand) {
+      return;
+    }
+
+    this.context.logVerbose(`Running "${buildCommand}"`);
+    await new Promise<void>((resolve, reject) => {
+      // We use exec() because the command to run is a string command
+      // with arguments in it (spawn doesn't support that)
+      // exec() also runs in a shell by default, which is probably
+      // what users expect
+      const child = exec(buildCommand, {
+        cwd: this.inputs.build.cwd,
+        env: {
+          ...process.env,
+          ...(this.inputs.build.environment ?? {}),
+        },
+      });
+      if (child.stdout) {
+        child.stdout.on('data', (data) => this.context.logVerbose(data.toString().trim()));
+      }
+      if (child.stderr) {
+        child.stderr.on('data', (data) => this.context.logVerbose(data.toString().trim()));
+      }
+      child.on('error', (err) => reject(err));
+      child.on('close', (code) => {
+        if (code !== 0) {
+          reject(`The command "${buildCommand}" failed with exit code ${code}`);
+        }
+        resolve();
+      });
+      // Make sure that when our process is killed, we terminate the subprocess too
+      process.on('exit', () => child.kill());
+    });
   }
 
   private async clearCDNCache() {
