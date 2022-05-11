@@ -1,7 +1,7 @@
 import { App } from 'aws-cdk-lib';
 import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
-import { ComponentContext, ServerlessError } from '@serverless/components';
-import { AwsComponent } from '@serverless/components-aws';
+import { ComponentContext, ServerlessError } from '@serverless-components/core';
+import { AwsComponent } from '@serverless-components/core-aws';
 import { exec } from 'child_process';
 import WebsiteConstruct from './WebsiteConstruct';
 import { WebsiteInput } from './Input';

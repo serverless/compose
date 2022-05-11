@@ -19,7 +19,7 @@
   "author": "serverless.com",
   "license": "MIT",
   "peerDependencies": {
-    "@serverless/components": "^0.0.1"
+    "@serverless-components/core": "^0.0.1"
   },
   "dependencies": {
     "@serverless/utils": "^6.0.3",

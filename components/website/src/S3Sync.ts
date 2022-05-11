@@ -11,7 +11,7 @@ import {
   PutObjectCommand,
   S3ClientConfig,
 } from '@aws-sdk/client-s3';
-import { ComponentContext, ServerlessError } from '@serverless/components';
+import { ComponentContext, ServerlessError } from '@serverless-components/core';
 
 type S3Objects = Record<string, _Object>;
 

@@ -1,9 +1,9 @@
 {
   "workspaces": [
     "cli",
-    "components",
-    "components-aws",
-    "components-all/*",
+    "core",
+    "core-aws",
+    "components/*",
     "demo/*"
   ],
   "scripts": {

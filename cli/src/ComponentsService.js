@@ -388,7 +388,7 @@ class ComponentsService {
     } else {
       await this.instantiateComponents();
 
-      /** @type {import('@serverless/components').Component} */
+      /** @type {import('@serverless-components/core').Component} */
       const component =
         this.allComponents &&
         this.allComponents[componentName] &&

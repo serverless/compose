@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * @typedef {import('@serverless/components').ComponentContext} ComponentContextInterface
+ * @typedef {import('@serverless-components/core').ComponentContext} ComponentContextInterface
  */
 
 /**

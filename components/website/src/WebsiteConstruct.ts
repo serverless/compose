@@ -13,7 +13,7 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { Construct } from 'constructs';
-import { ServerlessError } from '@serverless/components';
+import { ServerlessError } from '@serverless-components/core';
 import { WebsiteInput } from './Input';
 
 export default class WebsiteConstruct extends Stack {

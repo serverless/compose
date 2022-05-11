@@ -3,7 +3,7 @@ import { CloudFormationClient, DescribeStacksCommand } from '@aws-sdk/client-clo
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts';
 import * as childProcess from 'child_process';
 import { App } from 'aws-cdk-lib';
-import { ComponentContext } from '@serverless/components';
+import { ComponentContext } from '@serverless-components/core';
 
 export default class Cdk {
   private readonly toolkitStackName = 'serverless-cdk-toolkit';
@@ -215,7 +215,7 @@ export default class Cdk {
             )
           ) {
             reject(
-              'This component uses a version of "aws-cdk-lib" that is more recent than the version of "aws-cdk" used by the "@serverless/components-aws" package'
+              'This component uses a version of "aws-cdk-lib" that is more recent than the version of "aws-cdk" used by the "@serverless-components/core-aws" package'
             );
           }
           reject(allOutput);

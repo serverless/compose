@@ -1,5 +1,5 @@
 {
-  "name": "@serverless/cdk",
+  "name": "@serverless-components/cdk",
   "version": "0.0.1",
   "main": "dist/index.js",
   "author": "serverless.com",
@@ -9,10 +9,10 @@
     "build-fast": "esbuild-node-tsc"
   },
   "peerDependencies": {
-    "@serverless/components": "^0.0.1"
+    "@serverless-components/core": "^0.0.1"
   },
   "dependencies": {
-    "@serverless/components-aws": "^0.0.1",
+    "@serverless-components/core-aws": "^0.0.1",
     "aws-cdk-lib": "^2.22.0"
   }
 }

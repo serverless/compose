@@ -1,4 +1,4 @@
-import { Component, ComponentContext } from '@serverless/components';
+import { Component, ComponentContext } from '@serverless-components/core';
 import Cdk from './Cdk';
 
 export default abstract class AwsComponent extends Component {

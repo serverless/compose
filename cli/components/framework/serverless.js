@@ -7,7 +7,7 @@ const globby = require('globby');
 const path = require('path');
 const spawnExt = require('child-process-ext/spawn');
 const semver = require('semver');
-const { Component } = require('@serverless/components');
+const { Component } = require('@serverless-components/core');
 
 const MINIMAL_FRAMEWORK_VERSION = '3.7.7';
 

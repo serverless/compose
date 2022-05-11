@@ -1,5 +1,5 @@
 import { App, Stack } from 'aws-cdk-lib';
-import { AwsComponent } from '@serverless/components-aws';
+import { AwsComponent } from '@serverless-components/core-aws';
 import * as path from 'path';
 
 export default class CdkComponent extends AwsComponent {

@@ -1,5 +1,5 @@
 {
-  "name": "@serverless/components-aws",
+  "name": "@serverless-components/core-aws",
   "version": "0.0.1",
   "main": "dist/index.js",
   "author": "serverless.com",
@@ -9,7 +9,7 @@
     "build-fast": "esbuild-node-tsc"
   },
   "peerDependencies": {
-    "@serverless/components": "^0.0.1"
+    "@serverless-components/core": "^0.0.1"
   },
   "dependencies": {
     "@aws-sdk/client-cloudformation": "^3.81.0",
