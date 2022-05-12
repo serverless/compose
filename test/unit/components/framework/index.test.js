@@ -173,7 +173,7 @@ describe('test/unit/components/framework/index.test.js', () => {
     const component = new FrameworkComponent('some-id', context, { path: 'custom-path' });
     component.state.detectedFrameworkVersion = '9.9.9';
 
-    await component.command('print', { key: 'val', flag: true });
+    await component.command('print', { key: 'val', flag: true, o: 'shortoption' });
 
     expect(spawnStub).to.be.calledOnce;
     expect(spawnStub.getCall(0).args[0]).to.equal('serverless');
@@ -181,6 +181,8 @@ describe('test/unit/components/framework/index.test.js', () => {
       'print',
       '--key=val',
       '--flag',
+      '-o',
+      'shortoption',
       '--stage',
       'dev',
     ]);
