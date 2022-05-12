@@ -31,10 +31,15 @@ class ServerlessFramework extends Component {
   async command(command, options) {
     const cliparams = Object.entries(options)
       .filter(([key]) => key !== 'stage')
-      .map(([key, value]) => {
+      .flatMap(([key, value]) => {
         if (value === true) {
           // Support flags like `--verbose`
           return `--${key}`;
+        }
+        if (key.length === 1) {
+          // To handle shorthand notation like
+          // deploy -f function
+          return [`-${key}`, value];
         }
         return `--${key}=${value}`;
       });
