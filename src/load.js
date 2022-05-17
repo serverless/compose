@@ -1,7 +1,7 @@
 'use strict';
 
-const { resolve } = require('path');
 const ComponentContext = require('./ComponentContext');
+const ServerlessError = require('./serverless-error');
 
 /**
  * @param {{
@@ -13,10 +13,15 @@ const ComponentContext = require('./ComponentContext');
  * @return {Promise<import('./Component')>}
  */
 async function loadComponent({ context, path, alias, inputs }) {
-  const externalComponentPath = resolve(context.root, path, 'serverless.js');
-
   /** @type {typeof import('./Component')} */
-  const ComponentClass = require(externalComponentPath);
+  const ComponentClass = require(path);
+
+  if (typeof ComponentClass !== 'function') {
+    throw new ServerlessError(
+      `Component type "${path}" (service "${alias}") is invalid: "${path}" does not returns a component class`,
+      'UNRECOGNIZED_COMPONENT'
+    );
+  }
 
   const componentId = alias || ComponentClass.name;
   const componentContext = new ComponentContext(componentId, context);
