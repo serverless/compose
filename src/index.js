@@ -184,6 +184,4 @@ const runComponents = async () => {
 
 module.exports = {
   runComponents,
-  Component,
-  Context,
 };
