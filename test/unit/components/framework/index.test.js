@@ -43,7 +43,7 @@ describe('test/unit/components/framework/index.test.js', () => {
       },
       kill: () => {},
     });
-    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+    const FrameworkComponent = proxyquire('../../../../components/framework/index.js', {
       'cross-spawn': spawnStub,
     });
 
@@ -76,7 +76,7 @@ describe('test/unit/components/framework/index.test.js', () => {
       },
       kill: () => {},
     });
-    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+    const FrameworkComponent = proxyquire('../../../../components/framework/index.js', {
       'cross-spawn': spawnStub,
     });
 
@@ -106,7 +106,7 @@ describe('test/unit/components/framework/index.test.js', () => {
       },
       kill: () => {},
     });
-    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+    const FrameworkComponent = proxyquire('../../../../components/framework/index.js', {
       'cross-spawn': spawnStub,
     });
 
@@ -146,7 +146,7 @@ describe('test/unit/components/framework/index.test.js', () => {
       },
       kill: () => {},
     });
-    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+    const FrameworkComponent = proxyquire('../../../../components/framework/index.js', {
       'cross-spawn': spawnStub,
     });
 
@@ -181,7 +181,7 @@ describe('test/unit/components/framework/index.test.js', () => {
       },
       kill: () => {},
     });
-    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+    const FrameworkComponent = proxyquire('../../../../components/framework/index.js', {
       'cross-spawn': spawnStub,
     });
 
@@ -206,7 +206,7 @@ describe('test/unit/components/framework/index.test.js', () => {
       kill: () => {},
     });
 
-    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+    const FrameworkComponent = proxyquire('../../../../components/framework/index.js', {
       'cross-spawn': spawnStub,
     });
 
@@ -238,7 +238,7 @@ describe('test/unit/components/framework/index.test.js', () => {
       kill: () => {},
     });
 
-    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+    const FrameworkComponent = proxyquire('../../../../components/framework/index.js', {
       'cross-spawn': spawnStub,
     });
 
@@ -270,7 +270,7 @@ describe('test/unit/components/framework/index.test.js', () => {
       kill: () => {},
     });
 
-    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+    const FrameworkComponent = proxyquire('../../../../components/framework/index.js', {
       'cross-spawn': spawnStub,
     });
 
@@ -295,7 +295,7 @@ describe('test/unit/components/framework/index.test.js', () => {
       stdoutBuffer: Buffer.from('Framework Core: 2.1.0'),
     });
 
-    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+    const FrameworkComponent = proxyquire('../../../../components/framework/index.js', {
       'child-process-ext/spawn': spawnExtStub,
     });
 
@@ -320,7 +320,7 @@ describe('test/unit/components/framework/index.test.js', () => {
       },
       kill: () => {},
     });
-    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+    const FrameworkComponent = proxyquire('../../../../components/framework/index.js', {
       'cross-spawn': spawnStub,
     });
 
@@ -363,7 +363,7 @@ describe('test/unit/components/framework/index.test.js', () => {
       },
       kill: () => {},
     });
-    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+    const FrameworkComponent = proxyquire('../../../../components/framework/index.js', {
       'cross-spawn': spawnStub,
     });
 
@@ -390,7 +390,7 @@ describe('test/unit/components/framework/index.test.js', () => {
       },
       kill: () => {},
     });
-    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+    const FrameworkComponent = proxyquire('../../../../components/framework/index.js', {
       'cross-spawn': spawnStub,
     });
 

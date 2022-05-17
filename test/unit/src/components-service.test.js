@@ -9,7 +9,7 @@ const readStream = require('../read-stream');
 const expect = require('chai').expect;
 
 const frameworkComponentPath = path.dirname(
-  require.resolve('../../../components/framework/serverless.js')
+  require.resolve('../../../components/framework/index.js')
 );
 
 describe('test/unit/src/components-service.test.js', () => {
@@ -28,6 +28,7 @@ describe('test/unit/src/components-service.test.js', () => {
           },
         },
         anotherservice: {
+          component: '@foo/bar',
           path: 'another',
           dependsOn: 'consumer',
         },
@@ -50,11 +51,11 @@ describe('test/unit/src/components-service.test.js', () => {
       anotherservice: {
         dependencies: ['consumer'],
         inputs: {
-          component: 'serverless-framework',
+          component: '@foo/bar',
           dependsOn: 'consumer',
           path: 'another',
         },
-        path: frameworkComponentPath,
+        path: '@foo/bar',
       },
       consumer: {
         dependencies: ['resources'],

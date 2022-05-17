@@ -82,35 +82,35 @@ const getAllComponents = async (obj = {}) => {
   const allComponents = {};
 
   for (const [key, val] of Object.entries(obj.services)) {
-    if (val.component) {
-      if (val.component[0] === '.') {
-        const localComponentPath = resolve(process.cwd(), val.component, 'serverless.js');
-        if (!(await utils.fileExists(localComponentPath))) {
-          throw new ServerlessError(
-            `The component "${val.component}" (used by service "${key}") is invalid: no serverless.js file found`,
-            'MISSING_SERVERLESS_FILE_IN_COMPONENT_PATH'
-          );
-        }
-        allComponents[key] = {
-          path: val.component,
-          inputs: val,
-        };
-      } else if (val.component in INTERNAL_COMPONENTS) {
-        allComponents[key] = {
-          path: INTERNAL_COMPONENTS[val.component],
-          inputs: val,
-        };
-      } else {
+    // By default assume `serverless-framework` component
+    if (!val.component) {
+      val.component = 'serverless-framework';
+    }
+
+    // Local component (starts with '.')
+    if (val.component[0] === '.') {
+      const localComponentPath = resolve(process.cwd(), val.component);
+      if (!(await utils.fileExists(localComponentPath))) {
         throw new ServerlessError(
-          `Unrecognized component type "${val.component}" for service "${key}"`,
-          'UNRECOGNIZED_COMPONENT'
+          `The component "${val.component}" (used by service "${key}") is invalid: file not found`,
+          'INVALID_COMPONENT_PATH'
         );
       }
-    } else {
-      // By default assume `serverless-framework` component
       allComponents[key] = {
-        path: INTERNAL_COMPONENTS['serverless-framework'],
-        inputs: { ...val, component: 'serverless-framework' },
+        path: localComponentPath,
+        inputs: val,
+      };
+    } else if (val.component in INTERNAL_COMPONENTS) {
+      // Internal component
+      allComponents[key] = {
+        path: INTERNAL_COMPONENTS[val.component],
+        inputs: val,
+      };
+    } else {
+      // NPM package
+      allComponents[key] = {
+        path: val.component,
+        inputs: val,
       };
     }
   }
