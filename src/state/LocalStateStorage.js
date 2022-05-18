@@ -1,10 +1,10 @@
 'use strict';
 
-const utils = require('./utils/fs');
+const utils = require('../utils/fs');
 const path = require('path');
 const fsp = require('fs').promises;
 
-class StateStorage {
+class LocalStateStorage {
   constructor(stage) {
     this.stateRoot = path.join(process.cwd(), '.serverless');
     this.stage = stage;
@@ -102,4 +102,4 @@ class StateStorage {
   }
 }
 
-module.exports = StateStorage;
+module.exports = LocalStateStorage;
