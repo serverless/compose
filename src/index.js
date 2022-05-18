@@ -3,7 +3,6 @@
 // Setup log writing
 require('@serverless/utils/log-reporters/node');
 
-const path = require('path');
 const args = require('minimist')(process.argv.slice(2));
 const { clone } = require('ramda');
 const renderHelp = require('./render-help');
@@ -106,16 +105,17 @@ const runComponents = async () => {
   const configuration = await readConfiguration(configurationPath);
   validateConfiguration(configuration, configurationPath);
 
+  const stage = options.stage || 'dev';
+  await resolveConfigurationVariables(configuration, configurationPath, stage);
+
   const contextConfig = {
     root: process.cwd(),
-    stateRoot: path.join(process.cwd(), '.serverless'),
     verbose: options.verbose,
-    stage: options.stage || 'dev',
+    stage,
+    configuration,
   };
-
   context = new Context(contextConfig);
   await context.init();
-  await resolveConfigurationVariables(configuration, configurationPath, context.stage);
 
   // For telemetry we want to keep the configuration that has references to components outputs unresolved
   // So we can properly count it

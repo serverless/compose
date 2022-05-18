@@ -71,7 +71,9 @@ function validateConfiguration(configuration, configurationPath) {
     }
   });
 
-  const extraProperties = Object.keys(configuration).filter((key) => key !== 'services');
+  const extraProperties = Object.keys(configuration).filter(
+    (key) => !new Set(['services', 'state']).has(key)
+  );
   if (extraProperties.length > 0) {
     throw new ServerlessError(
       `Unrecognized property ${extraProperties.join(', ')} in "${configurationFilename}".\n` +

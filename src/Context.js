@@ -5,17 +5,19 @@ const prettyoutput = require('prettyoutput');
 const utils = require('./utils');
 const packageJson = require('../package.json');
 const StateStorage = require('./StateStorage');
+const S3StateStorage = require('./S3StateStorage');
 const Output = require('./cli/Output');
 const readline = require('readline');
 const Progresses = require('./cli/Progresses');
 const colors = require('./cli/colors');
+const isPlainObject = require('type/plain-object/is');
+const getComposeS3StateBucketName = require('./state/utils/get-compose-s3-state-bucket-name');
 
 class Context {
   constructor(config) {
     this.version = packageJson.version;
     this.root = path.resolve(config.root) || process.cwd();
     this.output = new Output(config.verbose || false, config.disableIO);
-    this.stateStorage = new StateStorage(config.stage);
     /** @type {string} */
     this.stage = config.stage;
     this.id = undefined;
@@ -26,12 +28,44 @@ class Context {
     if (!config.verbose) {
       this.progresses.setFooterText(colors.gray('Press [?] to enable verbose logs'));
     }
+
+    // Resolved Compose configuration
+    this.configuration = config.configuration;
+
+    // TODO: ADD TYPE
+    this.stateStorage = null;
   }
 
   async init() {
     this.startInteractiveInput();
+    await this.setupStateStorage();
     const serviceState = await this.stateStorage.readServiceState({ id: utils.randomId() });
     this.id = serviceState.id;
+  }
+
+  // TODO: TESTS
+  // TODO: REFACTORING & CLEANUP
+  // TODO: MAYBE MOVE THIS LOGIC SOMEWHERE ELSE?
+  async setupStateStorage() {
+    if (!this.configuration.state) {
+      this.stateStorage = new StateStorage(this.stage);
+    } else if (this.configuration.state === 's3') {
+      const bucketName = await getComposeS3StateBucketName({}, this);
+      const stateKey = `${this.stage}/state.json`;
+      this.stateStorage = new S3StateStorage({ bucketName, stateKey });
+    } else if (
+      isPlainObject(this.configuration.state) &&
+      this.configuration.state.backend === 's3'
+    ) {
+      const bucketName = await getComposeS3StateBucketName(this.configuration.state, this);
+      const stateKey = `${
+        this.configuration.state.prefix ? `${this.configuration.state.prefix}/` : ''
+      }${this.stage}/state.json`;
+      this.stateStorage = new S3StateStorage({ bucketName, stateKey });
+    } else {
+      // TODO: THROW PROPER ERROR HERE
+      throw new Error('invalid state config/backend');
+    }
   }
 
   renderOutputs(outputs) {

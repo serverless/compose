@@ -1,6 +1,5 @@
 'use strict';
 
-const path = require('path');
 const proxyquire = require('proxyquire');
 const chai = require('chai');
 const sinon = require('sinon');
@@ -18,9 +17,9 @@ const expect = require('chai').expect;
 const getContext = async () => {
   const contextConfig = {
     root: process.cwd(),
-    stateRoot: path.join(process.cwd(), '.serverless'),
     stage: 'dev',
     disableIO: true,
+    configuration: {},
   };
   const context = new Context(contextConfig);
   await context.init();
