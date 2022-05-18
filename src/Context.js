@@ -4,7 +4,7 @@ const path = require('path');
 const prettyoutput = require('prettyoutput');
 const utils = require('./utils');
 const packageJson = require('../package.json');
-const StateStorage = require('./StateStorage');
+const LocalStateStorage = require('./state/LocalStateStorage');
 const Output = require('./cli/Output');
 const readline = require('readline');
 const Progresses = require('./cli/Progresses');
@@ -15,7 +15,7 @@ class Context {
     this.version = packageJson.version;
     this.root = path.resolve(config.root) || process.cwd();
     this.output = new Output(config.verbose || false, config.disableIO);
-    this.stateStorage = new StateStorage(config.stage);
+    this.stateStorage = new LocalStateStorage(config.stage);
     /** @type {string} */
     this.stage = config.stage;
     this.id = undefined;
