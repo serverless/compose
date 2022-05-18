@@ -3,7 +3,6 @@
 // Setup log writing
 require('@serverless/utils/log-reporters/node');
 
-const path = require('path');
 const args = require('minimist')(process.argv.slice(2));
 const { clone } = require('ramda');
 const renderHelp = require('./render-help');
@@ -108,7 +107,6 @@ const runComponents = async () => {
 
   const contextConfig = {
     root: process.cwd(),
-    stateRoot: path.join(process.cwd(), '.serverless'),
     verbose: options.verbose,
     stage: options.stage || 'dev',
   };

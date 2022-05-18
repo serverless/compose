@@ -36,7 +36,6 @@ describe('test/unit/src/components-service.test.js', () => {
     };
     const contextConfig = {
       root: process.cwd(),
-      stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
       disableIO: true,
     };
@@ -107,7 +106,6 @@ describe('test/unit/src/components-service.test.js', () => {
     };
     const contextConfig = {
       root: process.cwd(),
-      stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
       disableIO: true,
     };
@@ -135,7 +133,6 @@ describe('test/unit/src/components-service.test.js', () => {
     };
     const contextConfig = {
       root: process.cwd(),
-      stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
       disableIO: true,
     };
@@ -187,7 +184,6 @@ describe('test/unit/src/components-service.test.js', () => {
     };
     const contextConfig = {
       root: process.cwd(),
-      stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
       disableIO: true,
     };
