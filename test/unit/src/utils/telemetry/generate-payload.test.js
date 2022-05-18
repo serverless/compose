@@ -1,7 +1,6 @@
 'use strict';
 
 const expect = require('chai').expect;
-const path = require('path');
 
 const Context = require('../../../../../src/Context');
 const ServerlessError = require('../../../../../src/serverless-error');
@@ -15,7 +14,6 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
   it('generates expected payload', () => {
     const contextConfig = {
       root: process.cwd(),
-      stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
       disableIO: true,
     };
@@ -82,7 +80,6 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
   it('recognizes programmer error in telemetry', () => {
     const contextConfig = {
       root: process.cwd(),
-      stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
       disableIO: true,
     };
@@ -111,7 +108,6 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
   it('recognizes user error in telemetry', () => {
     const contextConfig = {
       root: process.cwd(),
-      stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
       disableIO: true,
     };
@@ -229,7 +225,6 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
   it('properly resolves singleCommandType with option', () => {
     const contextConfig = {
       root: process.cwd(),
-      stateRoot: path.join(process.cwd(), '.serverless'),
       stage: 'dev',
       disableIO: true,
     };
