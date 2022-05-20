@@ -38,6 +38,7 @@ describe('test/unit/src/components-service.test.js', () => {
       root: process.cwd(),
       stage: 'dev',
       disableIO: true,
+      configuration: {},
     };
     const context = new Context(contextConfig);
     await context.init();
@@ -108,6 +109,7 @@ describe('test/unit/src/components-service.test.js', () => {
       root: process.cwd(),
       stage: 'dev',
       disableIO: true,
+      configuration: {},
     };
     const context = new Context(contextConfig);
     await context.init();
@@ -135,6 +137,7 @@ describe('test/unit/src/components-service.test.js', () => {
       root: process.cwd(),
       stage: 'dev',
       disableIO: true,
+      configuration: {},
     };
     const mockedStateStorage = {
       readServiceState: () => ({ id: 123, detectedFrameworkVersion: '9.9.9' }),
@@ -151,8 +154,8 @@ describe('test/unit/src/components-service.test.js', () => {
       },
     };
     const context = new Context(contextConfig);
-    context.stateStorage = mockedStateStorage;
     await context.init();
+    context.stateStorage = mockedStateStorage;
     componentsService = new ComponentsService(context, configuration);
 
     await componentsService.outputs();
@@ -186,6 +189,7 @@ describe('test/unit/src/components-service.test.js', () => {
       root: process.cwd(),
       stage: 'dev',
       disableIO: true,
+      configuration: {},
     };
     const mockedStateStorage = {
       readServiceState: () => ({ id: 123, detectedFrameworkVersion: '9.9.9' }),
@@ -196,8 +200,8 @@ describe('test/unit/src/components-service.test.js', () => {
       },
     };
     const context = new Context(contextConfig);
-    context.stateStorage = mockedStateStorage;
     await context.init();
+    context.stateStorage = mockedStateStorage;
     componentsService = new ComponentsService(context, configuration);
 
     await componentsService.outputs({ componentName: 'resources' });

@@ -2,20 +2,22 @@
 
 const path = require('path');
 const prettyoutput = require('prettyoutput');
+const isPlainObject = require('type/plain-object/is');
 const utils = require('./utils');
 const packageJson = require('../package.json');
 const LocalStateStorage = require('./state/LocalStateStorage');
+const getS3StateStorageFromConfig = require('./state/get-s3-state-storage-from-config');
 const Output = require('./cli/Output');
 const readline = require('readline');
 const Progresses = require('./cli/Progresses');
 const colors = require('./cli/colors');
+const ServerlessError = require('./serverless-error');
 
 class Context {
   constructor(config) {
     this.version = packageJson.version;
     this.root = path.resolve(config.root) || process.cwd();
     this.output = new Output(config.verbose || false, config.disableIO);
-    this.stateStorage = new LocalStateStorage(config.stage);
     /** @type {string} */
     this.stage = config.stage;
     this.id = undefined;
@@ -26,12 +28,46 @@ class Context {
     if (!config.verbose) {
       this.progresses.setFooterText(colors.gray('Press [?] to enable verbose logs'));
     }
+
+    // Resolved Compose configuration
+    this.configuration = config.configuration;
   }
 
   async init() {
     this.startInteractiveInput();
+    await this.setupStateStorage();
     const serviceState = await this.stateStorage.readServiceState({ id: utils.randomId() });
     this.id = serviceState.id;
+  }
+
+  async setupStateStorage() {
+    if (!this.configuration.state) {
+      this.stateStorage = new LocalStateStorage(this.stage);
+      return;
+    }
+
+    let stateConfiguration;
+    if (typeof this.configuration.state === 'string') {
+      stateConfiguration = {
+        backend: this.configuration.state,
+      };
+    } else if (isPlainObject(this.configuration.state)) {
+      stateConfiguration = this.configuration.state;
+    } else {
+      throw new ServerlessError(
+        'Invalid "state" configuration provided. It should be a string or an object.',
+        'INVALID_STATE_CONFIGURATION_FORMAT'
+      );
+    }
+
+    if (stateConfiguration.backend === 's3') {
+      this.stateStorage = await getS3StateStorageFromConfig(stateConfiguration);
+    }
+
+    throw new ServerlessError(
+      `Unrecognized state backend: "${stateConfiguration.backend}"`,
+      'UNRECOGNIZED_STATE_BACKEND'
+    );
   }
 
   renderOutputs(outputs) {

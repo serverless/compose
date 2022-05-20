@@ -19,6 +19,7 @@ const getContext = async () => {
     root: process.cwd(),
     stage: 'dev',
     disableIO: true,
+    configuration: {},
   };
   const context = new Context(contextConfig);
   await context.init();
