@@ -105,6 +105,7 @@ describe('test/unit/src/configuration/validate.test.js', () => {
       validateConfiguration(
         {
           services: {},
+          state: 's3',
         },
         configurationPath
       )
