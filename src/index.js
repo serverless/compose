@@ -105,15 +105,18 @@ const runComponents = async () => {
   const configuration = await readConfiguration(configurationPath);
   validateConfiguration(configuration, configurationPath);
 
+  const stage = options.stage || 'dev';
+  await resolveConfigurationVariables(configuration, configurationPath, stage);
+
   const contextConfig = {
     root: process.cwd(),
     verbose: options.verbose,
-    stage: options.stage || 'dev',
+    stage,
+    composeConfiguration: configuration,
   };
 
   context = new Context(contextConfig);
   await context.init();
-  await resolveConfigurationVariables(configuration, configurationPath, context.stage);
 
   // For telemetry we want to keep the configuration that has references to components outputs unresolved
   // So we can properly count it
