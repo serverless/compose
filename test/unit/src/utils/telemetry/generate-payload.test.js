@@ -72,6 +72,7 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
       hasEnabledVerboseInteractively: false,
       interruptSignal: undefined,
       singleCommandType: 'withSemicolon',
+      stateStorageType: 'local',
       outcome: 'unrecognized',
       versions,
     });
@@ -185,6 +186,26 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
     });
 
     expect(payload.hasEnabledVerboseInteractively).to.be.true;
+  });
+
+  it('recognizes s3 state backend', () => {
+    const contextConfig = {
+      root: process.cwd(),
+      disableIO: true,
+    };
+    const context = new Context(contextConfig);
+    const payload = generatePayload({
+      command: 'deploy',
+      context,
+      configuration: {
+        services: {},
+        state: {
+          backend: 's3',
+        },
+      },
+    });
+
+    expect(payload.stateStorageType).to.equal('s3');
   });
 
   it('recognizes interrupt', () => {

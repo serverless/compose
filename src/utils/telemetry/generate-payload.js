@@ -140,6 +140,20 @@ module.exports = ({
     })();
 
     payload.commandTargetComponents = commandTargetComponents;
+
+    const stateStorageType = (() => {
+      if (typeof configuration.state === 'string') {
+        return configuration.state;
+      }
+
+      if (configuration.state && configuration.state.backend) {
+        return configuration.state.backend;
+      }
+
+      return 'local';
+    })();
+
+    payload.stateStorageType = stateStorageType;
   }
 
   if (error) {
