@@ -127,9 +127,13 @@ const runComponents = async () => {
     const componentsService = new ComponentsService(context, configuration);
     await componentsService.init();
 
+    // Additionally, we're raising the listener default limit by 1 for each component - we might revisit it in the future
     if (componentName) {
+      process.setMaxListeners(process.getMaxListeners() + 1);
       await componentsService.invokeComponentCommand(componentName, method, options);
     } else {
+      const numOfComponents = Object.keys(componentsService.allComponents).length;
+      process.setMaxListeners(process.getMaxListeners() + numOfComponents);
       await componentsService.invokeGlobalCommand(method, options);
     }
 
