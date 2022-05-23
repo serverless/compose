@@ -93,6 +93,33 @@ describe('test/unit/components/framework/index.test.js', () => {
     expect(context.outputs).to.deep.equal({ Key: 'Output' });
   });
 
+  it('correctly set compose-specific specific env vars', async () => {
+    const spawnStub = sinon.stub().returns({
+      on: (arg, cb) => {
+        if (arg === 'close') cb(0);
+      },
+      stdout: {
+        on: (arg, cb) => {
+          const data = 'region: us-east-1\n\nStack Outputs:\n  Key: Output';
+          if (arg === 'data') cb(data);
+        },
+      },
+      kill: () => {},
+    });
+    const FrameworkComponent = proxyquire('../../../../components/framework/serverless.js', {
+      'cross-spawn': spawnStub,
+    });
+
+    const context = await getContext();
+    const component = new FrameworkComponent('some-id', context, { path: 'path' });
+    context.state.detectedFrameworkVersion = '9.9.9';
+    await component.refreshOutputs();
+
+    expect(spawnStub).to.be.calledOnce;
+    expect(spawnStub.getCall(0).args[2].env.SLS_DISABLE_AUTO_UPDATE).to.equal('1');
+    expect(spawnStub.getCall(0).args[2].env.SLS_COMPOSE).to.equal('1');
+  });
+
   it('correctly handles refresh-outputs with malformed info outputs', async () => {
     const spawnStub = sinon.stub().returns({
       on: (arg, cb) => {
