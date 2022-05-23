@@ -215,7 +215,7 @@ class ServerlessFramework extends Component {
       const child = spawn(command, args, {
         cwd: this.inputs.path,
         stdio: streamStdout ? 'inherit' : undefined,
-        env: { ...process.env, SLS_DISABLE_AUTO_UPDATE: '1' },
+        env: { ...process.env, SLS_DISABLE_AUTO_UPDATE: '1', SLS_COMPOSE: '1' },
       });
       let stdout = '';
       let stderr = '';
