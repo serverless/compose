@@ -203,6 +203,11 @@ class ServerlessFramework extends Component {
       args.push('--param', `${key}=${value}`);
     }
 
+    // Add region if necessary
+    if (this.inputs && this.inputs.region) {
+      args.push('--region', this.inputs.region);
+    }
+
     // Patch required for standalone distribution of Serverless
     // Needed because of the behavior of `pkg` when invoking itself via subprocess
     // https://github.com/vercel/pkg/issues/897
