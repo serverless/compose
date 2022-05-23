@@ -217,6 +217,13 @@ class ServerlessFramework extends Component {
         stdio: streamStdout ? 'inherit' : undefined,
         env: { ...process.env, SLS_DISABLE_AUTO_UPDATE: '1', SLS_COMPOSE: '1' },
       });
+
+      // Make sure that when our process is killed, we terminate the subprocess too
+      const processExitCallback = () => {
+        child.kill();
+      };
+      process.on('exit', processExitCallback);
+
       let stdout = '';
       let stderr = '';
       let allOutput = '';
@@ -237,8 +244,12 @@ class ServerlessFramework extends Component {
           allOutput += data;
         });
       }
-      child.on('error', (err) => reject(err));
+      child.on('error', (err) => {
+        process.removeListener('exit', processExitCallback);
+        reject(err);
+      });
       child.on('close', (code) => {
+        process.removeListener('exit', processExitCallback);
         if (code !== 0) {
           // Try to extract the error message (temporary solution)
           const errorMessagePosition = stdout.indexOf('Error:');
@@ -247,8 +258,6 @@ class ServerlessFramework extends Component {
         }
         resolve({ stdout, stderr });
       });
-      // Make sure that when our process is killed, we terminate the subprocess too
-      process.on('exit', () => child.kill());
     });
   }
 
