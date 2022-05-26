@@ -11,9 +11,9 @@ const getComposeS3StateBucketRegion = require('./utils/get-compose-s3-state-buck
  */
 const getS3StateStorageFromConfig = async (stateConfiguration, context) => {
   const bucketName = await getComposeS3StateBucketName(stateConfiguration, context);
-  const stateKey = `${
-    stateConfiguration.state.prefix ? `${stateConfiguration.state.prefix}/` : ''
-  }${this.stage}/state.json`;
+  const stateKey = `${stateConfiguration.prefix ? `${stateConfiguration.prefix}/` : ''}${
+    this.stage
+  }/state.json`;
 
   // We want to resolve region from S3 only for externally provided S3 buckets to avoid extra SDK call
   const region = stateConfiguration.externalBucket
