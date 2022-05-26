@@ -112,7 +112,7 @@ const runComponents = async () => {
     root: process.cwd(),
     verbose: options.verbose,
     stage,
-    composeConfiguration: configuration,
+    configuration,
   };
 
   context = new Context(contextConfig);
