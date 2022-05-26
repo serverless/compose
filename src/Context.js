@@ -61,7 +61,7 @@ class Context {
     }
 
     if (stateConfiguration.backend === 's3') {
-      this.stateStorage = await getS3StateStorageFromConfig(stateConfiguration);
+      this.stateStorage = await getS3StateStorageFromConfig(stateConfiguration, this);
     }
 
     throw new ServerlessError(
