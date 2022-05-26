@@ -37,6 +37,9 @@ const monitorStackCreation = async (stackName, context) => {
   );
 };
 
+/**
+ * @param {import('../../Context')} context
+ */
 const ensureRemoteStateBucketStackExists = async (context) => {
   const client = getCloudFormationClient();
   const templateBody = JSON.stringify(remoteStateCloudFormationTemplate);
@@ -60,9 +63,22 @@ const getComposeS3StateBucketNameFromCF = async () => {
     StackName: COMPOSE_REMOTE_STATE_STACK_NAME,
     LogicalResourceId: logicalResourceId,
   });
+  if (!result.StackResourceDetail) {
+    throw new Error(
+      `CloudFormation returned an empty response when fetching the stack "${COMPOSE_REMOTE_STATE_STACK_NAME}"`
+    );
+  }
+  if (!result.StackResourceDetail.PhysicalResourceId) {
+    throw new Error('The S3 bucket does not exist');
+  }
   return result.StackResourceDetail.PhysicalResourceId;
 };
 
+/**
+ * @param {Record<string, any>} stateConfiguration
+ * @param {import('../../Context')} context
+ * @returns {Promise<string>}
+ */
 const getComposeS3StateBucketName = async (stateConfiguration, context) => {
   // 1. Check from config
   if (stateConfiguration && stateConfiguration.existingBucket) {
