@@ -71,7 +71,7 @@ const getComposeS3StateBucketName = async (stateConfiguration, context) => {
 
   // 2. Check from remote
   try {
-    return await getComposeS3StateBucketNameFromCF(context);
+    return await getComposeS3StateBucketNameFromCF();
   } catch (e) {
     // If message incldues 'does not exist', we need move forward and create the stack first
     if (!(e.Code === 'ValidationError' && e.message.includes('does not exist'))) {
@@ -98,7 +98,7 @@ const getComposeS3StateBucketName = async (stateConfiguration, context) => {
   }
 
   // 4. Check from remote again
-  return await getComposeS3StateBucketNameFromCF(context);
+  return await getComposeS3StateBucketNameFromCF();
 };
 
 module.exports = getComposeS3StateBucketName;
