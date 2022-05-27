@@ -26,9 +26,17 @@ module.exports = (exception, output) => {
   output.log(colors.gray(detailsTextTokens.join('\n')));
   output.log();
 
-  const errorMsg =
-    exceptionTokens.stack && !isUserError ? exceptionTokens.stack : exceptionTokens.message;
-  output.writeText(`${colors.red('Error:')}\n${errorMsg}`);
+  const shouldShowStackTrace = exceptionTokens.stack && !isUserError;
+  if (shouldShowStackTrace) {
+    // Only show the stack trace for "programmer" errors (i.e. not user errors)
+    output.writeText(`${colors.red('Error:')}\n${exceptionTokens.stack}`);
+  } else {
+    output.writeText(`${colors.red('Error:')}\n${exceptionTokens.message}`);
+    if (exceptionTokens.stack) {
+      // Log the stack trace to verbose so that users can always debug further if needed
+      output.verbose(exceptionTokens.stack);
+    }
+  }
 
   output.log();
   output.log(colors.gray('Verbose logs are available in ".serverless/compose.log"'));
