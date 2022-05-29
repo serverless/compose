@@ -487,8 +487,6 @@ class ComponentsService {
         const inputs = resolveObject(this.allComponents[alias].inputs, availableOutputs, method);
 
         try {
-          inputs.componentId = alias;
-
           const component = await loadComponent({
             context: this.context,
             path: componentData.path,
@@ -553,8 +551,6 @@ class ComponentsService {
       const fn = async () => {
         const availableOutputs = await this.context.stateStorage.readComponentsOutputs();
         const inputs = resolveObject(this.allComponents[alias].inputs, availableOutputs);
-
-        inputs.componentId = alias;
 
         this.allComponents[alias].instance = await loadComponent({
           context: this.context,
