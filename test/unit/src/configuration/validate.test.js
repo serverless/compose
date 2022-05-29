@@ -1,7 +1,10 @@
 'use strict';
 
 const expect = require('chai').expect;
-const validateConfiguration = require('../../../../src/configuration/validate');
+const {
+  validateConfiguration,
+  validateComponentInputs,
+} = require('../../../../src/configuration/validate');
 
 describe('test/unit/src/configuration/validate.test.js', () => {
   const configurationPath = 'serverless-compose.yml';
@@ -106,5 +109,48 @@ describe('test/unit/src/configuration/validate.test.js', () => {
         configurationPath
       )
     ).not.to.throw();
+  });
+
+  it('rejects invalid component inputs', () => {
+    // This test validates multiple scenarios of different error messages
+    const schema = {
+      type: 'object',
+      properties: {
+        path: { type: 'string' },
+        params: {
+          type: 'object',
+          additionalProperties: {
+            type: 'string',
+          },
+        },
+      },
+      required: ['path', 'export'],
+      additionalProperties: false,
+    };
+    const inputs = {
+      // The component field is always passed but components don't have to
+      // declare it in their schemas, it's validated automatically
+      component: 'serverless-framework',
+      // `dependsOn` is applicable to all components, it's also validated implicitly
+      dependsOn: ['foo'],
+      // Invalid type
+      path: 123,
+      // Extra property
+      foo: 'bar',
+      // Invalid type in nested object
+      params: {
+        foo: 123,
+      },
+      // Missing property "export"
+    };
+    const expectedMessage =
+      'Invalid configuration for component "id":\n' +
+      "- must have required property 'export'\n" +
+      '- unknown property "foo"\n' +
+      '- "path": must be string\n' +
+      '- "params.foo": must be string';
+    expect(() => validateComponentInputs('id', schema, inputs))
+      .to.throw()
+      .and.have.property('message', expectedMessage);
   });
 });

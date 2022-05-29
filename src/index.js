@@ -17,7 +17,7 @@ const colors = require('./cli/colors');
 const resolveConfigurationVariables = require('./configuration/resolve-variables');
 const resolveConfigurationPath = require('./configuration/resolve-path');
 const readConfiguration = require('./configuration/read');
-const validateConfiguration = require('./configuration/validate');
+const { validateConfiguration } = require('./configuration/validate');
 const validateOptions = require('./validate-options');
 const processBackendNotificationRequest = require('./utils/process-backend-notification-request');
 

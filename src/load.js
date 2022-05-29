@@ -2,6 +2,7 @@
 
 const ComponentContext = require('./ComponentContext');
 const ServerlessError = require('./serverless-error');
+const { validateComponentInputs } = require('./configuration/validate');
 
 /**
  * @param {{
@@ -24,6 +25,15 @@ async function loadComponent({ context, path, alias, inputs }) {
   }
 
   const componentId = alias || ComponentClass.name;
+
+  // Validate inputs
+  // TODO: do this earlier, but this will require some heavier refactoring
+  // @ts-ignore
+  const configSchema = ComponentClass.SCHEMA;
+  if (configSchema !== undefined) {
+    validateComponentInputs(componentId, configSchema, inputs);
+  }
+
   const componentContext = new ComponentContext(componentId, context);
   await componentContext.init();
 
