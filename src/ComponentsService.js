@@ -487,7 +487,6 @@ class ComponentsService {
         const inputs = resolveObject(this.allComponents[alias].inputs, availableOutputs, method);
 
         try {
-          inputs.service = this.configuration.name;
           inputs.componentId = alias;
 
           const component = await loadComponent({
@@ -555,7 +554,6 @@ class ComponentsService {
         const availableOutputs = await this.context.stateStorage.readComponentsOutputs();
         const inputs = resolveObject(this.allComponents[alias].inputs, availableOutputs);
 
-        inputs.service = this.configuration.name;
         inputs.componentId = alias;
 
         this.allComponents[alias].instance = await loadComponent({
