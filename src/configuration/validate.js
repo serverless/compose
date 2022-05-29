@@ -3,6 +3,7 @@
 const path = require('path');
 const ServerlessError = require('../serverless-error');
 const isObject = require('type/object/is');
+const { default: Ajv } = require('ajv');
 
 function validateConfiguration(configuration, configurationPath) {
   const configurationFilename = path.basename(configurationPath);
@@ -81,4 +82,54 @@ function validateConfiguration(configuration, configurationPath) {
   }
 }
 
-module.exports = validateConfiguration;
+function validateComponentInputs(componentId, configSchema, inputs) {
+  // Extend the JSON schema of the component to add validation for global properties
+  configSchema.properties.component = { type: 'string' };
+  // `dependsOn` is a string or an array of strings
+  configSchema.properties.dependsOn = {
+    anyOf: [
+      { type: 'string' },
+      {
+        type: 'array',
+        items: { type: 'string' },
+      },
+    ],
+  };
+
+  const ajv = new Ajv({
+    allErrors: true,
+  });
+  const validate = ajv.compile(configSchema);
+  validate(inputs);
+  if (!validate.errors) {
+    return;
+  }
+
+  const messages = validate.errors.map((error) => {
+    let prefix = '';
+
+    let propertyPath = error.instancePath;
+    if (propertyPath) {
+      // Remove the leading `/`
+      propertyPath = propertyPath.slice(1);
+      // `.` are more understandable than `/`
+      propertyPath = propertyPath.replace('/', '.');
+      prefix += `"${propertyPath}": `;
+    }
+
+    if (error.keyword === 'additionalProperties') {
+      // Better error message than what AJV provides
+      return `${prefix}unknown property "${error.params.additionalProperty}"`;
+    }
+    return prefix + error.message;
+  });
+
+  const errorText = messages.map((message) => `- ${message}`).join('\n');
+
+  throw new ServerlessError(
+    `Invalid configuration for component "${componentId}":\n${errorText}`,
+    'INVALID_COMPONENT_CONFIGURATION'
+  );
+}
+
+module.exports = { validateConfiguration, validateComponentInputs };
