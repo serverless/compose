@@ -56,7 +56,7 @@ const ensureRemoteStateBucketStackExists = async (context) => {
   context.output.log('S3 bucket for remote state created successfully');
 };
 
-const getComposeS3StateBucketNameFromCF = async () => {
+const getStateBucketNameFromCF = async () => {
   const client = getCloudFormationClient();
   const logicalResourceId = 'ServerlessComposeRemoteStateBucket';
   const result = await client.describeStackResource({
@@ -79,7 +79,7 @@ const getComposeS3StateBucketNameFromCF = async () => {
  * @param {import('../../Context')} context
  * @returns {Promise<string>}
  */
-const getComposeS3StateBucketName = async (stateConfiguration, context) => {
+const getStateBucketName = async (stateConfiguration, context) => {
   // 1. Check from config
   if (stateConfiguration && stateConfiguration.existingBucket) {
     return stateConfiguration.existingBucket;
@@ -87,7 +87,7 @@ const getComposeS3StateBucketName = async (stateConfiguration, context) => {
 
   // 2. Check from remote
   try {
-    return await getComposeS3StateBucketNameFromCF();
+    return await getStateBucketNameFromCF();
   } catch (e) {
     // If message incldues 'does not exist', we need move forward and create the stack first
     if (!(e.Code === 'ValidationError' && e.message.includes('does not exist'))) {
@@ -114,7 +114,7 @@ const getComposeS3StateBucketName = async (stateConfiguration, context) => {
   }
 
   // 4. Check from remote again
-  return await getComposeS3StateBucketNameFromCF();
+  return await getStateBucketNameFromCF();
 };
 
-module.exports = getComposeS3StateBucketName;
+module.exports = getStateBucketName;
