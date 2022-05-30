@@ -4,13 +4,13 @@ const chai = require('chai');
 const { mockClient } = require('aws-sdk-client-mock');
 const { S3Client, GetBucketLocationCommand } = require('@aws-sdk/client-s3');
 
-const getComposeS3StateBucketRegion = require('../../../../../src/state/utils/get-compose-s3-state-bucket-region');
+const getStateBucketRegion = require('../../../../../src/state/utils/get-state-bucket-region');
 
 chai.use(require('sinon-chai'));
 
 const expect = chai.expect;
 
-describe('test/unit/src/state/utils/get-compose-s3-state-bucket-region.test.js', () => {
+describe('test/unit/src/state/utils/get-state-bucket-region.test.js', () => {
   let s3Mock;
   before(() => {
     s3Mock = mockClient(S3Client);
@@ -24,12 +24,12 @@ describe('test/unit/src/state/utils/get-compose-s3-state-bucket-region.test.js',
 
   it('correctly resolves region for `us-east-1` bucket', async () => {
     s3Mock.on(GetBucketLocationCommand).resolves({ LocationConstraint: undefined });
-    expect(await getComposeS3StateBucketRegion(bucketName)).to.equal('us-east-1');
+    expect(await getStateBucketRegion(bucketName)).to.equal('us-east-1');
   });
 
   it('correctly resolves region for non `us-east-1` bucket', async () => {
     s3Mock.on(GetBucketLocationCommand).resolves({ LocationConstraint: 'eu-central-1' });
-    expect(await getComposeS3StateBucketRegion(bucketName)).to.equal('eu-central-1');
+    expect(await getStateBucketRegion(bucketName)).to.equal('eu-central-1');
   });
 
   it('rejects when bucket cannot be found', async () => {
@@ -37,9 +37,7 @@ describe('test/unit/src/state/utils/get-compose-s3-state-bucket-region.test.js',
     bucketDoesNotExistError.Code = 'NoSuchBucket';
 
     s3Mock.on(GetBucketLocationCommand).rejects(bucketDoesNotExistError);
-    await expect(
-      getComposeS3StateBucketRegion(bucketName)
-    ).to.be.eventually.rejected.and.have.property(
+    await expect(getStateBucketRegion(bucketName)).to.be.eventually.rejected.and.have.property(
       'code',
       'CANNOT_FIND_PROVIDED_REMOTE_STATE_BUCKET'
     );
@@ -50,9 +48,7 @@ describe('test/unit/src/state/utils/get-compose-s3-state-bucket-region.test.js',
     bucketCannotBeAccessedError.Code = 'AccessDenied';
 
     s3Mock.on(GetBucketLocationCommand).rejects(bucketCannotBeAccessedError);
-    await expect(
-      getComposeS3StateBucketRegion(bucketName)
-    ).to.be.eventually.rejected.and.have.property(
+    await expect(getStateBucketRegion(bucketName)).to.be.eventually.rejected.and.have.property(
       'code',
       'CANNOT_ACCESS_PROVIDED_REMOTE_STATE_BUCKET'
     );
@@ -60,9 +56,7 @@ describe('test/unit/src/state/utils/get-compose-s3-state-bucket-region.test.js',
 
   it('rejects on generic error', async () => {
     s3Mock.on(GetBucketLocationCommand).rejects(new Error('failure'));
-    await expect(
-      getComposeS3StateBucketRegion(bucketName)
-    ).to.be.eventually.rejected.and.have.property(
+    await expect(getStateBucketRegion(bucketName)).to.be.eventually.rejected.and.have.property(
       'code',
       'GENERIC_CANNOT_ACCESS_PROVIDED_REMOTE_STATE_BUCKET'
     );
