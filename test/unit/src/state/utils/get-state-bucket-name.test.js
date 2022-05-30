@@ -57,13 +57,14 @@ describe('test/unit/src/state/utils/get-state-bucket-name.test.js', () => {
     cfMock
       .on(DescribeStackResourceCommand)
       .rejectsOnce(stackDoesNotExistError)
-      .resolvesOnce({ StackResourceDetail: { PhysicalResourceId: 'newly-created' } })
       .on(CreateStackCommand)
       .resolves()
       .on(DescribeStacksCommand)
       .resolves({ Stacks: [{ StackStatus: 'CREATE_COMPLETE' }] });
 
-    expect(await getStateBucketName(configuration, context)).to.equal('newly-created');
+    expect(
+      (await getStateBucketName(configuration, context)).startsWith('serverless-compose-state-')
+    ).to.be.true;
   });
 
   it('handles unexpected error when resolving bucket from s3', async () => {

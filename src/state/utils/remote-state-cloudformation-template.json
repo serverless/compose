@@ -1,6 +1,12 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "The AWS CloudFormation template for Serverless Compose Remote State S3 Bucket",
+  "Parameters": {
+    "BucketName": {
+      "Description": "Name of the created state bucket",
+      "Type": "String"
+    }
+  },
   "Resources": {
     "ServerlessComposeRemoteStateBucket": {
       "Type": "AWS::S3::Bucket",
@@ -13,6 +19,9 @@
               }
             }
           ]
+        },
+        "BucketName": {
+          "Ref": "BucketName"
         },
         "PublicAccessBlockConfiguration": {
           "BlockPublicAcls": true,

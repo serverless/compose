@@ -1,5 +1,6 @@
 'use strict';
 
+const crypto = require('crypto');
 const AWS = require('@aws-sdk/client-cloudformation');
 const { sleep } = require('../../utils');
 const remoteStateCloudFormationTemplate = require('./remote-state-cloudformation-template.json');
@@ -47,13 +48,21 @@ const ensureRemoteStateBucketStackExists = async (context) => {
   // TODO: REPLACE WITH PROGRESS
   context.output.log('Creating S3 bucket for remote state');
 
+  const bucketName = `serverless-compose-state-${crypto.randomBytes(6).toString('hex')}`;
   await client.createStack({
     StackName: COMPOSE_REMOTE_STATE_STACK_NAME,
     TemplateBody: templateBody,
+    Parameters: [
+      {
+        ParameterKey: 'BucketName',
+        ParameterValue: bucketName,
+      },
+    ],
   });
 
   await monitorStackCreation(COMPOSE_REMOTE_STATE_STACK_NAME, context);
   context.output.log('S3 bucket for remote state created successfully');
+  return bucketName;
 };
 
 const getStateBucketNameFromCF = async () => {
@@ -101,7 +110,7 @@ const getStateBucketName = async (stateConfiguration, context) => {
 
   // 3. If stack does not exist, ensure it exists
   try {
-    await ensureRemoteStateBucketStackExists(context);
+    return await ensureRemoteStateBucketStackExists(context);
   } catch (e) {
     if (e instanceof ServerlessError) {
       throw e;
@@ -112,9 +121,6 @@ const getStateBucketName = async (stateConfiguration, context) => {
       );
     }
   }
-
-  // 4. Check from remote again
-  return await getStateBucketNameFromCF();
 };
 
 module.exports = getStateBucketName;
