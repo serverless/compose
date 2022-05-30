@@ -12,7 +12,7 @@ const getStateBucketRegion = require('./utils/get-state-bucket-region');
 const getS3StateStorageFromConfig = async (stateConfiguration, context) => {
   const bucketName = await getStateBucketName(stateConfiguration, context);
   const stateKey = `${stateConfiguration.prefix ? `${stateConfiguration.prefix}/` : ''}${
-    this.stage
+    context.stage
   }/state.json`;
 
   // We want to resolve region from S3 only for externally provided S3 buckets to avoid extra SDK call
