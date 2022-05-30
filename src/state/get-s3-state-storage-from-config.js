@@ -1,7 +1,7 @@
 'use strict';
 
 const S3StateStorage = require('./S3StateStorage');
-const getComposeS3StateBucketName = require('./utils/get-compose-s3-state-bucket-name');
+const getStateBucketName = require('./utils/get-state-bucket-name');
 const getComposeS3StateBucketRegion = require('./utils/get-compose-s3-state-bucket-region');
 
 /**
@@ -10,7 +10,7 @@ const getComposeS3StateBucketRegion = require('./utils/get-compose-s3-state-buck
  * @returns {Promise<S3StateStorage>}
  */
 const getS3StateStorageFromConfig = async (stateConfiguration, context) => {
-  const bucketName = await getComposeS3StateBucketName(stateConfiguration, context);
+  const bucketName = await getStateBucketName(stateConfiguration, context);
   const stateKey = `${stateConfiguration.prefix ? `${stateConfiguration.prefix}/` : ''}${
     this.stage
   }/state.json`;
