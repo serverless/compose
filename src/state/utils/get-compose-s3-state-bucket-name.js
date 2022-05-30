@@ -5,7 +5,7 @@ const { sleep } = require('../../utils');
 const remoteStateCloudFormationTemplate = require('./remote-state-cloudformation-template.json');
 const ServerlessError = require('../../serverless-error');
 
-const COMPOSE_REMOTE_STATE_STACK_NAME = 'serverless-compose-remote-state';
+const COMPOSE_REMOTE_STATE_STACK_NAME = 'serverless-compose-state';
 
 // TODO: INJECT RESOLVED AWS CREDENTIALS
 const getCloudFormationClient = () => {
