@@ -4,11 +4,14 @@ const { S3 } = require('@aws-sdk/client-s3');
 const PromiseQueue = require('promise-queue');
 const streamToString = require('../utils/stream-to-string');
 const ServerlessError = require('../serverless-error');
+const BaseStateStorage = require('./BaseStateStorage');
 
 PromiseQueue.configure(Promise);
 
-class S3StateStorage {
+class S3StateStorage extends BaseStateStorage {
   constructor(config = {}) {
+    super();
+
     // Applicable only if external bucket has been provided, at least for now
     this.region = config.region || 'us-east-1';
 
