@@ -1,6 +1,5 @@
 'use strict';
 
-const Component = require('../../src/Component');
 const spawn = require('cross-spawn');
 const YAML = require('js-yaml');
 const hasha = require('hasha');
@@ -15,7 +14,18 @@ const MINIMAL_FRAMEWORK_VERSION = '3.7.7';
 const doesSatisfyRequiredFrameworkVersion = (version) =>
   semver.gte(version, MINIMAL_FRAMEWORK_VERSION);
 
-class ServerlessFramework extends Component {
+class ServerlessFramework {
+  /**
+   * @param {string} id
+   * @param {import('../../src/ComponentContext')} context
+   * @param {Record<string, any>} inputs
+   */
+  constructor(id, context, inputs) {
+    this.id = id;
+    this.inputs = inputs;
+    this.context = context;
+  }
+
   // TODO:
   // Component-specific commands
   // In the long run, they should be generated based on configured command schema

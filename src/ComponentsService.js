@@ -5,10 +5,10 @@ const { isEmpty, path } = require('ramda');
 const { Graph, alg } = require('graphlib');
 const traverse = require('traverse');
 const ServerlessError = require('./serverless-error');
-
 const utils = require('./utils');
 const { loadComponent } = require('./load');
 const colors = require('./cli/colors');
+const ServerlessFramework = require('../components/framework');
 
 const INTERNAL_COMPONENTS = {
   'serverless-framework': resolve(__dirname, '../components/framework'),
@@ -389,7 +389,7 @@ class ComponentsService {
       if (component === undefined) {
         throw new ServerlessError(`Unknown service "${componentName}"`, 'COMPONENT_NOT_FOUND');
       }
-      component.context.logVerbose(`Invoking "${command}" on service "${componentName}"`);
+      this.context.logVerbose(`Invoking "${command}" on service "${componentName}"`);
 
       const isDefaultCommand = ['deploy', 'remove', 'logs', 'info'].includes(command);
 
@@ -404,7 +404,7 @@ class ComponentsService {
         handler = (opts) => component[command](opts);
       } else if (
         (!component || !component.commands || !component.commands[command]) &&
-        component.inputs.component === 'serverless-framework'
+        component instanceof ServerlessFramework
       ) {
         // Workaround to invoke all custom Framework commands
         // TODO: Support options and validation
@@ -440,19 +440,19 @@ class ComponentsService {
     await this.instantiateComponents();
 
     this.context.logVerbose(`Executing "${method}" across all services in parallel`);
-    const promises = Object.values(this.allComponents).map(async ({ instance }) => {
+    const promises = Object.entries(this.allComponents).map(async ([id, { instance }]) => {
       if (typeof instance[method] !== 'function') return;
       try {
         await instance[method](options);
-        this.context.componentCommandsOutcomes[instance.id] = 'success';
+        this.context.componentCommandsOutcomes[id] = 'success';
       } catch (e) {
         // If the component has an ongoing progress, we automatically set it to "error"
-        if (this.context.progresses.exists(instance.id)) {
-          this.context.progresses.error(instance.id, e);
+        if (this.context.progresses.exists(id)) {
+          this.context.progresses.error(id, e);
         } else {
-          this.context.output.error(formatError(e), [instance.id]);
+          this.context.output.error(formatError(e), [id]);
         }
-        this.context.componentCommandsOutcomes[instance.id] = 'failure';
+        this.context.componentCommandsOutcomes[id] = 'failure';
       }
     });
 

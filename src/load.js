@@ -11,10 +11,8 @@ const { validateComponentInputs } = require('./configuration/validate');
  *     alias: string,
  *     inputs: Record<string, any>,
  * }} param
- * @return {Promise<import('./Component')>}
  */
 async function loadComponent({ context, path, alias, inputs }) {
-  /** @type {typeof import('./Component')} */
   const ComponentClass = require(path);
 
   if (typeof ComponentClass !== 'function') {
@@ -24,7 +22,7 @@ async function loadComponent({ context, path, alias, inputs }) {
     );
   }
 
-  const componentId = alias || ComponentClass.name;
+  const componentId = alias;
 
   // Validate inputs
   // TODO: do this earlier, but this will require some heavier refactoring
