@@ -18,8 +18,7 @@ class S3StateStorage extends BaseStateStorage {
     this.bucketName = config.bucketName;
     this.stateKey = config.stateKey;
 
-    // TODO: Ensure to override credentials when shared utlity for credentials resolution will be made available
-    this.s3Client = new S3({ region: this.region });
+    this.s3Client = new S3({ region: this.region, credentials: config.credentials });
 
     this.writeRequestQueue = new PromiseQueue(1, Infinity);
   }
