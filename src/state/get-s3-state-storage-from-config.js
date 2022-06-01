@@ -1,5 +1,7 @@
 'use strict';
 
+const { getCredentialProvider } = require('@serverless-components/utils-aws');
+
 const S3StateStorage = require('./S3StateStorage');
 const getStateBucketName = require('./utils/get-state-bucket-name');
 const getStateBucketRegion = require('./utils/get-state-bucket-region');
@@ -19,7 +21,10 @@ const getS3StateStorageFromConfig = async (stateConfiguration, context) => {
   const region = stateConfiguration.externalBucket
     ? await getStateBucketRegion(bucketName)
     : 'us-east-1';
-  return new S3StateStorage({ bucketName, stateKey, region });
+
+  const credentialProvider = getCredentialProvider({ profile: stateConfiguration.profile, region });
+
+  return new S3StateStorage({ bucketName, stateKey, region, credentials: credentialProvider });
 };
 
 module.exports = getS3StateStorageFromConfig;
