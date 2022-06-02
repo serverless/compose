@@ -125,7 +125,7 @@ const runComponents = async () => {
   validateOptions(options, method);
 
   try {
-    const componentsService = new ComponentsService(context, configuration);
+    const componentsService = new ComponentsService(context, configuration, options);
     await componentsService.init();
 
     // Additionally, we're raising the listener default limit by 1 for each component - we might revisit it in the future

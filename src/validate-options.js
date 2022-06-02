@@ -17,7 +17,7 @@ function validateCliOptions(options, method) {
   });
 
   // Globally recognized options for global Compose methods
-  const supportedOptions = new Set(['verbose', 'stage']);
+  const supportedOptions = new Set(['verbose', 'stage', 'max-concurrency']);
   // We only validate methods that are explicitly recognized by Compose (excluding pass-through methods for Framework)
 
   const recognizedMethods = new Set([

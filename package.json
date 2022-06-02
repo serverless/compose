@@ -38,6 +38,7 @@
     "js-yaml": "^4.1.0",
     "minimist": "^1.2.6",
     "node-fetch": "^2.6.7",
+    "p-limit": "^3.1.0",
     "path2": "^0.1.0",
     "prettyoutput": "^1.2.0",
     "promise-queue": "^2.2.5",
