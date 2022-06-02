@@ -6,6 +6,9 @@ const chai = require('chai');
 const sinon = require('sinon');
 const Context = require('../../../../src/Context');
 const ComponentContext = require('../../../../src/ComponentContext');
+const { validateComponentInputs } = require('../../../../src/configuration/validate');
+const { configSchema } = require('../../../../components/framework/configuration');
+const ServerlessFramework = require('../../../../components/framework');
 
 // Configure chai
 chai.use(require('chai-as-promised'));
@@ -300,7 +303,7 @@ describe('test/unit/components/framework/index.test.js', () => {
     });
 
     const context = await getContext();
-    const component = new FrameworkComponent('some-id', context, {});
+    const component = new FrameworkComponent('some-id', context, { path: 'foo' });
     await expect(component.deploy()).to.eventually.be.rejectedWith(
       'The installed version of Serverless Framework (2.1.0) is not supported by Compose. Please upgrade Serverless Framework to a version greater or equal to "3.7.7"'
     );
@@ -411,5 +414,29 @@ describe('test/unit/components/framework/index.test.js', () => {
       '--stage',
       'dev',
     ]);
+  });
+
+  it('rejects invalid inputs', () => {
+    expect(() =>
+      validateComponentInputs('id', configSchema, {
+        region: 123,
+        params: 'foo',
+      })
+    )
+      .to.throw()
+      .and.have.property(
+        'message',
+        'Invalid configuration for component "id":\n' +
+          "- must have required property 'path'\n" +
+          '- "region": must be string\n' +
+          '- "params": must be object'
+      );
+  });
+
+  it('rejects path that is the root compose path', async () => {
+    const context = await getContext();
+    expect(() => new ServerlessFramework('id', context, { path: '.' }))
+      .to.throw()
+      .and.have.property('code', 'INVALID_PATH_IN_SERVICE_CONFIGURATION');
   });
 });

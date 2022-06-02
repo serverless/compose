@@ -8,6 +8,7 @@ const path = require('path');
 const spawnExt = require('child-process-ext/spawn');
 const semver = require('semver');
 const { configSchema } = require('./configuration');
+const ServerlessError = require('../../src/serverless-error');
 
 const MINIMAL_FRAMEWORK_VERSION = '3.7.7';
 
@@ -24,6 +25,13 @@ class ServerlessFramework {
     this.id = id;
     this.inputs = inputs;
     this.context = context;
+
+    if (path.relative(process.cwd(), inputs.path) === '') {
+      throw new ServerlessError(
+        `Service "${id}" cannot have a "path" that points to the root directory of the Serverless Framework Compose project`,
+        'INVALID_PATH_IN_SERVICE_CONFIGURATION'
+      );
+    }
   }
 
   // TODO:
