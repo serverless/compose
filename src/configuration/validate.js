@@ -31,21 +31,6 @@ function validateConfiguration(configuration, configurationPath) {
         'INVALID_NON_OBJECT_SERVICE_CONFIGURATION'
       );
     }
-
-    if (!value.path) {
-      throw new ServerlessError(
-        `Invalid configuration: definition of "${key}" service must contain a "path" property.\n` +
-          'Read about Serverless Framework Compose configuration in the documentation: https://slss.io/docs-compose',
-        'MISSING_PATH_IN_SERVICE_CONFIGURATION'
-      );
-    }
-
-    if (path.relative(process.cwd(), value.path) === '') {
-      throw new ServerlessError(
-        `Definition of "${key}" service must contain a "path" property that does not point to the root directory of Serverless Framework Compose project`,
-        'INVALID_PATH_IN_SERVICE_CONFIGURATION'
-      );
-    }
   });
 
   // Provide a targeted error message if users use Framework options

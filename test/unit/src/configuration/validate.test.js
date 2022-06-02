@@ -42,36 +42,6 @@ describe('test/unit/src/configuration/validate.test.js', () => {
       .and.have.property('code', 'INVALID_NON_OBJECT_SERVICE_CONFIGURATION');
   });
 
-  it('rejects configuration of specific services that do not have path defined', () => {
-    expect(() =>
-      validateConfiguration(
-        {
-          services: {
-            service: {},
-          },
-        },
-        configurationPath
-      )
-    )
-      .to.throw()
-      .and.have.property('code', 'MISSING_PATH_IN_SERVICE_CONFIGURATION');
-  });
-
-  it('rejects configuration of specific services that have path definition of root compose service', () => {
-    expect(() =>
-      validateConfiguration(
-        {
-          services: {
-            service: { path: '.' },
-          },
-        },
-        configurationPath
-      )
-    )
-      .to.throw()
-      .and.have.property('code', 'INVALID_PATH_IN_SERVICE_CONFIGURATION');
-  });
-
   it('rejects configuration that contains Framework-specific properties', () => {
     expect(() =>
       validateConfiguration(
