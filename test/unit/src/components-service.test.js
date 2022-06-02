@@ -42,7 +42,7 @@ describe('test/unit/src/components-service.test.js', () => {
     };
     const context = new Context(contextConfig);
     await context.init();
-    componentsService = new ComponentsService(context, configuration);
+    componentsService = new ComponentsService(context, configuration, {});
     await componentsService.init();
   });
 
@@ -113,7 +113,7 @@ describe('test/unit/src/components-service.test.js', () => {
     };
     const context = new Context(contextConfig);
     await context.init();
-    componentsService = new ComponentsService(context, configuration);
+    componentsService = new ComponentsService(context, configuration, {});
 
     await expect(componentsService.init()).to.eventually.be.rejectedWith(
       'Service "resources" has the same "path" as the following services: "duplicated". This is currently not supported because deploying the same service in parallel generates packages in the same ".serverless/" directory which can cause conflicts.'
@@ -156,7 +156,7 @@ describe('test/unit/src/components-service.test.js', () => {
     const context = new Context(contextConfig);
     await context.init();
     context.stateStorage = mockedStateStorage;
-    componentsService = new ComponentsService(context, configuration);
+    componentsService = new ComponentsService(context, configuration, {});
 
     await componentsService.outputs();
     expect(stripAnsi(await readStream(context.output.stdout))).to.equal(
@@ -202,7 +202,7 @@ describe('test/unit/src/components-service.test.js', () => {
     const context = new Context(contextConfig);
     await context.init();
     context.stateStorage = mockedStateStorage;
-    componentsService = new ComponentsService(context, configuration);
+    componentsService = new ComponentsService(context, configuration, {});
 
     await componentsService.outputs({ componentName: 'resources' });
     expect(stripAnsi(await readStream(context.output.stdout))).to.equal(

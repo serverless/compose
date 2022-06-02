@@ -4,6 +4,7 @@ const { resolve } = require('path');
 const { isEmpty, path } = require('ramda');
 const { Graph, alg } = require('graphlib');
 const traverse = require('traverse');
+const pLimit = require('p-limit');
 const ServerlessError = require('./serverless-error');
 const utils = require('./utils');
 const { loadComponent } = require('./load');
@@ -223,10 +224,12 @@ class ComponentsService {
   /**
    * @param {import('./Context')} context
    * @param configuration
+   * @param options
    */
-  constructor(context, configuration) {
+  constructor(context, configuration, options) {
     this.context = context;
     this.configuration = configuration;
+    this.options = options;
 
     // Variables that will be populated during init
     this.allComponents = null;
@@ -440,21 +443,29 @@ class ComponentsService {
     await this.instantiateComponents();
 
     this.context.logVerbose(`Executing "${method}" across all services in parallel`);
-    const promises = Object.entries(this.allComponents).map(async ([id, { instance }]) => {
-      if (typeof instance[method] !== 'function') return;
-      try {
-        await instance[method](options);
-        this.context.componentCommandsOutcomes[id] = 'success';
-      } catch (e) {
-        // If the component has an ongoing progress, we automatically set it to "error"
-        if (this.context.progresses.exists(id)) {
-          this.context.progresses.error(id, e);
-        } else {
-          this.context.output.error(formatError(e), [id]);
+    const limit = pLimit(options['max-concurrency'] || Infinity);
+
+    const promises = [];
+
+    for (const [id, { instance }] of Object.entries(this.allComponents)) {
+      const fn = async () => {
+        if (typeof instance[method] !== 'function') return;
+        try {
+          await instance[method](options);
+          this.context.componentCommandsOutcomes[id] = 'success';
+        } catch (e) {
+          // If the component has an ongoing progress, we automatically set it to "error"
+          if (this.context.progresses.exists(id)) {
+            this.context.progresses.error(id, e);
+          } else {
+            this.context.output.error(formatError(e), [id]);
+          }
+          this.context.componentCommandsOutcomes[id] = 'failure';
         }
-        this.context.componentCommandsOutcomes[id] = 'failure';
-      }
-    });
+      };
+
+      promises.push(limit(fn));
+    }
 
     await Promise.all(promises);
   }
@@ -475,6 +486,8 @@ class ComponentsService {
     if (isEmpty(nodes)) {
       return;
     }
+
+    const limit = pLimit(this.options['max-concurrency'] || Infinity);
 
     /** @type {Promise<boolean>[]} */
     const promises = [];
@@ -519,7 +532,7 @@ class ComponentsService {
         }
       };
 
-      promises.push(fn());
+      promises.push(limit(fn));
     }
 
     const results = await Promise.all(promises);
