@@ -5,6 +5,7 @@ const configSchema = {
   properties: {
     path: { type: 'string' },
     region: { type: 'string' },
+    config: { type: 'string' },
     params: {
       type: 'object',
       additionalProperties: true,
