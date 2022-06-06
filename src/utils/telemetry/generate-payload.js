@@ -120,7 +120,7 @@ module.exports = ({
           return serviceDefinition.dependsOn.length;
         })();
         return {
-          type: serviceDefinition.type || 'serverless-framework',
+          type: serviceDefinition.component || 'serverless-framework',
           dependsOnCount,
           paramsCount: Object.values(serviceDefinition.params || {}).length,
         };
@@ -132,10 +132,10 @@ module.exports = ({
         if (!configuration.services[componentName]) {
           return ['unknown'];
         }
-        return [configuration.services[componentName].type || 'serverless-framework'];
+        return [configuration.services[componentName].component || 'serverless-framework'];
       }
       return Object.values(configuration.services).map(
-        (serviceDefinition) => serviceDefinition.type || 'serverless-framework'
+        (serviceDefinition) => serviceDefinition.component || 'serverless-framework'
       );
     })();
 

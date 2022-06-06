@@ -33,6 +33,10 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
               workerQueueArn: '${resources.WorkerQueueArn}',
             },
           },
+          website: {
+            path: 'public',
+            component: '@serverless-components/website',
+          },
         },
       },
       componentName: 'resources',
@@ -65,6 +69,11 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
             dependsOnCount: 0,
             paramsCount: 1,
             type: 'serverless-framework',
+          },
+          {
+            dependsOnCount: 0,
+            paramsCount: 0,
+            type: '@serverless-components/website',
           },
         ],
         componentsOutputsVariablesCount: 1,
