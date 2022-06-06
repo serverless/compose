@@ -55,6 +55,12 @@ module.exports = async () => {
   output.writeText(colors.gray('Global options'));
   output.writeText(formatLine('--verbose', 'Enable verbose logs'));
   output.writeText(formatLine('--stage', 'Stage of the service'));
+  output.writeText(
+    formatLine(
+      '--max-concurrency',
+      'Specify maximum number of concurrently running service methods'
+    )
+  );
   output.writeText();
   output.writeText(colors.gray('Commands'));
 
