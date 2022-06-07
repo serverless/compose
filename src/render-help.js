@@ -58,7 +58,7 @@ module.exports = async () => {
   output.writeText(
     formatLine(
       '--max-concurrency',
-      'Specify maximum number of concurrently running service methods'
+      'Specify the maximum number of concurrently running service commands'
     )
   );
   output.writeText();
