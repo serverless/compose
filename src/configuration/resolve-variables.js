@@ -13,8 +13,8 @@ const resolveConfigurationVariables = async (
   unrecognizedVariableSources = new Set()
 ) => {
   const regex = /\${(\w*:[\w\d.-]+)}/g;
-  const slsStageRegex = /\${sls:stage}/g;
-  const envRegex = /\${env:(\w*[\w.-_]+)}/g;
+  const slsStageRegex = /\${sls:stage}/;
+  const envRegex = /\${env:(\w*[\w.-_]+)}/;
 
   let variableResolved = false;
   const resolvedConfiguration = traverse(configuration).forEach(function (value) {
