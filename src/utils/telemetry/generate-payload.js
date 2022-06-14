@@ -71,6 +71,8 @@ module.exports = ({
 
   const commandType = componentName ? 'single' : 'global';
 
+  const stage = (options && options.stage) || 'dev';
+
   const payload = {
     command,
     commandType,
@@ -81,6 +83,7 @@ module.exports = ({
     commandOptionNames: options ? Object.keys(options).filter((key) => key !== '_') : [],
     frameworkLocalUserId: userConfig.get('frameworkId'),
     interruptSignal,
+    stage,
     timestamp: Date.now(),
     timezone,
     versions: usedVersions,

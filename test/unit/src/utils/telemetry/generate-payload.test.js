@@ -20,7 +20,7 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
     const context = new Context(contextConfig);
     const payload = generatePayload({
       command: 'deploy',
-      options: { someoption: 'abc' },
+      options: { someoption: 'abc', stage: 'prod' },
       configuration: {
         name: 'test-service',
         services: {
@@ -54,7 +54,7 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
     expect(payload).to.deep.equal({
       cliName: '@serverless/compose',
       command: 'deploy',
-      commandOptionNames: ['someoption'],
+      commandOptionNames: ['someoption', 'stage'],
       commandTargetComponents: ['serverless-framework'],
       commandType: 'single',
       componentsOutcomes: [],
@@ -81,6 +81,7 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
       hasEnabledVerboseInteractively: false,
       interruptSignal: undefined,
       singleCommandType: 'withSemicolon',
+      stage: 'prod',
       stateStorageType: 'local',
       outcome: 'unrecognized',
       versions,
@@ -174,6 +175,7 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
       hasEnabledVerboseInteractively: false,
       interruptSignal: undefined,
       outcome: 'failure',
+      stage: 'dev',
       versions,
       failureReason: {
         code: 'ERROR_CODE',
@@ -248,6 +250,7 @@ describe('test/unit/lib/utils/telemetry/generate-payload.test.js', () => {
       hasEnabledVerboseInteractively: false,
       outcome: 'interrupt',
       interruptSignal,
+      stage: 'dev',
       versions,
     });
   });
