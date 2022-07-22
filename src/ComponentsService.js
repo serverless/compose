@@ -307,6 +307,26 @@ class ComponentsService {
     });
   }
 
+  async package() {
+    this.context.output.log();
+    this.context.output.log(`Packaging for stage ${this.context.stage}`);
+
+    // Pre-emptively add all components to the progress list
+    Object.keys(this.allComponents).forEach((componentName) => {
+      this.context.progresses.add(componentName);
+    });
+
+    await this.executeComponentsGraph({ method: 'package', reverse: false });
+
+    // Resolve the status of components that were not deployed
+    Object.keys(this.allComponents).forEach((componentName) => {
+      if (this.context.progresses.isWaiting(componentName)) {
+        this.context.progresses.skipped(componentName);
+        this.context.componentCommandsOutcomes[componentName] = 'skip';
+      }
+    });
+  }
+
   async logs(options) {
     await this.invokeComponentsInParallel('logs', options);
   }
@@ -333,16 +353,8 @@ class ComponentsService {
   }
 
   async invokeGlobalCommand(command, options) {
-    const globalCommands = ['deploy', 'remove', 'info', 'logs', 'outputs', 'refresh-outputs'];
+    const globalCommands = ['deploy', 'remove', 'info', 'logs', 'outputs', 'refresh-outputs', 'package'];
     // Specific error messages for popular Framework commands
-    if (command === 'package') {
-      throw new ServerlessError(
-        `"package" is not a global command in Serverless Framework Compose.\nAvailable global commands: ${globalCommands.join(
-          ', '
-        )}.\nYou can package each Serverless Framework service by running "serverless <service-name>:${command}".`,
-        'COMMAND_NOT_FOUND'
-      );
-    }
     if (command === 'invoke') {
       throw new ServerlessError(
         `"invoke" is not a global command in Serverless Framework Compose.\nAvailable global commands: ${globalCommands.join(
@@ -394,7 +406,7 @@ class ComponentsService {
       }
       this.context.logVerbose(`Invoking "${command}" on service "${componentName}"`);
 
-      const isDefaultCommand = ['deploy', 'remove', 'logs', 'info'].includes(command);
+      const isDefaultCommand = ['deploy', 'remove', 'logs', 'info', 'package'].includes(command);
 
       if (isDefaultCommand) {
         // Default command defined for all components (deploy, logs, dev, etc.)

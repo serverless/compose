@@ -116,6 +116,25 @@ class ServerlessFramework {
     this.context.successProgress('removed');
   }
 
+  async package() {
+    this.context.startProgress('packaging');
+
+    await this.exec('serverless', ['package']);
+
+    const hasOutputs = this.context.outputs && Object.keys(this.context.outputs).length > 0;
+
+    // Skip retrieving outputs via `sls info` if we already have outputs (faster)
+    if (!hasOutputs) {
+      await this.context.updateOutputs(await this.retrieveOutputs());
+    }
+
+    // Save state
+    if (this.inputs.cachePatterns) {
+      this.context.state.inputs = this.inputs;
+      await this.context.save();
+    }
+  }
+
   async info() {
     const { stdout: infoOutput } = await this.exec('serverless', ['info']);
     this.context.writeText(infoOutput);

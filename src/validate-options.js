@@ -27,6 +27,7 @@ function validateCliOptions(options, method) {
     'logs',
     'outputs',
     'refresh-outputs',
+    'package',
   ]);
 
   if (!recognizedMethods.has(method)) return;
@@ -49,7 +50,7 @@ function validateCliOptions(options, method) {
     'app',
     'org',
     'force',
-    'package',
+    'package'
   ]);
   const usedFrameworkSpecificCliOptions = unrecognizedCliOptions.filter((option) =>
     frameworkSpecificCliOptions.has(option)
