@@ -318,8 +318,6 @@ class ComponentsService {
 
     await this.invokeComponentsInParallel('package');
 
-    // await this.executeComponentsGraph({ method: 'package', reverse: false });
-
     // Resolve the status of components that were not packaged
     Object.keys(this.allComponents).forEach((componentName) => {
       if (this.context.progresses.isWaiting(componentName)) {
