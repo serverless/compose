@@ -121,13 +121,6 @@ class ServerlessFramework {
 
     await this.exec('serverless', ['package']);
 
-    const hasOutputs = this.context.outputs && Object.keys(this.context.outputs).length > 0;
-
-    // Skip retrieving outputs via `sls info` if we already have outputs (faster)
-    if (!hasOutputs) {
-      await this.context.updateOutputs(await this.retrieveOutputs());
-    }
-
     // Save state
     if (this.inputs.cachePatterns) {
       this.context.state.inputs = this.inputs;
