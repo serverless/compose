@@ -120,6 +120,8 @@ class ServerlessFramework {
     this.context.startProgress('packaging');
 
     await this.exec('serverless', ['package']);
+
+    this.context.successProgress('packaged');
   }
 
   async info() {

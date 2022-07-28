@@ -307,11 +307,11 @@ class ComponentsService {
     });
   }
 
-  async package() {
+  async package(options) {
     this.context.output.log();
     this.context.output.log(`Packaging for stage ${this.context.stage}`);
 
-    await this.invokeComponentsInParallel('package');
+    await this.invokeComponentsInParallel('package', options);
   }
 
   async logs(options) {
