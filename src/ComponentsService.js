@@ -316,7 +316,9 @@ class ComponentsService {
       this.context.progresses.add(componentName);
     });
 
-    await this.executeComponentsGraph({ method: 'package', reverse: false });
+    await this.invokeComponentsInParallel('package');
+
+    // await this.executeComponentsGraph({ method: 'package', reverse: false });
 
     // Resolve the status of components that were not packaged
     Object.keys(this.allComponents).forEach((componentName) => {
