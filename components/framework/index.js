@@ -120,12 +120,6 @@ class ServerlessFramework {
     this.context.startProgress('packaging');
 
     await this.exec('serverless', ['package']);
-
-    // Save state
-    if (this.inputs.cachePatterns) {
-      this.context.state.inputs = this.inputs;
-      await this.context.save();
-    }
   }
 
   async info() {
