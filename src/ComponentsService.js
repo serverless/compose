@@ -311,20 +311,7 @@ class ComponentsService {
     this.context.output.log();
     this.context.output.log(`Packaging for stage ${this.context.stage}`);
 
-    // Pre-emptively add all components to the progress list
-    Object.keys(this.allComponents).forEach((componentName) => {
-      this.context.progresses.add(componentName);
-    });
-
     await this.invokeComponentsInParallel('package');
-
-    // Resolve the status of components that were not packaged
-    Object.keys(this.allComponents).forEach((componentName) => {
-      if (this.context.progresses.isWaiting(componentName)) {
-        this.context.progresses.skipped(componentName);
-        this.context.componentCommandsOutcomes[componentName] = 'skip';
-      }
-    });
   }
 
   async logs(options) {
