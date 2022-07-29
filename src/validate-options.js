@@ -27,6 +27,7 @@ function validateCliOptions(options, method) {
     'logs',
     'outputs',
     'refresh-outputs',
+    'package',
   ]);
 
   if (!recognizedMethods.has(method)) return;

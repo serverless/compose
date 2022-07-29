@@ -116,6 +116,14 @@ class ServerlessFramework {
     this.context.successProgress('removed');
   }
 
+  async package() {
+    this.context.startProgress('packaging');
+
+    await this.exec('serverless', ['package']);
+
+    this.context.successProgress('packaged');
+  }
+
   async info() {
     const { stdout: infoOutput } = await this.exec('serverless', ['info']);
     this.context.writeText(infoOutput);
