@@ -50,7 +50,7 @@ function validateCliOptions(options, method) {
     'app',
     'org',
     'force',
-    'package'
+    'package',
   ]);
   const usedFrameworkSpecificCliOptions = unrecognizedCliOptions.filter((option) =>
     frameworkSpecificCliOptions.has(option)

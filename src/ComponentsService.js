@@ -340,7 +340,15 @@ class ComponentsService {
   }
 
   async invokeGlobalCommand(command, options) {
-    const globalCommands = ['deploy', 'remove', 'info', 'logs', 'outputs', 'refresh-outputs', 'package'];
+    const globalCommands = [
+      'deploy',
+      'remove',
+      'info',
+      'logs',
+      'outputs',
+      'refresh-outputs',
+      'package',
+    ];
     // Specific error messages for popular Framework commands
     if (command === 'invoke') {
       throw new ServerlessError(
