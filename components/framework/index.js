@@ -296,25 +296,21 @@ class ServerlessFramework {
 
   async retrieveOutputs() {
     const { stdout: infoOutput } = await this.exec('serverless', ['info', '--verbose']);
-    
-    let sanitizedOutput;
+
+    const sanitizedOutput = stripAnsi(infoOutput.toString());
 
     try {
-      sanitizedOutput = stripAnsi(infoOutput.toString());
       return YAML.load(sanitizedOutput)['Stack Outputs'];
     } catch (e) {
-      // If the strip failed, this will not be defined, so there's nothing to parse.
-      if (sanitizedOutput) {
-        // Try to extract the section with `Stack Outputs` and parse it
-        // The regex below matches everything indented with 2 spaces below "Stack Outputs:"
-        // If plugins add extra output afterwards, it should be ignored.
-        const res = sanitizedOutput.match(/Stack Outputs:\n(( {2}[ \S]+\n)+)/);
-        if (res) {
-          try {
-            return YAML.load(res[1]);
-          } catch {
-            // Pass to generic error
-          }
+      // Try to extract the section with `Stack Outputs` and parse it
+      // The regex below matches everything indented with 2 spaces below "Stack Outputs:"
+      // If plugins add extra output afterwards, it should be ignored.
+      const res = sanitizedOutput.match(/Stack Outputs:\n(( {2}[ \S]+\n)+)/);
+      if (res) {
+        try {
+          return YAML.load(res[1]);
+        } catch {
+          // Pass to generic error
         }
       }
     }
