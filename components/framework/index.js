@@ -84,10 +84,10 @@ class ServerlessFramework {
       this.context.updateProgress('deploying');
     }
 
-    const { stderr: deployOutput } = await this.exec('serverless', ['deploy']);
+    const { stderr: deployOutput } = await this.exec('serverless', ['deploy'], true);
 
     const hasOutputs = this.context.outputs && Object.keys(this.context.outputs).length > 0;
-    const hasChanges = !deployOutput.includes('No changes to deploy. Deployment skipped.');
+    const hasChanges = !deployOutput.includes('Change set did not include any changes to be deployed.');
     // Skip retrieving outputs via `sls info` if we already have outputs (faster)
     if (hasChanges || !hasOutputs) {
       await this.context.updateOutputs(await this.retrieveOutputs());
@@ -110,7 +110,7 @@ class ServerlessFramework {
   async remove() {
     this.context.startProgress('removing');
 
-    await this.exec('serverless', ['remove']);
+    await this.exec('serverless', ['remove'], true);
     this.context.state = {};
     await this.context.save();
     await this.context.updateOutputs({});
